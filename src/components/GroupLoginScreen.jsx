@@ -85,6 +85,18 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
   // Saved Users / Profiles on this Device
   const [savedUsers, setSavedUsers] = useState(() => getSavedUsers());
 
+  useEffect(() => {
+    const handleSync = () => {
+      setSavedUsers(getSavedUsers());
+    };
+    window.addEventListener("classroom-sync", handleSync);
+    window.addEventListener("storage", handleSync);
+    return () => {
+      window.removeEventListener("classroom-sync", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
+  }, []);
+
   // 1-Click Quick Login as Saved User
   const handleQuickLogin = (profileId) => {
     sound.playClick();

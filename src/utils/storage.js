@@ -9,31 +9,8 @@ const SCREEN_FREEZE_KEY = "redaksi_siswa_screen_freeze_v5";
 const APP_INITIALIZED_KEY = "redaksi_siswa_initialized_v5";
 const ACTIVE_MODULE_KEY = "redaksi_siswa_active_module_v5";
 
-export const defaultTeam = {
-  id: "team-default",
-  name: "Biro Redaksi Garuda",
-  leaderName: "Ahmad Fadilah",
-  leaderClass: "8-A",
-  leaderCode: "1X88H",
-  memberCode: "UD19J",
-  members: [
-    { name: "Ahmad Fadilah", classInfo: "8-A", role: "Pemimpin Redaksi (Ketua Kelompok)", isLeader: true },
-    { name: "Siti Nurhaliza", classInfo: "9-B", role: "Wartawan Investigasi Fakta (5W+1H)", isLeader: false },
-    { name: "Budi Santoso", classInfo: "7-C", role: "Redaktur Struktur & Piramida", isLeader: false }
-  ],
-  avatar: "mascot-1",
-  coins: 100,
-  inventory: [], // [{ instanceId, cardId, name, emoji, category, targetType }]
-  activeShield: false,
-  activeDebuffs: [], // ["card_fake_distractor", "card_scramble_clues", "card_deadline_panic"]
-  completedStages: [], // [1, 2, 3]
-  scores: {},
-  stageTimes: {}, // { stage_1: 180, ... }
-  stageTimers: {}, // { stage_1: { durationSeconds, isPaused, startedAt } }
-  badges: [],
-  points: 0,
-  createdAt: new Date().toISOString()
-};
+// No default/dummy team - only teacher and student registered teams are allowed
+export const defaultTeam = null;
 
 // Session current user (admin, leader, or member)
 export const getCurrentUser = () => {
@@ -285,59 +262,59 @@ export const pushStateToServer = async (partialState) => {
 export const applyServerState = (serverState) => {
   if (!serverState || typeof window === "undefined") return;
 
-  // 1. Teams
-  if (Array.isArray(serverState.teams) && serverState.teams.length > 0) {
+  // 1. Teams (Authoritative Server State)
+  if (Array.isArray(serverState.teams)) {
     try {
       const rawLocal = localStorage.getItem(TEAMS_STORAGE_KEY);
       const localTeams = rawLocal ? JSON.parse(rawLocal) : [];
-      const activeId = typeof window !== "undefined" ? (localStorage.getItem(ACTIVE_TEAM_KEY) || sessionStorage.getItem(ACTIVE_TEAM_KEY)) : null;
-      const mergedMap = new Map();
+      // Strictly purge any dummy default teams
+      const sanitizedServerTeams = serverState.teams.filter(t => t && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda');
       
-      for (const st of serverState.teams) {
-        if (!st || !st.id) continue;
+      const serverTeamIds = new Set(sanitizedServerTeams.map(t => t.id));
+      const activeId = localStorage.getItem(ACTIVE_TEAM_KEY) || sessionStorage.getItem(ACTIVE_TEAM_KEY);
+
+      // If active team was deleted on server by Admin/Teacher, log out active user
+      if (activeId && !serverTeamIds.has(activeId)) {
+        localStorage.removeItem(ACTIVE_TEAM_KEY);
+        sessionStorage.removeItem(ACTIVE_TEAM_KEY);
+        localStorage.removeItem(CURRENT_USER_KEY);
+        sessionStorage.removeItem(CURRENT_USER_KEY);
+      }
+
+      const mergedTeams = sanitizedServerTeams.map(st => {
         const lt = localTeams.find(x => x.id === st.id);
-        if (lt) {
-          // If local client is working on this team, preserve active running timer and avoid reset
-          const mergedTimers = { ...(st.stageTimers || {}) };
-          const mergedTimes = { ...(st.stageTimes || {}) };
+        if (!lt) return st;
 
-          if (lt.stageTimers) {
-            for (const [stgKey, ltTimer] of Object.entries(lt.stageTimers)) {
-              const stTimer = mergedTimers[stgKey];
-              // Keep local timer if active, running, or has more accumulated progress
-              if (!stTimer || (ltTimer.isPaused === false && ltTimer.startedAt) || (ltTimer.accumulatedSeconds || 0) > (stTimer.accumulatedSeconds || 0)) {
-                mergedTimers[stgKey] = ltTimer;
-              }
+        // If local client is actively working on this team, preserve local running stopwatch timer
+        const mergedTimers = { ...(st.stageTimers || {}) };
+        const mergedTimes = { ...(st.stageTimes || {}) };
+
+        if (lt.stageTimers) {
+          for (const [stgKey, ltTimer] of Object.entries(lt.stageTimers)) {
+            const stTimer = mergedTimers[stgKey];
+            if (!stTimer || (ltTimer.isPaused === false && ltTimer.startedAt) || (ltTimer.accumulatedSeconds || 0) > (stTimer.accumulatedSeconds || 0)) {
+              mergedTimers[stgKey] = ltTimer;
             }
           }
+        }
 
-          if (lt.stageTimes) {
-            for (const [stgKey, ltSec] of Object.entries(lt.stageTimes)) {
-              if (ltSec && (!mergedTimes[stgKey] || ltSec > mergedTimes[stgKey])) {
-                mergedTimes[stgKey] = ltSec;
-              }
+        if (lt.stageTimes) {
+          for (const [stgKey, ltSec] of Object.entries(lt.stageTimes)) {
+            if (ltSec && (!mergedTimes[stgKey] || ltSec > mergedTimes[stgKey])) {
+              mergedTimes[stgKey] = ltSec;
             }
           }
-
-          mergedMap.set(st.id, {
-            ...st,
-            stageTimers: mergedTimers,
-            stageTimes: mergedTimes,
-            completedStages: Array.from(new Set([...(st.completedStages || []), ...(lt.completedStages || [])]))
-          });
-        } else {
-          mergedMap.set(st.id, st);
         }
-      }
 
-      // Keep any local teams that aren't on server yet
-      for (const lt of localTeams) {
-        if (lt && lt.id && !mergedMap.has(lt.id)) {
-          mergedMap.set(lt.id, lt);
-        }
-      }
-      const merged = Array.from(mergedMap.values());
-      localStorage.setItem(TEAMS_STORAGE_KEY, JSON.stringify(merged));
+        return {
+          ...st,
+          stageTimers: mergedTimers,
+          stageTimes: mergedTimes,
+          completedStages: Array.from(new Set([...(st.completedStages || []), ...(lt.completedStages || [])]))
+        };
+      });
+
+      localStorage.setItem(TEAMS_STORAGE_KEY, JSON.stringify(mergedTeams));
     } catch (e) {
       console.warn("Failed merging teams from server", e);
     }
@@ -369,21 +346,20 @@ export const applyServerState = (serverState) => {
   }
 
   // 7. Registered Users from VPS Server
-  if (Array.isArray(serverState.registeredUsers) && serverState.registeredUsers.length > 0) {
+  if (Array.isArray(serverState.registeredUsers)) {
     try {
-      const rawLocal = localStorage.getItem(SAVED_USERS_KEY);
-      const localUsers = rawLocal ? JSON.parse(rawLocal) : [];
-      const userMap = new Map();
-      localUsers.forEach(u => { if (u && u.id) userMap.set(u.id, u); });
-      serverState.registeredUsers.forEach(u => {
-        if (u && u.id && !userMap.has(u.id)) {
-          userMap.set(u.id, u);
-        }
-      });
-      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(Array.from(userMap.values()).slice(0, 20)));
+      const sanitizedUsers = serverState.registeredUsers.filter(u => u && u.teamId !== 'team-default' && u.teamName !== 'Biro Redaksi Garuda' && !["Ahmad Fadilah", "Siti Nurhaliza", "Budi Santoso"].includes(u.name));
+      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(sanitizedUsers.slice(0, 30)));
     } catch {
       // ignore
     }
+  }
+
+  // Broadcast custom event to current window so all UI components update in real-time
+  try {
+    window.dispatchEvent(new CustomEvent("classroom-sync", { detail: serverState }));
+  } catch (err) {
+    // ignore
   }
 };
 
@@ -422,11 +398,12 @@ export const getAllTeams = () => {
   }
 };
 
-export const saveAllTeams = (teams) => {
+export const saveAllTeams = (teams, isFullRosterSync = true) => {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(TEAMS_STORAGE_KEY, JSON.stringify(teams));
-    pushStateToServer({ teams });
+    const cleanTeams = (teams || []).filter(t => t && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda');
+    localStorage.setItem(TEAMS_STORAGE_KEY, JSON.stringify(cleanTeams));
+    pushStateToServer({ teams: cleanTeams, isFullRosterSync });
   } catch (err) {
     console.error("Failed to save teams", err);
   }
@@ -1203,21 +1180,38 @@ export const resetClassroomProgress = () => {
 export const initDefaultTeamIfNeeded = () => {
   if (typeof window === "undefined") return;
   try {
-    const isInit = localStorage.getItem(APP_INITIALIZED_KEY);
-    if (!isInit) {
-      const existing = getAllTeams();
-      if (existing.length === 0) {
-        registerOrUpdateTeam(defaultTeam);
-      }
-      localStorage.setItem(APP_INITIALIZED_KEY, "true");
+    // 1. Proactively purge any lingering mock/dummy teams (Biro Redaksi Garuda / team-default)
+    const existing = getAllTeams();
+    const cleaned = existing.filter(t => t && t.id !== "team-default" && t.name !== "Biro Redaksi Garuda");
+    if (cleaned.length !== existing.length) {
+      localStorage.setItem(TEAMS_STORAGE_KEY, JSON.stringify(cleaned));
+      pushStateToServer({ teams: cleaned, deleteTeamId: "team-default", isFullRosterSync: true });
     }
+
+    // 2. Proactively purge mock dummy users from saved profiles
+    const savedUsers = getSavedUsers();
+    const cleanUsers = savedUsers.filter(u => u && u.teamId !== "team-default" && u.teamName !== "Biro Redaksi Garuda" && !["Ahmad Fadilah", "Siti Nurhaliza", "Budi Santoso"].includes(u.name));
+    if (cleanUsers.length !== savedUsers.length) {
+      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(cleanUsers));
+      pushStateToServer({ registeredUsers: cleanUsers });
+    }
+
+    // 3. Purge active session if it was the dummy group
+    const activeId = localStorage.getItem(ACTIVE_TEAM_KEY);
+    if (activeId === "team-default") {
+      localStorage.removeItem(ACTIVE_TEAM_KEY);
+      sessionStorage.removeItem(ACTIVE_TEAM_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
+      sessionStorage.removeItem(CURRENT_USER_KEY);
+    }
+    localStorage.setItem(APP_INITIALIZED_KEY, "true");
 
     // Auto-migrate starting teams from 500 to 100 if unstarted
     const migrationCoinsKey = "jurnal66_coins_100_migrated_v2";
     if (!localStorage.getItem(migrationCoinsKey)) {
-      const existing = getAllTeams();
+      const currentTeams = getAllTeams();
       let changed = false;
-      const updated = existing.map(t => {
+      const updated = currentTeams.map(t => {
         if (t.coins === 500 && (t.completedStages || []).length === 0 && (t.inventory || []).length === 0) {
           changed = true;
           return { ...t, coins: 100 };
@@ -1225,7 +1219,7 @@ export const initDefaultTeamIfNeeded = () => {
         return t;
       });
       if (changed) {
-        saveAllTeams(updated);
+        saveAllTeams(updated, true);
         const activeId = localStorage.getItem(ACTIVE_TEAM_KEY);
         const active = updated.find(t => t.id === activeId);
         if (active) {
@@ -1235,8 +1229,8 @@ export const initDefaultTeamIfNeeded = () => {
       }
       localStorage.setItem(migrationCoinsKey, "true");
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    console.warn("initDefaultTeamIfNeeded check failed", err);
   }
 };
 
@@ -1247,7 +1241,15 @@ export const adminDeleteTeam = (teamId) => {
   const teams = getAllTeams();
   const team = teams.find(t => t.id === teamId);
   const filtered = teams.filter(t => t.id !== teamId);
-  saveAllTeams(filtered);
+  saveAllTeams(filtered, true);
+  
+  // Authoritatively broadcast deletion to the VPS server so other devices remove it
+  pushStateToServer({ 
+    teams: filtered, 
+    deleteTeamId: teamId, 
+    isFullRosterSync: true 
+  });
+
   const activeId = localStorage.getItem(ACTIVE_TEAM_KEY);
   if (activeId === teamId) {
     setActiveTeam(null);
@@ -1539,11 +1541,13 @@ export const adminRemoveMember = (teamId, memberName) => {
   // Also sync activeTeam and currentUser if this member was active
   const activeTeam = getActiveTeam();
   if (activeTeam && activeTeam.id === teamId) {
-    safeSetItem(ACTIVE_TEAM_KEY, JSON.stringify(updatedTeam));
+    localStorage.setItem(ACTIVE_TEAM_KEY, updatedTeam.id);
     const currentUser = getCurrentUser();
     if (currentUser && currentUser.name?.toLowerCase() === memberName.toLowerCase()) {
-      safeRemoveItem(CURRENT_USER_KEY);
-      safeRemoveItem(ACTIVE_TEAM_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
+      sessionStorage.removeItem(CURRENT_USER_KEY);
+      localStorage.removeItem(ACTIVE_TEAM_KEY);
+      sessionStorage.removeItem(ACTIVE_TEAM_KEY);
     }
   }
 

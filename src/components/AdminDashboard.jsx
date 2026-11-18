@@ -220,6 +220,13 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
   useEffect(() => {
     let tickCount = 0;
+    const handleRemoteSync = () => {
+      setTick(t => t + 1);
+    };
+
+    window.addEventListener("classroom-sync", handleRemoteSync);
+    window.addEventListener("storage", handleRemoteSync);
+
     const timerInterval = setInterval(() => {
       setTimerState(getGlobalTimer());
       setFreezeState(getScreenFreeze());
@@ -229,7 +236,12 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         syncWithServerNow();
       }
     }, 1000);
-    return () => clearInterval(timerInterval);
+
+    return () => {
+      window.removeEventListener("classroom-sync", handleRemoteSync);
+      window.removeEventListener("storage", handleRemoteSync);
+      clearInterval(timerInterval);
+    };
   }, []);
 
   const teams = getAllTeams();

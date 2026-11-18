@@ -47,8 +47,15 @@ const writeState = (state) => {
 
 // 1. GET /api/sync
 app.get('/api/sync', (req, res) => {
-  const state = readState();
-  res.json({ success: true, state: state || {} });
+  const state = readState() || {};
+  // Sanitize out any dummy mock teams
+  if (Array.isArray(state.teams)) {
+    state.teams = state.teams.filter(t => t && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda');
+  }
+  if (Array.isArray(state.registeredUsers)) {
+    state.registeredUsers = state.registeredUsers.filter(u => u && u.teamId !== 'team-default' && u.teamName !== 'Biro Redaksi Garuda');
+  }
+  res.json({ success: true, state });
 });
 
 // 2. POST /api/sync
@@ -57,24 +64,49 @@ app.post('/api/sync', (req, res) => {
     const incoming = req.body || {};
     const existing = readState() || {};
 
-    // Smart merge for registeredUsers (master roster of users across all devices on VPS)
-    let mergedUsers = existing.registeredUsers || [];
+    // Filter out mock dummy teams from existing
+    let currentTeams = (existing.teams || []).filter(t => t && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda');
+    let currentUsers = (existing.registeredUsers || []).filter(u => u && u.teamId !== 'team-default' && u.teamName !== 'Biro Redaksi Garuda');
+
+    // Handle explicit team deletion
+    if (incoming.deleteTeamId) {
+      currentTeams = currentTeams.filter(t => t.id !== incoming.deleteTeamId);
+      currentUsers = currentUsers.filter(u => u.teamId !== incoming.deleteTeamId);
+    }
+
+    // Merge teams
+    if (incoming.isFullRosterSync && Array.isArray(incoming.teams)) {
+      currentTeams = incoming.teams.filter(t => t && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda');
+    } else if (Array.isArray(incoming.teams)) {
+      const teamMap = new Map();
+      currentTeams.forEach(t => teamMap.set(t.id, t));
+      incoming.teams.forEach(t => {
+        if (t && t.id && t.id !== 'team-default' && t.name !== 'Biro Redaksi Garuda') {
+          const old = teamMap.get(t.id);
+          teamMap.set(t.id, { ...old, ...t });
+        }
+      });
+      currentTeams = Array.from(teamMap.values());
+    }
+
+    // Smart merge for registeredUsers
     if (Array.isArray(incoming.registeredUsers)) {
       const userMap = new Map();
-      (existing.registeredUsers || []).forEach(u => { if (u && u.id) userMap.set(u.id, u); });
+      currentUsers.forEach(u => userMap.set(u.id, u));
       incoming.registeredUsers.forEach(u => {
-        if (u && u.id) {
+        if (u && u.id && u.teamId !== 'team-default' && u.teamName !== 'Biro Redaksi Garuda') {
           const old = userMap.get(u.id);
           userMap.set(u.id, { ...old, ...u, lastUsedAt: Math.max(old?.lastUsedAt || 0, u.lastUsedAt || 0) });
         }
       });
-      mergedUsers = Array.from(userMap.values());
+      currentUsers = Array.from(userMap.values());
     }
 
     const merged = {
       ...existing,
       ...incoming,
-      ...(mergedUsers.length > 0 ? { registeredUsers: mergedUsers } : {}),
+      teams: currentTeams,
+      registeredUsers: currentUsers,
       updatedAt: new Date().toISOString()
     };
     writeState(merged);

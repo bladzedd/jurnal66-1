@@ -41,31 +41,46 @@ export default function App() {
   const [stageTick, setStageTick] = useState(0); // trigger re-render on sync
   const [freezeState, setFreezeState] = useState(() => getScreenFreeze());
 
+  // Multi-device server sync & cross-tab consistency listener
   useEffect(() => {
-    const intv = setInterval(() => {
+    const handleSync = () => {
+      setActiveTeamState(getActiveTeam());
       setFreezeState(getScreenFreeze());
-    }, 1000);
-    return () => clearInterval(intv);
-  }, []);
+      setStageTick(prev => prev + 1);
+    };
 
-  // Multi-tab storage sync for rock-solid consistency across devices and reloads
-  useEffect(() => {
     const handleStorageSync = (e) => {
       if (
+        !e.key ||
         e.key === "redaksi_siswa_active_team_id_v5" || 
         e.key === "redaksi_siswa_teams_v5" || 
         e.key === "redaksi_classroom_stage_v5"
       ) {
-        setActiveTeamState(getActiveTeam());
-        setStageTick(prev => prev + 1);
+        handleSync();
       }
       if (e.key === "redaksi_siswa_screen_freeze_v5") {
         setFreezeState(getScreenFreeze());
       }
     };
+
     window.addEventListener("storage", handleStorageSync);
-    return () => window.removeEventListener("storage", handleStorageSync);
-  }, []);
+    window.addEventListener("classroom-sync", handleSync);
+
+    const intv = setInterval(() => {
+      setFreezeState(getScreenFreeze());
+      const current = getActiveTeam();
+      // If team was disbanded or changed remotely on server, update immediately
+      if ((!current && activeTeam) || (current && !activeTeam) || (current?.id !== activeTeam?.id)) {
+        setActiveTeamState(current);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageSync);
+      window.removeEventListener("classroom-sync", handleSync);
+      clearInterval(intv);
+    };
+  }, [activeTeam]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
