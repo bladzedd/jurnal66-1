@@ -1,0 +1,64 @@
+/* Hallmark Stamp: Dusk Theme | modern-minimal financial & editorial command */
+/* Paper: dark 17.5 268 | Display: Wix Madefor Display | Accent: Periwinkle (274) & Apricot (62) | Glass: smoked glass with lit top edge */
+
+:root {
+  /* Dusk Base Surfaces */
+  --color-paper: oklch(17.5% 0.014 268);
+  --color-paper-card: oklch(22% 0.018 268 / 0.65);
+  --color-paper-2: oklch(21% 0.016 268);
+  --color-paper-3: oklch(25% 0.017 268);
+  --color-shade: oklch(10% 0.022 268);
+
+  /* Typography Colors */
+  --color-ink: oklch(96% 0.006 75);
+  --color-ink-2: oklch(85% 0.010 262);
+  --color-ink-muted: oklch(70% 0.016 262);
+  --color-muted: oklch(70% 0.016 262);
+  --color-light: oklch(100% 0 0);
+
+  /* Rules & Hairlines */
+  --color-rule: oklch(30% 0.016 266);
+  --rule-hair: 1px;
+  --rule-thick: 1px;
+  --rule-thin: 1px;
+
+  /* Dusk Signals: Periwinkle (Matched/Primary) & Apricot (Attention/Open) */
+  --color-accent: oklch(77% 0.10 274);
+  --color-accent-ink: oklch(19% 0.035 274);
+  --color-accent-hi: oklch(84% 0.085 274);
+  --color-accent-deep: oklch(44% 0.13 274);
+  --color-accent-soft: oklch(91% 0.038 274);
+  --color-focus: oklch(80% 0.10 274);
+  --color-accent-2: oklch(83% 0.095 62);
+  --color-dusk: oklch(70% 0.12 330);
+
+  /* Aliased App Signals to Dusk Palette */
+  --color-accent-yellow: oklch(77% 0.10 274); /* Periwinkle signal */
+  --color-accent-orange: oklch(83% 0.095 62); /* Apricot signal */
+  --color-accent-cyan: oklch(85% 0.08 230);   /* Soft ice signal */
+  --color-accent-green: oklch(80% 0.07 160);  /* Sage / mint signal */
+  --color-accent-red: oklch(70% 0.12 330);    /* Dusk berry / rose */
+
+  /* Glassmorphism & Shadow Tokens */
+  --glass: oklch(22% 0.018 268 / 0.58);
+  --glass-blur: 22px;
+  --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
+  --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
+
+  /* Adapted Shadows for Neo-Tokens to Dusk Elevation */
+  --shadow-neo: 0 1px 0 oklch(100% 0 0 / 0.08) inset, 0 20px 40px -12px oklch(8% 0.02 268 / 0.6);
+  --shadow-neo-sm: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 8px 20px -6px oklch(8% 0.02 268 / 0.4);
+  --shadow-neo-lg: 0 1px 0 oklch(100% 0 0 / 0.10) inset, 0 40px 80px -28px oklch(8% 0.02 268 / 0.75);
+
+  /* Radii */
+  --radius-card: 18px;
+  --radius-inner: 10px;
+  --radius-pill: 999px;
+
+  /* Typography */
+  --font-display: "Wix Madefor Display", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Wix Madefor Text", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+  --tracking-display: -0.022em;
+  --display-weight: 500;
+}
