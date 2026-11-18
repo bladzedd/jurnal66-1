@@ -3,7 +3,14 @@ const ACTIVE_TEAM_KEY = "redaksi_siswa_active_team_id_v5";
 const CLASSROOM_STAGE_KEY = "redaksi_classroom_stage_v5";
 const PRESS_WAR_LOGS_KEY = "redaksi_siswa_war_logs_v5";
 const CURRENT_USER_KEY = "redaksi_siswa_current_user_v5";
-const SAVED_USERS_KEY = "redaksi_siswa_saved_users_v5";
+
+// DEVICE_SAVED_USERS_KEY: Strictly private to THIS specific physical device/browser.
+// Other devices never receive or display these profiles on their login screen!
+const DEVICE_SAVED_USERS_KEY = "redaksi_siswa_device_local_users_v6";
+
+// SERVER_ROSTER_USERS_KEY: Master list of all registered students from VPS, displayed ONLY on Meja Guru (Admin).
+const SERVER_ROSTER_USERS_KEY = "redaksi_siswa_server_roster_v6";
+
 const GLOBAL_TIMER_KEY = "redaksi_siswa_global_timer_v5";
 const SCREEN_FREEZE_KEY = "redaksi_siswa_screen_freeze_v5";
 const APP_INITIALIZED_KEY = "redaksi_siswa_initialized_v5";
@@ -40,13 +47,13 @@ export const setCurrentUser = (user) => {
 };
 
 // =========================================================================
-// SAVED USERS / PROFIL PENGGUNA TERSIMPAN (Untuk Digunakan Kembali Nanti)
+// SAVED USERS / PROFIL PENGGUNA TERSIMPAN (KHUSUS PERANGKAT INI)
 // =========================================================================
 
 export const getSavedUsers = () => {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(SAVED_USERS_KEY);
+    const raw = localStorage.getItem(DEVICE_SAVED_USERS_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -97,10 +104,12 @@ export const saveUserProfile = (userProfile) => {
     const filtered = users.filter(u => u.id !== profileId && !(u.name.toLowerCase() === cleanName.toLowerCase() && u.teamId === teamId));
     filtered.unshift(entry);
 
-    const updatedUsers = filtered.slice(0, 20);
-    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(updatedUsers));
-    // Push master registered users list to the VPS server!
-    pushStateToServer({ registeredUsers: updatedUsers });
+    const updatedUsers = filtered.slice(0, 10);
+    // Saved strictly to THIS device only!
+    localStorage.setItem(DEVICE_SAVED_USERS_KEY, JSON.stringify(updatedUsers));
+
+    // Send single profile to VPS server so Teacher can see in Master Roster
+    pushStateToServer({ registeredUsers: [entry] });
     return entry;
   } catch (err) {
     console.error("Failed to save user profile", err);
@@ -113,7 +122,7 @@ export const removeSavedUser = (profileId) => {
   try {
     const users = getSavedUsers();
     const filtered = users.filter(u => u.id !== profileId);
-    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(filtered));
+    localStorage.setItem(DEVICE_SAVED_USERS_KEY, JSON.stringify(filtered));
   } catch {
     // ignore
   }
@@ -122,7 +131,7 @@ export const removeSavedUser = (profileId) => {
 export const clearAllSavedUsers = () => {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(SAVED_USERS_KEY);
+    localStorage.removeItem(DEVICE_SAVED_USERS_KEY);
   } catch {
     // ignore
   }
@@ -188,6 +197,22 @@ export const getAllClassroomUsers = () => {
       }
     }
   }
+
+  // Also include any users registered on server VPS (for teacher overview)
+  try {
+    const raw = localStorage.getItem(SERVER_ROSTER_USERS_KEY);
+    const serverUsers = raw ? JSON.parse(raw) : [];
+    for (const su of serverUsers) {
+      if (su && su.name && su.teamId) {
+        const key = `${su.name.toLowerCase()}_${su.teamId}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          roster.push(su);
+        }
+      }
+    }
+  } catch {}
+
   return roster;
 };
 
@@ -345,11 +370,11 @@ export const applyServerState = (serverState) => {
     localStorage.setItem(ACTIVE_CLASSROOM_CASE_KEY, serverState.activeCaseId);
   }
 
-  // 7. Registered Users from VPS Server
+  // 7. Registered Users from VPS Server (Saved ONLY for Teacher Admin Roster, NEVER as device login profiles)
   if (Array.isArray(serverState.registeredUsers)) {
     try {
       const sanitizedUsers = serverState.registeredUsers.filter(u => u && u.teamId !== 'team-default' && u.teamName !== 'Biro Redaksi Garuda' && !["Ahmad Fadilah", "Siti Nurhaliza", "Budi Santoso"].includes(u.name));
-      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(sanitizedUsers.slice(0, 30)));
+      localStorage.setItem(SERVER_ROSTER_USERS_KEY, JSON.stringify(sanitizedUsers.slice(0, 50)));
     } catch {
       // ignore
     }
@@ -1188,13 +1213,10 @@ export const initDefaultTeamIfNeeded = () => {
       pushStateToServer({ teams: cleaned, deleteTeamId: "team-default", isFullRosterSync: true });
     }
 
-    // 2. Proactively purge mock dummy users from saved profiles
-    const savedUsers = getSavedUsers();
-    const cleanUsers = savedUsers.filter(u => u && u.teamId !== "team-default" && u.teamName !== "Biro Redaksi Garuda" && !["Ahmad Fadilah", "Siti Nurhaliza", "Budi Santoso"].includes(u.name));
-    if (cleanUsers.length !== savedUsers.length) {
-      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(cleanUsers));
-      pushStateToServer({ registeredUsers: cleanUsers });
-    }
+    // 2. Proactively purge old contaminated legacy saved users key
+    try {
+      localStorage.removeItem("redaksi_siswa_saved_users_v5");
+    } catch {}
 
     // 3. Purge active session if it was the dummy group
     const activeId = localStorage.getItem(ACTIVE_TEAM_KEY);
