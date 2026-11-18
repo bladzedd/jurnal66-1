@@ -5,7 +5,7 @@ import {
   MessageSquare, BookOpen, Coins, Megaphone, Lightbulb, PenTool, Crown, Radio, Clock
 } from 'lucide-react';
 import { journalismStages } from '../data/journalismData';
-import { getCurrentUser, setCurrentUser, getClassroomStage, isStageCompleted, getActiveClassroomCase } from '../utils/storage';
+import { getCurrentUser, setCurrentUser, getClassroomStage, isStageCompleted, getActiveClassroomCase, isTeamLeader } from '../utils/storage';
 import { sound } from '../utils/sound';
 import StageWaitingRoom from './StageWaitingRoom';
 import { WitnessAvatar, CoinBadge } from './ui/ProfessionalIcon';
@@ -24,6 +24,7 @@ export default function Dashboard({
   const [copiedCode, setCopiedCode] = useState(false);
   const [, setUserTick] = useState(0);
   const currentUser = getCurrentUser();
+  const isLeader = isTeamLeader(team, currentUser);
 
   const handleSwitchActiveMember = (m, isLeader) => {
     sound.playClick();
@@ -463,9 +464,21 @@ export default function Dashboard({
             <div className="mt-4 p-3 bg-accent/10 border border-accent/25 rounded-xl font-body text-xs text-ink-2 flex items-start gap-2">
               <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <strong>Instruksi Diskusi Tim:</strong> Kerjakan bersama tim. Gunakan <strong>Koin</strong> di Toko jika butuh <em>Power-Up</em> atau kirim <em>Debuff</em> ke rival!
+                <strong>Instruksi Kolaborasi Real-Time:</strong> {isLeader 
+                  ? "Sebagai Ketua, Anda memegang kendali menjawab tugas. Pilihan Anda langsung tersinkronisasi ke layar seluruh anggota tim."
+                  : `Ketua kelompok (${team?.leaderName || "Ketua"}) bertugas memilih jawaban. Anda dan anggota lainnya dapat melihat proses pengerjaan secara langsung (real-time).`}
               </div>
             </div>
+
+            {!isLeader && team?.liveTask?.activeStage === activeStageData.number && (
+              <div className="mt-3 p-3 bg-accent-orange/15 border border-accent-orange/35 rounded-xl font-body text-xs text-ink flex items-center justify-between gap-2 shadow-sm animate-pulse">
+                <div className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-accent-orange shrink-0 animate-pulse" />
+                  <span><strong>Ketua Sedang Aktif Mengerjakan:</strong> {team?.leaderName || "Ketua Kelompok"} sedang menjalankan tugas ini secara real-time. Masuk untuk memantau langsung!</span>
+                </div>
+                <span className="shrink-0 text-[10px] font-bold bg-accent-orange text-white px-2 py-0.5 rounded-full uppercase">Live</span>
+              </div>
+            )}
 
             <div className="mt-6 pt-4 border-t border-rule/60 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <button
@@ -478,10 +491,25 @@ export default function Dashboard({
 
               <button
                 onClick={() => { sound.playClick(); onSelectModule(activeStageData); }}
-                className="neo-btn p-3.5 sm:p-4 px-7 sm:px-9 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-all min-h-[48px]"
+                className={`neo-btn p-3.5 sm:p-4 px-7 sm:px-9 font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-all min-h-[48px] ${
+                  isLeader 
+                    ? "bg-accent text-accent-ink hover:bg-accent-hi" 
+                    : "bg-accent-orange text-white hover:bg-accent-orange/90"
+                }`}
               >
-                <span>Kerjakan Tahap Ini</span>
-                <ArrowRight className="w-4 h-4 text-accent-ink" />
+                {isLeader ? (
+                  <>
+                    <Crown className="w-4 h-4 text-accent-ink" />
+                    <span>Mulai & Jawab Tugas (Ketua)</span>
+                    <ArrowRight className="w-4 h-4 text-accent-ink" />
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4 text-white" />
+                    <span>Lihat & Pantau Tugas (Anggota)</span>
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  </>
+                )}
               </button>
             </div>
           </div>

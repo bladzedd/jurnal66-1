@@ -331,8 +331,22 @@ export const applyServerState = (serverState) => {
           }
         }
 
+        // Leader preserves newer local liveTask; Member always adopts authoritative server liveTask from Leader
+        const isCurLeader = isTeamLeader(st, getCurrentUser());
+        let finalLiveTask = st.liveTask || lt.liveTask || null;
+        if (isCurLeader) {
+          if (lt.liveTask?.updatedAt && (!st.liveTask?.updatedAt || lt.liveTask.updatedAt > st.liveTask.updatedAt)) {
+            finalLiveTask = lt.liveTask;
+          } else if (st.liveTask) {
+            finalLiveTask = st.liveTask;
+          }
+        } else {
+          finalLiveTask = st.liveTask || lt.liveTask || null;
+        }
+
         return {
           ...st,
+          liveTask: finalLiveTask,
           stageTimers: mergedTimers,
           stageTimes: mergedTimes,
           completedStages: Array.from(new Set([...(st.completedStages || []), ...(lt.completedStages || [])]))
@@ -806,6 +820,64 @@ export const registerOrUpdateTeam = (teamData, setActive = false) => {
     setActiveTeam(updatedTeam.id);
   }
   return updatedTeam;
+};
+
+// --- LEADER & MEMBER REAL-TIME TASK COLLABORATION ENGINE ---
+
+export const isTeamLeader = (team, user = null) => {
+  if (!team) return false;
+  const current = user || getCurrentUser();
+  return Boolean(
+    current?.isLeader ||
+    current?.role === "leader" ||
+    (team?.leaderName && current?.name && current.name.trim().toLowerCase() === team.leaderName.trim().toLowerCase())
+  );
+};
+
+export const updateTeamLiveTask = (teamId, stageNumber, liveTaskPatch) => {
+  if (!teamId || !stageNumber) return null;
+  const teams = getAllTeams();
+  const team = teams.find(t => t.id === teamId);
+  if (!team) return null;
+
+  const currentLive = team.liveTask || {};
+  const currentStageKey = `stage_${stageNumber}`;
+  const currentStageData = currentLive[currentStageKey] || {};
+
+  const updatedStageData = {
+    ...currentStageData,
+    ...liveTaskPatch,
+    updatedAt: Date.now()
+  };
+
+  const updatedLiveTask = {
+    ...currentLive,
+    activeStage: stageNumber,
+    lastUpdatedBy: getCurrentUser()?.name || team.leaderName || "Ketua",
+    updatedAt: Date.now(),
+    [currentStageKey]: updatedStageData
+  };
+
+  const updatedTeam = {
+    ...team,
+    liveTask: updatedLiveTask
+  };
+
+  registerOrUpdateTeam(updatedTeam, true);
+  return updatedTeam;
+};
+
+export const getTeamLiveTask = (teamOrId, stageNumber = null) => {
+  if (!teamOrId) return null;
+  const teamId = typeof teamOrId === "object" ? teamOrId?.id : teamOrId;
+  const teams = getAllTeams();
+  const team = teams.find(t => t.id === teamId) || (typeof teamOrId === "object" ? teamOrId : null);
+  if (!team || !team.liveTask) return null;
+
+  if (stageNumber) {
+    return team.liveTask[`stage_${stageNumber}`] || null;
+  }
+  return team.liveTask;
 };
 
 // --- GROUP STAGE TIME TRACKING (STOPWATCH & AUTO-PAUSE) ---

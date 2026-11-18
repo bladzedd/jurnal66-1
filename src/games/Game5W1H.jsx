@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, CheckCircle2, RotateCcw, ArrowRight, 
   HelpCircle, Sparkles, BookOpen, Clock, AlertTriangle, Users, FileText,
-  Pause, Play 
+  Pause, Play, Crown, Eye, Lock, Radio
 } from 'lucide-react';
 import { journalismStages } from '../data/journalismData';
 import { sound } from '../utils/sound';
@@ -13,14 +13,27 @@ import {
   startOrResumeTeamStageTimer, 
   pauseTeamStageTimer, 
   getTeamStageTimer, 
-  formatDuration 
+  formatDuration,
+  isTeamLeader,
+  updateTeamLiveTask,
+  getTeamLiveTask,
+  getCurrentUser,
+  getActiveTeam
 } from '../utils/storage';
 
 export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
   const cases = moduleData?.cases || journalismStages[0].cases;
   const assignedVarIdx = getTeamVariationIndex(team);
 
+  const currentUser = getCurrentUser();
+  const isLeader = isTeamLeader(team, currentUser);
+
+  const initialLive = team?.liveTask?.stage_1 || {};
+
   const [currentCaseIdx, setCurrentCaseIdx] = useState(() => {
+    if (initialLive.currentCaseIdx !== undefined && initialLive.currentCaseIdx < (cases?.length || 5)) {
+      return initialLive.currentCaseIdx;
+    }
     try {
       const saved = sessionStorage.getItem("redaksi_game1_case_v5");
       const parsed = saved !== null ? parseInt(saved, 10) : null;
@@ -32,15 +45,54 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       return assignedVarIdx % (cases?.length || 5);
     }
   });
-  const [assignments, setAssignments] = useState({}); // { what: clueObj, who: clueObj, ... }
+
+  const [assignments, setAssignments] = useState(() => initialLive.assignments || {}); // { what: clueObj, who: clueObj, ... }
   const [selectedClue, setSelectedClue] = useState(null);
-  const [isCaseFinished, setIsCaseFinished] = useState(false);
-  const [feedbackMsg, setFeedbackMsg] = useState(null);
+  const [leaderSelectedClueId, setLeaderSelectedClueId] = useState(() => initialLive.selectedClueId || null);
+  const [isCaseFinished, setIsCaseFinished] = useState(() => Boolean(initialLive.isCaseFinished));
+  const [feedbackMsg, setFeedbackMsg] = useState(() => initialLive.feedbackMsg || null);
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
     const t = getTeamStageTimer(team?.id || team, 1);
     return t.seconds;
   });
+
+  // Listen to remote changes from server (Anggota updates state to match Ketua live)
+  useEffect(() => {
+    const handleRemoteTaskSync = () => {
+      const latestTeam = getActiveTeam() || team;
+      if (!latestTeam) return;
+      const live = latestTeam.liveTask?.stage_1;
+      if (!live) return;
+
+      if (!isLeader) {
+        if (live.currentCaseIdx !== undefined && live.currentCaseIdx !== currentCaseIdx) {
+          setCurrentCaseIdx(live.currentCaseIdx);
+        }
+        if (live.assignments !== undefined) {
+          setAssignments(live.assignments || {});
+        }
+        if (live.selectedClueId !== undefined) {
+          setLeaderSelectedClueId(live.selectedClueId);
+        }
+        if (live.isCaseFinished !== undefined) {
+          setIsCaseFinished(Boolean(live.isCaseFinished));
+        }
+        if (live.feedbackMsg !== undefined) {
+          setFeedbackMsg(live.feedbackMsg);
+        }
+      }
+    };
+
+    window.addEventListener("classroom-sync", handleRemoteTaskSync);
+    window.addEventListener("storage", handleRemoteTaskSync);
+    const intv = setInterval(handleRemoteTaskSync, 1000);
+    return () => {
+      window.removeEventListener("classroom-sync", handleRemoteTaskSync);
+      window.removeEventListener("storage", handleRemoteTaskSync);
+      clearInterval(intv);
+    };
+  }, [isLeader, currentCaseIdx, team?.id]);
 
   useEffect(() => {
     if (team?.id) {
@@ -131,25 +183,44 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
     }
     if (hasFakeDistractor) list = [...list, distractorClue];
     setCluesPool(shuffleArray(list));
-    setAssignments({});
-    setSelectedClue(null);
-    setIsCaseFinished(false);
-    setFeedbackMsg(null);
-  }, [currentCaseIdx, activeCase, hasFakeDistractor]);
 
-  // Handle clue selection
-  const handleSelectClue = (clue) => {
-    sound.playClick();
-    if (selectedClue && selectedClue.id === clue.id) {
-      setSelectedClue(null);
+    const currentLive = team?.liveTask?.stage_1;
+    if (isLeader) {
+      if (!currentLive || currentLive.currentCaseIdx !== currentCaseIdx) {
+        setAssignments({});
+        setSelectedClue(null);
+        setIsCaseFinished(false);
+        setFeedbackMsg(null);
+      }
     } else {
-      setSelectedClue(clue);
+      if (currentLive && currentLive.currentCaseIdx === currentCaseIdx) {
+        setAssignments(currentLive.assignments || {});
+        setIsCaseFinished(Boolean(currentLive.isCaseFinished));
+        setFeedbackMsg(currentLive.feedbackMsg || null);
+      }
+    }
+  }, [currentCaseIdx, activeCase, hasFakeDistractor, isLeader]);
+
+  // Handle clue selection (Only Leader can select clue to assign)
+  const handleSelectClue = (clue) => {
+    if (!isLeader) return;
+    sound.playClick();
+    const next = selectedClue && selectedClue.id === clue.id ? null : clue;
+    setSelectedClue(next);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 1, {
+        currentCaseIdx,
+        assignments,
+        selectedClueId: next ? next.id : null,
+        isCaseFinished,
+        feedbackMsg
+      });
     }
   };
 
-  // Handle slot assignment
+  // Handle slot assignment (Only Leader can place clues into slots)
   const handleAssignToSlot = (elementKey) => {
-    if (!selectedClue) return;
+    if (!isLeader || !selectedClue) return;
 
     sound.playClick();
 
@@ -158,8 +229,18 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       sound.playError();
       const typeLabel = selectedClue.distractorType || "Pengecoh Non-Faktual";
       const reason = selectedClue.distractorReason || "Bukan fakta pokok berita 5W+1H!";
-      setFeedbackMsg(`Pengecoh Terdeteksi [${typeLabel}]: "${selectedClue.text}" — ${reason}`);
+      const msg = `Pengecoh Terdeteksi [${typeLabel}]: "${selectedClue.text}" — ${reason}`;
+      setFeedbackMsg(msg);
       setSelectedClue(null);
+      if (team?.id) {
+        updateTeamLiveTask(team.id, 1, {
+          currentCaseIdx,
+          assignments,
+          selectedClueId: null,
+          isCaseFinished: false,
+          feedbackMsg: msg
+        });
+      }
       return;
     }
 
@@ -171,15 +252,35 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
     const filledCount = Object.keys(nextAssignments).length;
     if (filledCount === 6) {
       evaluateCase(nextAssignments);
+    } else {
+      if (team?.id) {
+        updateTeamLiveTask(team.id, 1, {
+          currentCaseIdx,
+          assignments: nextAssignments,
+          selectedClueId: null,
+          isCaseFinished: false,
+          feedbackMsg: null
+        });
+      }
     }
   };
 
   const handleRemoveFromSlot = (elementKey) => {
+    if (!isLeader) return;
     sound.playClick();
     const next = { ...assignments };
     delete next[elementKey];
     setAssignments(next);
     setIsCaseFinished(false);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 1, {
+        currentCaseIdx,
+        assignments: next,
+        selectedClueId: null,
+        isCaseFinished: false,
+        feedbackMsg: null
+      });
+    }
   };
 
   const evaluateCase = (finalAssignments) => {
@@ -194,33 +295,74 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       sound.playSuccess();
       sound.playStamp();
       setIsCaseFinished(true);
-      setFeedbackMsg(`Keren banget! Semua 6 unsur 5W+1H pada Kasus #${currentCaseIdx + 1} udah tepat dan valid. Mantap!`);
+      const msg = `Keren banget! Semua 6 unsur 5W+1H pada Kasus #${currentCaseIdx + 1} udah tepat dan valid. Mantap!`;
+      setFeedbackMsg(msg);
 
       if (currentCaseIdx === cases.length - 1) {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
       }
+      if (team?.id) {
+        updateTeamLiveTask(team.id, 1, {
+          currentCaseIdx,
+          assignments: finalAssignments,
+          selectedClueId: null,
+          isCaseFinished: true,
+          feedbackMsg: msg
+        });
+      }
     } else {
       sound.playError();
-      setFeedbackMsg(`Ups, masih ada ${6 - correctCount} unsur yang ketuker nih! Yuk cek lagi bareng temen-temen se-tim!`);
+      const msg = `Ups, masih ada ${6 - correctCount} unsur yang ketuker nih! Yuk cek lagi bareng temen-temen se-tim!`;
+      setFeedbackMsg(msg);
+      if (team?.id) {
+        updateTeamLiveTask(team.id, 1, {
+          currentCaseIdx,
+          assignments: finalAssignments,
+          selectedClueId: null,
+          isCaseFinished: false,
+          feedbackMsg: msg
+        });
+      }
     }
   };
 
   const handleNextCase = () => {
+    if (!isLeader) return;
     sound.playStamp();
-    setCurrentCaseIdx((prev) => (prev + 1) % cases.length);
+    const nextIdx = (currentCaseIdx + 1) % cases.length;
+    setCurrentCaseIdx(nextIdx);
     setAssignments({});
     setSelectedClue(null);
     setIsCaseFinished(false);
     setFeedbackMsg(null);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 1, {
+        currentCaseIdx: nextIdx,
+        assignments: {},
+        selectedClueId: null,
+        isCaseFinished: false,
+        feedbackMsg: null
+      });
+    }
   };
 
   const handleResetCurrentCase = () => {
+    if (!isLeader) return;
     sound.playClick();
     setAssignments({});
     setSelectedClue(null);
     setIsCaseFinished(false);
     setFeedbackMsg(null);
     setCluesPool(prev => shuffleArray(prev));
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 1, {
+        currentCaseIdx,
+        assignments: {},
+        selectedClueId: null,
+        isCaseFinished: false,
+        feedbackMsg: null
+      });
+    }
   };
 
   const assignedClueIds = Object.values(assignments).map(c => c.id);
@@ -252,6 +394,47 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
             {VARIATION_BEATS[assignedVarIdx]?.title || `Variasi #${assignedVarIdx + 1}`}
           </span>
         </div>
+      </div>
+
+      {/* Real-time Collaboration Role Banner */}
+      <div className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 shadow-sm ${
+        isLeader
+          ? "bg-accent/15 border-accent/35 text-ink"
+          : "bg-accent-orange/15 border-accent-orange/35 text-ink"
+      }`}>
+        <div className="flex items-center gap-2.5">
+          {isLeader ? (
+            <div className="w-8 h-8 rounded-lg bg-accent text-accent-ink flex items-center justify-center shrink-0">
+              <Crown className="w-4 h-4" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-accent-orange text-white flex items-center justify-center shrink-0">
+              <Eye className="w-4 h-4" />
+            </div>
+          )}
+          <div>
+            <div className="font-body text-xs font-bold flex items-center gap-1.5">
+              <span>{isLeader ? "Mode Ketua Kelompok (Pengambil Keputusan)" : "Mode Pantau Anggota (Real-Time Spectator)"}</span>
+              {!isLeader && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                  Live Sync
+                </span>
+              )}
+            </div>
+            <p className="font-body text-[11px] text-ink-muted">
+              {isLeader
+                ? "Pilihan dan penempatan fakta Anda langsung tersinkronisasi secara real-time ke layar seluruh anggota kelompok."
+                : `Ketua (${team?.leaderName || "Ketua Kelompok"}) sedang memegang kendali pengerjaan. Layar Anda menampilkan penempatan fakta secara real-time.`}
+            </p>
+          </div>
+        </div>
+        {!isLeader && (
+          <div className="shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-[11px] text-ink-muted font-medium">
+            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse" />
+            <span>Memantau Ketua</span>
+          </div>
+        )}
       </div>
 
       {/* Debuff Alert */}
@@ -325,13 +508,15 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
             <div
               key={elem.key}
               data-slot={elem.key}
-              onClick={() => handleAssignToSlot(elem.key)}
-              className={`p-4 rounded-xl border transition-all duration-150 relative cursor-pointer ${
+              onClick={isLeader ? () => handleAssignToSlot(elem.key) : undefined}
+              className={`p-4 rounded-xl border transition-all duration-150 relative ${
+                isLeader ? "cursor-pointer" : "cursor-default"
+              } ${
                 assigned
                   ? isCorrect && isCaseFinished
                     ? "bg-accent-green/15 border-accent-green/40 shadow-sm"
                     : "glass border-rule shadow-sm"
-                  : selectedClue
+                  : selectedClue && isLeader
                     ? "bg-accent/10 border-accent/40 border-dashed hover:bg-accent/15"
                     : "glass border-rule/80 hover:border-rule"
               }`}
@@ -356,19 +541,23 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                     <span className="font-body text-xs sm:text-sm font-medium text-ink">
                       {assigned.text}
                     </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveFromSlot(elem.key);
-                      }}
-                      className="text-accent-red font-body text-xs hover:underline shrink-0 font-medium px-2 py-1 rounded bg-accent-red/10 border border-accent-red/20 min-h-[36px]"
-                    >
-                      [Lepas]
-                    </button>
+                    {isLeader && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFromSlot(elem.key);
+                        }}
+                        className="text-accent-red font-body text-xs hover:underline shrink-0 font-medium px-2 py-1 rounded bg-accent-red/10 border border-accent-red/20 min-h-[36px]"
+                      >
+                        [Lepas]
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="text-xs font-body text-ink-muted italic w-full text-center py-2.5 border border-dashed border-rule/60 rounded-lg min-h-[44px] flex items-center justify-center">
-                    {selectedClue ? "Ketuk di sini untuk memasukkan fakta terpilih" : "Kotak masih kosong"}
+                    {isLeader 
+                      ? (selectedClue ? "Ketuk di sini untuk memasukkan fakta terpilih" : "Kotak masih kosong")
+                      : "Menunggu Ketua memasukkan fakta..."}
                   </div>
                 )}
               </div>
@@ -383,13 +572,20 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
           <span className="font-body text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Potongan Fakta Tersedia ({availableClues.length} tersisa):
           </span>
-          <button
-            onClick={handleResetCurrentCase}
-            className="text-xs font-body font-medium text-accent-orange hover:text-accent-orange/80 flex items-center gap-1.5 transition-colors min-h-[40px] px-3 py-1.5 rounded-full bg-accent-orange/10 border border-accent-orange/20"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Kasus Ini</span>
-          </button>
+          {isLeader ? (
+            <button
+              onClick={handleResetCurrentCase}
+              className="text-xs font-body font-medium text-accent-orange hover:text-accent-orange/80 flex items-center gap-1.5 transition-colors min-h-[40px] px-3 py-1.5 rounded-full bg-accent-orange/10 border border-accent-orange/20"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Kasus Ini</span>
+            </button>
+          ) : (
+            <span className="text-[11px] font-body text-ink-muted italic flex items-center gap-1">
+              <Lock className="w-3 h-3 text-ink-muted" />
+              <span>Kendali dipegang Ketua</span>
+            </span>
+          )}
         </div>
 
         {isCaseFinished && availableClues.length > 0 && (
@@ -402,21 +598,37 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
         {availableClues.length > 0 ? (
           <div className="flex flex-wrap gap-2.5">
             {availableClues.map((clue) => {
-              const isSelected = selectedClue && selectedClue.id === clue.id;
+              const isSelectedByMe = isLeader && selectedClue && selectedClue.id === clue.id;
+              const isSelectedByLeader = !isLeader && leaderSelectedClueId === clue.id;
+              const isAnySelected = isSelectedByMe || isSelectedByLeader;
+
               return (
                 <button
                   key={clue.id}
-                  onClick={() => handleSelectClue(clue)}
+                  data-clue-id={clue.id}
+                  data-clue-btn="true"
+                  onClick={isLeader ? () => handleSelectClue(clue) : undefined}
+                  disabled={!isLeader}
                   className={`text-left p-3 px-3.5 rounded-xl border text-xs sm:text-sm transition-all min-h-[44px] ${
-                    isSelected
-                      ? "bg-accent text-accent-ink border-accent font-semibold shadow-md ring-2 ring-accent"
+                    isLeader ? "cursor-pointer" : "cursor-default"
+                  } ${
+                    isAnySelected
+                      ? "bg-accent text-accent-ink border-accent font-semibold shadow-md ring-2 ring-accent animate-pulse"
                       : "bg-paper-2/60 border-rule text-ink-2 hover:bg-paper-2 hover:border-rule/80 font-medium"
                   }`}
                 >
-                  <span className="inline-flex items-start gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
-                    <span>{clue.text}</span>
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="inline-flex items-start gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                      <span>{clue.text}</span>
+                    </span>
+                    {isSelectedByLeader && (
+                      <span className="font-mono text-[9px] bg-accent text-accent-ink px-1.5 py-0.5 rounded font-bold uppercase w-fit inline-flex items-center gap-1">
+                        <Crown className="w-2.5 h-2.5" />
+                        Sedang Dipilih Ketua
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -455,27 +667,51 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                 Biro <strong>{team?.name}</strong> berhasil membuktikan keenam unsur pokok berita tanpa terkecoh rumor hoaks.
               </p>
             </div>
-            <button
-              onClick={() => {
-                sound.playStamp();
-                handleCleanComplete(1, 100, moduleData?.badge || "Master 5W+1H");
-              }}
-              className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] shrink-0 w-full sm:w-auto justify-center inline-flex items-center gap-2"
-            >
-              <span>Klaim Lencana & Masuk Ruang Tunggu</span>
-              <ArrowRight className="w-4 h-4 text-accent-ink" />
-            </button>
+            {isLeader ? (
+              <button
+                onClick={() => {
+                  sound.playStamp();
+                  handleCleanComplete(1, 100, moduleData?.badge || "Master 5W+1H");
+                }}
+                className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] shrink-0 w-full sm:w-auto justify-center inline-flex items-center gap-2"
+              >
+                <span>Klaim Lencana & Masuk Ruang Tunggu</span>
+                <ArrowRight className="w-4 h-4 text-accent-ink" />
+              </button>
+            ) : (
+              <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
+                <div className="px-4 py-2.5 rounded-xl bg-accent-orange/15 border border-accent-orange/30 text-accent-orange text-xs font-semibold inline-flex items-center gap-2">
+                  <Crown className="w-4 h-4" />
+                  <span>Menunggu Ketua Mengklaim Lencana...</span>
+                </div>
+                <button
+                  onClick={() => {
+                    sound.playStamp();
+                    handleCleanComplete(1, 100, moduleData?.badge || "Master 5W+1H");
+                  }}
+                  className="text-xs text-ink-muted hover:text-ink underline self-center sm:self-end"
+                >
+                  Atau masuk ke Ruang Tunggu sekarang
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="pt-3 border-t border-rule/60 flex flex-wrap items-center justify-between gap-2 text-xs font-body text-ink-muted">
             <span>Ingin menguji kemampuan pada berkas investigasi variasi lainnya?</span>
-            <button
-              onClick={handleNextCase}
-              className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center gap-1.5 transition-all min-h-[38px]"
-            >
-              <span>Jelajahi Kasus Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            {isLeader ? (
+              <button
+                onClick={handleNextCase}
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center gap-1.5 transition-all min-h-[38px]"
+              >
+                <span>Jelajahi Kasus Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <span className="text-xs text-ink-muted italic">
+                Ketua ({team?.leaderName || "Ketua"}) yang menentukan kasus berikutnya
+              </span>
+            )}
           </div>
         </div>
       )}

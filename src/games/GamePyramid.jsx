@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, ArrowUp, ArrowDown, CheckCircle2, RotateCcw, ArrowRight, 
-  HelpCircle, Layers, Users, AlertTriangle, Sparkles, Clock, Pause, Play 
+  HelpCircle, Layers, Users, AlertTriangle, Sparkles, Clock, Pause, Play,
+  Crown, Eye, Lock, Radio
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { 
@@ -11,14 +12,27 @@ import {
   startOrResumeTeamStageTimer, 
   pauseTeamStageTimer, 
   getTeamStageTimer, 
-  formatDuration 
+  formatDuration,
+  isTeamLeader,
+  updateTeamLiveTask,
+  getTeamLiveTask,
+  getCurrentUser,
+  getActiveTeam
 } from '../utils/storage';
 
 export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
   const cases = moduleData.cases;
   const assignedVarIdx = getTeamVariationIndex(team);
 
+  const currentUser = getCurrentUser();
+  const isLeader = isTeamLeader(team, currentUser);
+
+  const initialLive = team?.liveTask?.stage_2 || {};
+
   const [currentCaseIdx, setCurrentCaseIdx] = useState(() => {
+    if (initialLive.currentCaseIdx !== undefined && initialLive.currentCaseIdx < (cases?.length || 5)) {
+      return initialLive.currentCaseIdx;
+    }
     try {
       const saved = sessionStorage.getItem("redaksi_game2_case_v5");
       const parsed = saved !== null ? parseInt(saved, 10) : null;
@@ -36,6 +50,63 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
     const t = getTeamStageTimer(team?.id || team, 2);
     return t.seconds;
   });
+
+  const shuffleBlocks = (rawBlocks) => {
+    const arr = [...rawBlocks];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    // Prevent accidental pre-solved order
+    if (arr.every((b, idx) => b.level === idx + 1) && arr.length > 1) {
+      [arr[0], arr[1]] = [arr[1], arr[0]];
+    }
+    return arr;
+  };
+
+  const [blocks, setBlocks] = useState(() => {
+    if (initialLive.blocks && Array.isArray(initialLive.blocks) && initialLive.blocks.length > 0) {
+      return initialLive.blocks;
+    }
+    return shuffleBlocks(activeCase.blocks);
+  });
+  const [isCaseSuccess, setIsCaseSuccess] = useState(() => Boolean(initialLive.isCaseSuccess));
+  const [isAllSuccess, setIsAllSuccess] = useState(false);
+  const [feedback, setFeedback] = useState(() => initialLive.feedback || null);
+
+  // Listen to remote changes from server (Anggota updates state to match Ketua live)
+  useEffect(() => {
+    const handleRemoteTaskSync = () => {
+      const latestTeam = getActiveTeam() || team;
+      if (!latestTeam) return;
+      const live = latestTeam.liveTask?.stage_2;
+      if (!live) return;
+
+      if (!isLeader) {
+        if (live.currentCaseIdx !== undefined && live.currentCaseIdx !== currentCaseIdx) {
+          setCurrentCaseIdx(live.currentCaseIdx);
+        }
+        if (live.blocks && Array.isArray(live.blocks) && live.blocks.length > 0) {
+          setBlocks(live.blocks);
+        }
+        if (live.isCaseSuccess !== undefined) {
+          setIsCaseSuccess(Boolean(live.isCaseSuccess));
+        }
+        if (live.feedback !== undefined) {
+          setFeedback(live.feedback);
+        }
+      }
+    };
+
+    window.addEventListener("classroom-sync", handleRemoteTaskSync);
+    window.addEventListener("storage", handleRemoteTaskSync);
+    const intv = setInterval(handleRemoteTaskSync, 1000);
+    return () => {
+      window.removeEventListener("classroom-sync", handleRemoteTaskSync);
+      window.removeEventListener("storage", handleRemoteTaskSync);
+      clearInterval(intv);
+    };
+  }, [isLeader, currentCaseIdx, team?.id]);
 
   useEffect(() => {
     if (team?.id) {
@@ -76,33 +147,29 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
 
   const hasScrambleDebuff = team?.activeDebuffs?.includes("card_scramble_clues");
 
-  const shuffleBlocks = (rawBlocks) => {
-    const arr = [...rawBlocks];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    // Prevent accidental pre-solved order
-    if (arr.every((b, idx) => b.level === idx + 1) && arr.length > 1) {
-      [arr[0], arr[1]] = [arr[1], arr[0]];
-    }
-    return arr;
-  };
-
-  const [blocks, setBlocks] = useState(() => shuffleBlocks(activeCase.blocks));
-  const [isCaseSuccess, setIsCaseSuccess] = useState(false);
-  const [isAllSuccess, setIsAllSuccess] = useState(false);
-  const [feedback, setFeedback] = useState(null);
-
-  // Update blocks when changing case
+  // Update blocks when changing case (Leader only)
   useEffect(() => {
-    setBlocks(shuffleBlocks(activeCase.blocks));
-    setIsCaseSuccess(false);
-    setFeedback(null);
+    if (isLeader) {
+      const currentLive = team?.liveTask?.stage_2;
+      if (!currentLive || currentLive.currentCaseIdx !== currentCaseIdx) {
+        const fresh = shuffleBlocks(activeCase.blocks);
+        setBlocks(fresh);
+        setIsCaseSuccess(false);
+        setFeedback(null);
+        if (team?.id) {
+          updateTeamLiveTask(team.id, 2, {
+            currentCaseIdx,
+            blocks: fresh,
+            isCaseSuccess: false,
+            feedback: null
+          });
+        }
+      }
+    }
   }, [currentCaseIdx, activeCase]);
 
   const moveUp = (index) => {
-    if (index === 0) return;
+    if (!isLeader || index === 0) return;
     sound.playClick();
     const updated = [...blocks];
     const temp = updated[index - 1];
@@ -111,10 +178,18 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
     setBlocks(updated);
     setIsCaseSuccess(false);
     setFeedback(null);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 2, {
+        currentCaseIdx,
+        blocks: updated,
+        isCaseSuccess: false,
+        feedback: null
+      });
+    }
   };
 
   const moveDown = (index) => {
-    if (index === blocks.length - 1) return;
+    if (!isLeader || index === blocks.length - 1) return;
     sound.playClick();
     const updated = [...blocks];
     const temp = updated[index + 1];
@@ -123,17 +198,28 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
     setBlocks(updated);
     setIsCaseSuccess(false);
     setFeedback(null);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 2, {
+        currentCaseIdx,
+        blocks: updated,
+        isCaseSuccess: false,
+        feedback: null
+      });
+    }
   };
 
   const handleValidate = () => {
+    if (!isLeader) return;
     sound.playClick();
     const isCorrect = blocks.every((b, idx) => b.level === idx + 1);
+    let fb = null;
 
     if (isCorrect) {
       sound.playSuccess();
       sound.playStamp();
       setIsCaseSuccess(true);
-      setFeedback("Sempurna! Susunan Piramida Terbalik kasus ini tepat dan berurutan dari tingkat 1 hingga 5.");
+      fb = "Sempurna! Susunan Piramida Terbalik kasus ini tepat dan berurutan dari tingkat 1 hingga 5.";
+      setFeedback(fb);
 
       if (currentCaseIdx === cases.length - 1) {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
@@ -141,20 +227,54 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
       }
     } else {
       sound.playError();
-      setFeedback("Susunan piramida belum tepat! Ingat: Urutkan dari Headline di puncak -> Lead (Teras 5W1H) -> Kronologi Tubuh -> Kutipan Resmi -> Ekor Berita di bagian terbawah.");
+      fb = "Susunan piramida belum tepat! Ingat: Urutkan dari Headline di puncak -> Lead (Teras 5W1H) -> Kronologi Tubuh -> Kutipan Resmi -> Ekor Berita di bagian terbawah.";
+      setFeedback(fb);
+    }
+
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 2, {
+        currentCaseIdx,
+        blocks,
+        isCaseSuccess: isCorrect,
+        feedback: fb
+      });
     }
   };
 
   const handleNextCase = () => {
+    if (!isLeader) return;
     sound.playClick();
-    setCurrentCaseIdx((prev) => (prev + 1) % cases.length);
+    const nextIdx = (currentCaseIdx + 1) % cases.length;
+    setCurrentCaseIdx(nextIdx);
+    const nextBlocks = shuffleBlocks(cases[nextIdx].blocks);
+    setBlocks(nextBlocks);
+    setIsCaseSuccess(false);
+    setFeedback(null);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 2, {
+        currentCaseIdx: nextIdx,
+        blocks: nextBlocks,
+        isCaseSuccess: false,
+        feedback: null
+      });
+    }
   };
 
   const handleReset = () => {
+    if (!isLeader) return;
     sound.playClick();
-    setBlocks(shuffleBlocks(activeCase.blocks));
+    const nextBlocks = shuffleBlocks(activeCase.blocks);
+    setBlocks(nextBlocks);
     setIsCaseSuccess(false);
     setFeedback(null);
+    if (team?.id) {
+      updateTeamLiveTask(team.id, 2, {
+        currentCaseIdx,
+        blocks: nextBlocks,
+        isCaseSuccess: false,
+        feedback: null
+      });
+    }
   };
 
   const pyramidWidths = [
@@ -198,6 +318,47 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
             {VARIATION_BEATS[assignedVarIdx]?.title || `Variasi #${assignedVarIdx + 1}`}
           </span>
         </div>
+      </div>
+
+      {/* Real-time Collaboration Role Banner */}
+      <div className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 shadow-sm ${
+        isLeader
+          ? "bg-accent/15 border-accent/35 text-ink"
+          : "bg-accent-orange/15 border-accent-orange/35 text-ink"
+      }`}>
+        <div className="flex items-center gap-2.5">
+          {isLeader ? (
+            <div className="w-8 h-8 rounded-lg bg-accent text-accent-ink flex items-center justify-center shrink-0">
+              <Crown className="w-4 h-4" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-accent-orange text-white flex items-center justify-center shrink-0">
+              <Eye className="w-4 h-4" />
+            </div>
+          )}
+          <div>
+            <div className="font-body text-xs font-bold flex items-center gap-1.5">
+              <span>{isLeader ? "Mode Ketua Kelompok (Pengambil Keputusan)" : "Mode Pantau Anggota (Real-Time Spectator)"}</span>
+              {!isLeader && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                  Live Sync
+                </span>
+              )}
+            </div>
+            <p className="font-body text-[11px] text-ink-muted">
+              {isLeader
+                ? "Pergeseran balok piramida Anda langsung tersinkronisasi secara real-time ke layar seluruh anggota kelompok."
+                : `Ketua (${team?.leaderName || "Ketua Kelompok"}) sedang menyusun urutan piramida. Posisi balok di layar Anda tergeser secara otomatis mengikuti Ketua.`}
+            </p>
+          </div>
+        </div>
+        {!isLeader && (
+          <div className="shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-[11px] text-ink-muted font-medium">
+            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse" />
+            <span>Memantau Ketua</span>
+          </div>
+        )}
       </div>
 
       {/* Debuff Alert */}
@@ -260,6 +421,8 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
           return (
             <div
               key={block.id}
+              data-block-id={block.id}
+              data-block-level={block.level}
               className={`${pyramidWidths[idx] || "w-full"} transition-all duration-200`}
             >
               <div className={`glass p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 shadow-sm ${
@@ -290,24 +453,33 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
 
                 {/* Move Controls */}
                 <div className="flex sm:flex-col gap-2 shrink-0 self-end sm:self-center">
-                  <button
-                    onClick={() => moveUp(idx)}
-                    disabled={idx === 0 || isCaseSuccess}
-                    className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
-                    title="Pindahkan ke atas"
-                    aria-label="Pindahkan ke atas"
-                  >
-                    <ArrowUp className="w-5 h-5 text-ink" />
-                  </button>
-                  <button
-                    onClick={() => moveDown(idx)}
-                    disabled={idx === blocks.length - 1 || isCaseSuccess}
-                    className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
-                    title="Pindahkan ke bawah"
-                    aria-label="Pindahkan ke bawah"
-                  >
-                    <ArrowDown className="w-5 h-5 text-ink" />
-                  </button>
+                  {isLeader ? (
+                    <>
+                      <button
+                        onClick={() => moveUp(idx)}
+                        disabled={idx === 0 || isCaseSuccess}
+                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
+                        title="Pindahkan ke atas"
+                        aria-label="Pindahkan ke atas"
+                      >
+                        <ArrowUp className="w-5 h-5 text-ink" />
+                      </button>
+                      <button
+                        onClick={() => moveDown(idx)}
+                        disabled={idx === blocks.length - 1 || isCaseSuccess}
+                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
+                        title="Pindahkan ke bawah"
+                        aria-label="Pindahkan ke bawah"
+                      >
+                        <ArrowDown className="w-5 h-5 text-ink" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="px-2.5 py-1.5 rounded-lg bg-paper-2 border border-rule text-[11px] font-mono font-medium text-ink-muted flex items-center gap-1 shrink-0">
+                      <Eye className="w-3.5 h-3.5 text-accent-orange" />
+                      <span className="hidden sm:inline">Urutan Live</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -317,22 +489,36 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
-        <button
-          onClick={handleReset}
-          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-4 py-2.5 text-xs font-body font-medium text-ink inline-flex items-center justify-center transition-all shadow-sm min-h-[44px]"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>Acak Ulang</span>
-        </button>
+        {isLeader ? (
+          <button
+            onClick={handleReset}
+            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-4 py-2.5 text-xs font-body font-medium text-ink inline-flex items-center justify-center transition-all shadow-sm min-h-[44px]"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Acak Ulang</span>
+          </button>
+        ) : (
+          <div className="text-[11px] font-body text-ink-muted italic flex items-center gap-1.5 px-3 py-2">
+            <Lock className="w-3.5 h-3.5 text-ink-muted" />
+            <span>Kendali susunan dipegang Ketua</span>
+          </div>
+        )}
 
         {!isCaseSuccess ? (
-          <button
-            onClick={handleValidate}
-            className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 justify-center shadow-lg transition-all min-h-[44px]"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Uji Kebenaran Piramida</span>
-          </button>
+          isLeader ? (
+            <button
+              onClick={handleValidate}
+              className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 justify-center shadow-lg transition-all min-h-[44px]"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Uji Kebenaran Piramida</span>
+            </button>
+          ) : (
+            <div className="px-4 py-2.5 rounded-full bg-paper-2 border border-rule text-xs font-medium text-ink-muted flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Menunggu Ketua ({team?.leaderName || "Ketua"}) menguji susunan piramida...</span>
+            </div>
+          )
         ) : (
           <div className="w-full space-y-4">
             <div className="glass p-6 sm:p-7 rounded-2xl border border-accent-green/40 text-center space-y-3.5 shadow-card w-full animate-in fade-in">
@@ -357,23 +543,43 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                 Kalian telah membuktikan kejelian membaca anatomi naskah jurnalistik dari Headline di puncak hingga Ekor di dasar berita.
               </p>
               <div className="pt-2 flex flex-col sm:flex-row justify-center gap-2">
-                <button
-                  onClick={() => {
-                    sound.playStamp();
-                    handleCleanComplete(moduleData.number, 100, moduleData.badge || "Arsitek Struktur");
-                  }}
-                  className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] inline-flex items-center gap-2"
-                >
-                  <span>Klaim Lencana & Masuk Ruang Tunggu Redaksi</span>
-                  <ArrowRight className="w-4 h-4 text-accent-ink" />
-                </button>
-                <button
-                  onClick={handleNextCase}
-                  className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center justify-center gap-1.5 transition-all min-h-[44px]"
-                >
-                  <span>Jelajahi Kasus Piramida Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                {isLeader ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        sound.playStamp();
+                        handleCleanComplete(moduleData.number, 100, moduleData.badge || "Arsitek Struktur");
+                      }}
+                      className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] inline-flex items-center gap-2"
+                    >
+                      <span>Klaim Lencana & Masuk Ruang Tunggu Redaksi</span>
+                      <ArrowRight className="w-4 h-4 text-accent-ink" />
+                    </button>
+                    <button
+                      onClick={handleNextCase}
+                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center justify-center gap-1.5 transition-all min-h-[44px]"
+                    >
+                      <span>Jelajahi Kasus Piramida Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="px-5 py-2.5 rounded-xl bg-accent-orange/15 border border-accent-orange/30 text-accent-orange text-xs font-semibold inline-flex items-center gap-2">
+                      <Crown className="w-4 h-4" />
+                      <span>Menunggu Ketua ({team?.leaderName || "Ketua"}) Mengklaim Lencana...</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        sound.playStamp();
+                        handleCleanComplete(moduleData.number, 100, moduleData.badge || "Arsitek Struktur");
+                      }}
+                      className="text-xs text-ink-muted hover:text-ink underline"
+                    >
+                      Atau masuk ke Ruang Tunggu sekarang
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
