@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, GraduationCap, User, Stethoscope, Store, 
   Sparkles, Cpu, Award, Search, Mic, Newspaper, Zap, 
@@ -7,11 +7,77 @@ import {
   Layers, Users, Clock, ShieldAlert, BookOpen, Flame
 } from 'lucide-react';
 
+export const WITNESS_PHOTOS = {
+  // Case 1: Gawai di Sekolah
+  "witness_wakasek": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80", // Ibu Dra. Nurulita (Wakasek)
+  "witness_osis": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80", // Rizky Pratama (Ketua OSIS)
+  "witness_aisyah": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=160&auto=format&fit=crop&q=80", // Siti Aisyah (Siswi Mading)
+
+  // Case 2: Kantin & UKS
+  "witness_pedagang": "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=160&auto=format&fit=crop&q=80", // Mang Ujang (Pedagang Kantin)
+  "witness_dokter_uks": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=160&auto=format&fit=crop&q=80", // dr. Farida Hanum (Dokter UKS)
+  "witness_korban_dika": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&auto=format&fit=crop&q=80", // Dika Ardian (Siswa)
+
+  // Case 3: Piala Bergilir
+  "witness_pak_mahmud": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80", // Pak Mahmud (Kebersihan Aula)
+  "witness_pembina_sains": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80", // Bu Ratna (Pembina)
+  "witness_satpam": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80", // Pak Joko Santoso (Satpam)
+
+  // Case 4: Voting Duta Pelajar & IT
+  "witness_doni_it": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&auto=format&fit=crop&q=80", // Doni Prasetyo (Koordinator IT)
+  "witness_salsabila": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80" // Salsabila Anindya (Kandidat Duta)
+};
+
+const getPhotoByRole = (text) => {
+  if (text.includes("dokter") || text.includes("uks") || text.includes("medis") || text.includes("kesehatan")) {
+    return "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("guru") || text.includes("kepala") || text.includes("wakasek") || text.includes("pembina")) {
+    return "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("kantin") || text.includes("pedagang") || text.includes("warung") || text.includes("cilok") || text.includes("ujang")) {
+    return "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("satpam") || text.includes("keamanan") || text.includes("security")) {
+    return "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("it") || text.includes("komputer") || text.includes("voting") || text.includes("siber")) {
+    return "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("kebersihan") || text.includes("aula") || text.includes("mahmud")) {
+    return "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("duta") || text.includes("siswi") || text.includes("mading") || text.includes("aisyah")) {
+    return "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=160&auto=format&fit=crop&q=80";
+  }
+  if (text.includes("osis") || text.includes("siswa") || text.includes("ketua")) {
+    return "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=160&auto=format&fit=crop&q=80";
+  }
+  return "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80";
+};
+
 /**
- * Returns a professional Lucide icon for witnesses based on their ID, role, or avatar key.
+ * Returns a photo avatar for witnesses with graceful fallback to professional Lucide icons.
  */
-export function WitnessAvatar({ witnessId, role = "", avatar = "", className = "", iconClassName = "", size = 20 }) {
+export function WitnessAvatar({ witnessId = "", role = "", avatar = "", className = "", iconClassName = "", size = 20 }) {
+  const [hasError, setHasError] = useState(false);
   const text = `${witnessId} ${role} ${avatar}`.toLowerCase();
+  const photoUrl = WITNESS_PHOTOS[witnessId] || getPhotoByRole(text);
+
+  if (photoUrl && !hasError) {
+    const finalClass = className || "w-9 h-9 rounded-xl";
+    return (
+      <div className={`relative shrink-0 overflow-hidden border border-rule/80 bg-paper-2 shadow-xs group ${finalClass}`}>
+        <img
+          src={photoUrl}
+          alt={role || "Saksi Liputan"}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+          onError={() => setHasError(true)}
+        />
+      </div>
+    );
+  }
 
   let IconComponent = User;
   let bgClass = "bg-accent/15 text-accent border-accent/30";

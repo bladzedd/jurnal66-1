@@ -3,6 +3,7 @@ const ACTIVE_TEAM_KEY = "redaksi_siswa_active_team_id_v5";
 const CLASSROOM_STAGE_KEY = "redaksi_classroom_stage_v5";
 const PRESS_WAR_LOGS_KEY = "redaksi_siswa_war_logs_v5";
 const CURRENT_USER_KEY = "redaksi_siswa_current_user_v5";
+const SAVED_USERS_KEY = "redaksi_siswa_saved_users_v5";
 const GLOBAL_TIMER_KEY = "redaksi_siswa_global_timer_v5";
 const SCREEN_FREEZE_KEY = "redaksi_siswa_screen_freeze_v5";
 const APP_INITIALIZED_KEY = "redaksi_siswa_initialized_v5";
@@ -51,6 +52,7 @@ export const setCurrentUser = (user) => {
     if (user) {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
       sessionStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      saveUserProfile(user);
     } else {
       localStorage.removeItem(CURRENT_USER_KEY);
       sessionStorage.removeItem(CURRENT_USER_KEY);
@@ -58,6 +60,158 @@ export const setCurrentUser = (user) => {
   } catch {
     // ignore
   }
+};
+
+// =========================================================================
+// SAVED USERS / PROFIL PENGGUNA TERSIMPAN (Untuk Digunakan Kembali Nanti)
+// =========================================================================
+
+export const getSavedUsers = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(SAVED_USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveUserProfile = (userProfile) => {
+  if (typeof window === "undefined" || !userProfile || !userProfile.name) return null;
+  try {
+    const users = getSavedUsers();
+    const cleanName = (userProfile.name || "").trim();
+    const cleanClass = (userProfile.classInfo || "").trim();
+    const teamId = userProfile.teamId || "";
+
+    const profileId = userProfile.id || `user_${cleanName.toLowerCase()}_${teamId || 'general'}`;
+    const isLeader = Boolean(
+      userProfile.isLeader || 
+      userProfile.role === "leader" || 
+      (userProfile.memberRole && userProfile.memberRole.includes("Pemimpin"))
+    );
+
+    let teamName = userProfile.teamName || "";
+    let code = userProfile.code || "";
+
+    if (teamId) {
+      const allTeams = getAllTeams();
+      const matchTeam = allTeams.find(t => t.id === teamId);
+      if (matchTeam) {
+        teamName = matchTeam.name;
+        code = isLeader ? matchTeam.leaderCode : matchTeam.memberCode;
+      }
+    }
+
+    const entry = {
+      id: profileId,
+      name: cleanName,
+      classInfo: cleanClass,
+      role: isLeader ? "Pemimpin Redaksi (Ketua Kelompok)" : (userProfile.memberRole || userProfile.role || "Wartawan Liputan Lapangan"),
+      memberRole: isLeader ? "Pemimpin Redaksi (Ketua Kelompok)" : (userProfile.memberRole || userProfile.role || "Wartawan Liputan Lapangan"),
+      isLeader,
+      teamId,
+      teamName,
+      code,
+      avatar: userProfile.avatar || "user",
+      lastUsedAt: Date.now()
+    };
+
+    const filtered = users.filter(u => u.id !== profileId && !(u.name.toLowerCase() === cleanName.toLowerCase() && u.teamId === teamId));
+    filtered.unshift(entry);
+
+    const updatedUsers = filtered.slice(0, 20);
+    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(updatedUsers));
+    // Push master registered users list to the VPS server!
+    pushStateToServer({ registeredUsers: updatedUsers });
+    return entry;
+  } catch (err) {
+    console.error("Failed to save user profile", err);
+    return null;
+  }
+};
+
+export const removeSavedUser = (profileId) => {
+  if (typeof window === "undefined" || !profileId) return;
+  try {
+    const users = getSavedUsers();
+    const filtered = users.filter(u => u.id !== profileId);
+    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(filtered));
+  } catch {
+    // ignore
+  }
+};
+
+export const clearAllSavedUsers = () => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(SAVED_USERS_KEY);
+  } catch {
+    // ignore
+  }
+};
+
+export const loginAsSavedUser = (profileId) => {
+  const users = getSavedUsers();
+  const profile = users.find(u => u.id === profileId);
+  if (!profile) return { success: false, message: "Profil pengguna tidak ditemukan!" };
+
+  const allTeams = getAllTeams();
+  const team = allTeams.find(t => t.id === profile.teamId);
+  if (!team) {
+    return { 
+      success: false, 
+      message: `Biro '${profile.teamName || "Kelompok"}' sudah tidak aktif atau dibubarkan!` 
+    };
+  }
+
+  setActiveTeam(team.id);
+  const userObj = {
+    role: profile.isLeader ? "leader" : "member",
+    name: profile.name,
+    classInfo: profile.classInfo,
+    memberRole: profile.memberRole || profile.role,
+    teamId: team.id,
+    teamName: team.name,
+    code: profile.isLeader ? team.leaderCode : team.memberCode,
+    isLeader: profile.isLeader
+  };
+  setCurrentUser(userObj);
+  saveUserProfile(userObj);
+
+  return { success: true, team, user: userObj };
+};
+
+// Returns full master roster of all registered users across all teams on the VPS
+export const getAllClassroomUsers = () => {
+  const teams = getAllTeams();
+  const roster = [];
+  const seen = new Set();
+
+  for (const t of teams) {
+    for (const m of (t.members || [])) {
+      const name = typeof m === "string" ? m : m.name;
+      const classInfo = typeof m === "string" ? (t.leaderClass || "-") : (m.classInfo || t.leaderClass || "-");
+      const role = typeof m === "string" ? "Wartawan" : (m.role || "Wartawan");
+      const isLeader = typeof m === "string" ? false : Boolean(m.isLeader);
+      const key = `${name.toLowerCase()}_${t.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        roster.push({
+          id: key,
+          name,
+          classInfo,
+          role,
+          isLeader,
+          teamId: t.id,
+          teamName: t.name,
+          leaderCode: t.leaderCode,
+          memberCode: t.memberCode
+        });
+      }
+    }
+  }
+  return roster;
 };
 
 // Active Module persistence for resilience across refresh / mobile reload
@@ -136,12 +290,46 @@ export const applyServerState = (serverState) => {
     try {
       const rawLocal = localStorage.getItem(TEAMS_STORAGE_KEY);
       const localTeams = rawLocal ? JSON.parse(rawLocal) : [];
+      const activeId = typeof window !== "undefined" ? (localStorage.getItem(ACTIVE_TEAM_KEY) || sessionStorage.getItem(ACTIVE_TEAM_KEY)) : null;
       const mergedMap = new Map();
       
-      // Server teams have highest authority
       for (const st of serverState.teams) {
-        if (st && st.id) mergedMap.set(st.id, st);
+        if (!st || !st.id) continue;
+        const lt = localTeams.find(x => x.id === st.id);
+        if (lt) {
+          // If local client is working on this team, preserve active running timer and avoid reset
+          const mergedTimers = { ...(st.stageTimers || {}) };
+          const mergedTimes = { ...(st.stageTimes || {}) };
+
+          if (lt.stageTimers) {
+            for (const [stgKey, ltTimer] of Object.entries(lt.stageTimers)) {
+              const stTimer = mergedTimers[stgKey];
+              // Keep local timer if active, running, or has more accumulated progress
+              if (!stTimer || (ltTimer.isPaused === false && ltTimer.startedAt) || (ltTimer.accumulatedSeconds || 0) > (stTimer.accumulatedSeconds || 0)) {
+                mergedTimers[stgKey] = ltTimer;
+              }
+            }
+          }
+
+          if (lt.stageTimes) {
+            for (const [stgKey, ltSec] of Object.entries(lt.stageTimes)) {
+              if (ltSec && (!mergedTimes[stgKey] || ltSec > mergedTimes[stgKey])) {
+                mergedTimes[stgKey] = ltSec;
+              }
+            }
+          }
+
+          mergedMap.set(st.id, {
+            ...st,
+            stageTimers: mergedTimers,
+            stageTimes: mergedTimes,
+            completedStages: Array.from(new Set([...(st.completedStages || []), ...(lt.completedStages || [])]))
+          });
+        } else {
+          mergedMap.set(st.id, st);
+        }
       }
+
       // Keep any local teams that aren't on server yet
       for (const lt of localTeams) {
         if (lt && lt.id && !mergedMap.has(lt.id)) {
@@ -178,6 +366,24 @@ export const applyServerState = (serverState) => {
   // 6. Active Classroom Case
   if (serverState.activeCaseId) {
     localStorage.setItem(ACTIVE_CLASSROOM_CASE_KEY, serverState.activeCaseId);
+  }
+
+  // 7. Registered Users from VPS Server
+  if (Array.isArray(serverState.registeredUsers) && serverState.registeredUsers.length > 0) {
+    try {
+      const rawLocal = localStorage.getItem(SAVED_USERS_KEY);
+      const localUsers = rawLocal ? JSON.parse(rawLocal) : [];
+      const userMap = new Map();
+      localUsers.forEach(u => { if (u && u.id) userMap.set(u.id, u); });
+      serverState.registeredUsers.forEach(u => {
+        if (u && u.id && !userMap.has(u.id)) {
+          userMap.set(u.id, u);
+        }
+      });
+      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(Array.from(userMap.values()).slice(0, 20)));
+    } catch {
+      // ignore
+    }
   }
 };
 
@@ -608,13 +814,21 @@ export const formatDuration = (sec) => {
   return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
 };
 
-export const getTeamStageTimer = (team, stageNumber) => {
+export const getTeamStageTimer = (teamOrId, stageNumber) => {
+  if (!teamOrId || !stageNumber) return { seconds: 0, formatted: "00:00", isRunning: false, isPaused: false, isCompleted: false };
+
+  // Always resolve latest team state to prevent stale closure bugs
+  const teamId = typeof teamOrId === "object" ? teamOrId?.id : teamOrId;
+  const teams = getAllTeams();
+  const team = teams.find(t => t.id === teamId) || (typeof teamOrId === "object" ? teamOrId : null);
   if (!team) return { seconds: 0, formatted: "00:00", isRunning: false, isPaused: false, isCompleted: false };
 
   // 1. If stage is already completed -> Locked & PAUSED!
   const finalTime = team.stageTimes?.[`stage_${stageNumber}`];
-  if (typeof finalTime === "number" || isStageCompleted(team, stageNumber)) {
-    const sec = typeof finalTime === "number" ? finalTime : 0;
+  if ((typeof finalTime === "number" && !isNaN(finalTime)) || isStageCompleted(team, stageNumber)) {
+    const sec = (typeof finalTime === "number" && !isNaN(finalTime)) 
+      ? finalTime 
+      : (team.stageTimers?.[`stage_${stageNumber}`]?.durationSeconds || team.stageTimers?.[`stage_${stageNumber}`]?.accumulatedSeconds || 0);
     return {
       seconds: sec,
       formatted: formatDuration(sec),
@@ -640,7 +854,7 @@ export const getTeamStageTimer = (team, stageNumber) => {
 
     if (timer.startedAt) {
       const elapsed = Math.round((Date.now() - timer.startedAt) / 1000) + (timer.accumulatedSeconds || 0);
-      const sec = Math.max(0, elapsed);
+      const sec = Math.max(0, isNaN(elapsed) ? 0 : elapsed);
       return {
         seconds: sec,
         formatted: formatDuration(sec),
@@ -676,7 +890,7 @@ export const startOrResumeTeamStageTimer = (teamId, stageNumber) => {
     return team;
   }
 
-  const accumulated = currentTimer ? (currentTimer.accumulatedSeconds || 0) : 0;
+  const accumulated = currentTimer ? (currentTimer.accumulatedSeconds || currentTimer.durationSeconds || 0) : 0;
 
   const updatedTeam = {
     ...team,
@@ -685,6 +899,7 @@ export const startOrResumeTeamStageTimer = (teamId, stageNumber) => {
       [`stage_${stageNumber}`]: {
         startedAt: Date.now(),
         accumulatedSeconds: accumulated,
+        durationSeconds: accumulated,
         isPaused: false
       }
     }
@@ -710,14 +925,16 @@ export const pauseTeamStageTimer = (teamId, stageNumber) => {
     ? Math.round((Date.now() - currentTimer.startedAt) / 1000) + (currentTimer.accumulatedSeconds || 0)
     : (currentTimer.accumulatedSeconds || 0);
 
+  const finalSec = Math.max(0, isNaN(elapsed) ? 0 : elapsed);
+
   const updatedTeam = {
     ...team,
     stageTimers: {
       ...(team.stageTimers || {}),
       [`stage_${stageNumber}`]: {
         startedAt: null,
-        accumulatedSeconds: elapsed,
-        durationSeconds: elapsed,
+        accumulatedSeconds: finalSec,
+        durationSeconds: finalSec,
         isPaused: true
       }
     }

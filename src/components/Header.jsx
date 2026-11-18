@@ -174,11 +174,11 @@ export default function Header({
           {/* Switch / Logout Team */}
           <button
             onClick={() => { sound.playClick(); onLogoutTeam(); }}
-            title="Ganti Kelompok"
+            title="Ganti Pengguna / Profil Biro"
             className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule p-2 sm:px-3 sm:py-1.5 text-xs font-body text-ink-muted hover:text-ink flex items-center justify-center gap-1 transition-all shadow-sm min-h-[42px] min-w-[42px]"
           >
             <LogOut className="w-3.5 h-3.5 text-accent-red" />
-            <span className="hidden lg:inline">Ganti Tim</span>
+            <span className="hidden lg:inline">Ganti Pengguna</span>
           </button>
         </div>
       </div>

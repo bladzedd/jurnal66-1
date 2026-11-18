@@ -48,7 +48,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
               </div>
               <h4 className="font-display font-medium text-base text-ink">Buku Catatan Masih Kosong</h4>
               <p className="font-body text-xs text-ink-muted leading-relaxed max-w-xs mx-auto">
-                Biro kalian belum mewawancarai narasumber. Temui saksi-saksi di Ruang Wawancara untuk mengumpulkan fakta penting dan kutipan berita!
+                Biro kalian belum ngobrol sama saksi nih. Yuk temui saksi-saksi di Ruang Wawancara buat ngumpulin fakta penting sama kutipan berita!
               </p>
               {onOpenInterview && (
                 <button
@@ -76,7 +76,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
                       witnessId={note.witnessId} 
                       role={note.witnessRole} 
                       avatar={note.witnessAvatar} 
-                      className="w-8 h-8 rounded-lg shrink-0" 
+                      className="w-9 h-9 rounded-full shrink-0 border border-rule/80 shadow-xs" 
                       iconClassName="w-4 h-4" 
                     />
                     <div>
@@ -106,7 +106,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
                 {note.isScoop && (
                   <div className="pt-1 border-t border-accent-orange/20 flex items-center gap-1.5 text-[11px] font-body text-accent-orange font-medium">
                     <Award className="w-3.5 h-3.5" />
-                    <span>Otomatis membuka opsi akurasi 100% di Tahap 3 (Menulis Berita)!</span>
+                    <span>Bakal otomatis ngebuka opsi akurat 100% pas nulis berita di Tahap 3!</span>
                   </div>
                 )}
               </div>
@@ -127,7 +127,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
           )}
 
           <div className="text-center font-body text-[11px] text-ink-muted">
-            Kutipan di buku saku otomatis siap disisipkan ke naskah berita Tahap 3.
+            Kutipan di buku saku ini siap dipake pas ngerjain naskah berita Tahap 3 nanti ya!
           </div>
         </div>
       </div>

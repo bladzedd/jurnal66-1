@@ -46,7 +46,9 @@ import {
   getTeamVariationIndex,
   VARIATION_BEATS,
   getTeamStageTimer,
-  formatDuration
+  formatDuration,
+  syncWithServerNow,
+  getAllClassroomUsers
 } from '../utils/storage';
 import { editorialRoles } from './GroupLoginScreen';
 import { journalismStages } from '../data/journalismData';
@@ -217,10 +219,15 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   };
 
   useEffect(() => {
+    let tickCount = 0;
     const timerInterval = setInterval(() => {
       setTimerState(getGlobalTimer());
       setFreezeState(getScreenFreeze());
       setTick(t => t + 1);
+      tickCount++;
+      if (tickCount % 2 === 0) {
+        syncWithServerNow();
+      }
     }, 1000);
     return () => clearInterval(timerInterval);
   }, []);
@@ -231,6 +238,8 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
   const totalMembers = teams.reduce((acc, t) => acc + (t.members?.length || 0), 0);
   const totalCoins = teams.reduce((acc, t) => acc + (t.coins || 0), 0);
+  const activeWorkingCount = teams.filter(t => [1, 2, 3].some(stg => getTeamStageTimer(t, stg).isRunning)).length;
+  const allClassroomUsers = getAllClassroomUsers();
 
   const refresh = () => setTick(t => t + 1);
 
@@ -271,8 +280,8 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   const handlePinSubmit = (e) => {
     e.preventDefault();
     sound.playClick();
-    const cleanPin = pinInput.trim().toUpperCase();
-    if (cleanPin === "GURU2026" || cleanPin === "ADMIN" || cleanPin === "GURU") {
+    const cleanPin = pinInput.trim();
+    if (cleanPin === "040498") {
       sound.playSuccess();
       try {
         sessionStorage.setItem('redaksi_admin_auth', 'true');
@@ -283,7 +292,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
       setPinError(null);
     } else {
       sound.playError();
-      setPinError("PIN Guru tidak cocok! Gunakan PIN resmi: GURU2026");
+      setPinError("PIN Admin salah. Silakan periksa kembali PIN Anda.");
     }
   };
 
@@ -335,7 +344,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 <div className="relative">
                   <input
                     type={showPin ? "text" : "password"}
-                    placeholder="Ketik PIN (contoh: GURU2026)"
+                    placeholder="Masukkan 6-Digit PIN Admin"
                     maxLength={15}
                     value={pinInput}
                     onChange={(e) => { setPinInput(e.target.value); setPinError(null); }}
@@ -349,20 +358,6 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     title={showPin ? "Sembunyikan PIN" : "Tampilkan PIN"}
                   >
                     {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-2.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPinInput("GURU2026");
-                      setPinError(null);
-                    }}
-                    className="text-[11px] font-body bg-accent/15 hover:bg-accent/25 border border-accent/30 text-accent font-semibold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 min-h-[34px]"
-                  >
-                    <Lightbulb className="w-3.5 h-3.5 text-accent shrink-0" />
-                    <span>Gunakan PIN Default: <strong>GURU2026</strong></span>
                   </button>
                 </div>
               </div>
@@ -920,7 +915,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 space-y-6">
         {/* Quick Stats Metrics Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
             <span className="font-body text-xs text-ink-muted block font-medium">TOTAL BIRO AKTIF</span>
             <span className="font-display font-medium text-2xl text-ink tracking-tight mt-1 block">{teams.length} Kelompok</span>
@@ -930,8 +925,15 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             <span className="font-display font-medium text-2xl text-accent-orange tracking-tight mt-1 block">{totalMembers} Siswa</span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TAHAP SINKRONISASI KELAS</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">TAHAP KELAS AKTIF</span>
             <span className="font-display font-medium text-2xl text-accent-green tracking-tight mt-1 block">Tahap #{currentStage}</span>
+          </div>
+          <div className="glass p-4 rounded-xl border border-rule shadow-card">
+            <span className="font-body text-xs text-ink-muted block font-medium">TIM SEDANG KERJA</span>
+            <span className="font-display font-medium text-xl text-accent tracking-tight mt-1 flex items-center gap-1.5">
+              <Clock className={`w-5 h-5 ${activeWorkingCount > 0 ? "text-accent animate-spin" : "text-ink-muted"}`} />
+              <span>{activeWorkingCount} Biro Berjalan</span>
+            </span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
             <span className="font-body text-xs text-ink-muted block font-medium">TOTAL KOIN KAS KELAS</span>
@@ -1278,10 +1280,42 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           </span>
                         ) : (
                           <span>
-                            Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo}) • Kas: <strong>{t.coins || 0} Koin</strong> • Waktu Tugas: <strong>{formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</strong>
+                            Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo}) • Kas: <strong>{t.coins || 0} Koin</strong> • Total Pengerjaan: <strong className="text-accent">{formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</strong>
                           </span>
                         )}
                       </p>
+
+                      {/* Live Working Timer & Stages Bar */}
+                      {!t.isPendingSetup && (
+                        <div className="flex items-center gap-2 flex-wrap pt-2 mt-1 border-t border-rule/50">
+                          <span className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider">Durasi per Tahap:</span>
+                          {[1, 2, 3].map(stg => {
+                            const timer = getTeamStageTimer(t, stg);
+                            const isDone = isStageCompleted(t, stg);
+                            return (
+                              <span 
+                                key={stg} 
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-mono text-xs font-semibold ${
+                                  isDone 
+                                    ? "bg-accent-green/15 text-accent-green border border-accent-green/30" 
+                                    : timer.isRunning 
+                                    ? "bg-accent/20 text-accent border border-accent/40 animate-pulse" 
+                                    : "bg-paper-2 border border-rule text-ink-muted"
+                                }`}
+                              >
+                                {isDone ? (
+                                  <Pause className="w-3 h-3 fill-current" />
+                                ) : timer.isRunning ? (
+                                  <Play className="w-3 h-3 fill-current text-accent" />
+                                ) : (
+                                  <Clock className="w-3 h-3 text-ink-muted" />
+                                )}
+                                <span>T{stg}: {isDone ? `${formatDuration(timer.seconds)} (Selesai)` : timer.isRunning ? `${formatDuration(timer.seconds)} (Berjalan)` : "-"}</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
@@ -1753,6 +1787,72 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Master Roster of Registered Classroom Users on VPS */}
+            <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-4">
+              <div className="flex flex-wrap justify-between items-center gap-2 border-b border-rule/60 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-accent/20 border border-accent/30 text-accent flex items-center justify-center">
+                    <UserCheck className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-medium text-base sm:text-lg text-ink">
+                      Daftar Seluruh Pengguna & Siswa Terdaftar (Server VPS)
+                    </h3>
+                    <p className="font-body text-xs text-ink-muted">
+                      Seluruh identitas siswa yang terdaftar tersimpan di server VPS ({allClassroomUsers.length} Siswa)
+                    </p>
+                  </div>
+                </div>
+                <span className="font-mono text-xs bg-accent-green/20 text-accent-green border border-accent-green/30 rounded-full px-3 py-1 font-bold">
+                  {allClassroomUsers.length} Siswa di Server
+                </span>
+              </div>
+
+              {allClassroomUsers.length === 0 ? (
+                <div className="p-4 text-center font-body text-xs text-ink-muted">
+                  Belum ada siswa yang mendaftar atau bergabung ke biro.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-body text-xs">
+                    <thead className="bg-paper-2/60 border-b border-rule text-[11px] text-ink-muted uppercase">
+                      <tr>
+                        <th className="p-2.5 text-center">No</th>
+                        <th className="p-2.5">Nama Lengkap Siswa</th>
+                        <th className="p-2.5">Kelas</th>
+                        <th className="p-2.5">Biro Redaksi</th>
+                        <th className="p-2.5">Peran Spesialis</th>
+                        <th className="p-2.5 text-center">Jabatan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-rule/50">
+                      {allClassroomUsers.map((u, uIdx) => (
+                        <tr key={u.id || uIdx} className="hover:bg-paper-2/40 transition-colors">
+                          <td className="p-2.5 text-center text-ink-muted font-mono">{uIdx + 1}</td>
+                          <td className="p-2.5 font-semibold text-ink">{u.name}</td>
+                          <td className="p-2.5 font-mono text-ink-muted">{u.classInfo || "-"}</td>
+                          <td className="p-2.5 text-accent font-medium">{u.teamName}</td>
+                          <td className="p-2.5 text-ink-2">{u.role}</td>
+                          <td className="p-2.5 text-center">
+                            {u.isLeader ? (
+                              <span className="bg-accent-orange/20 text-accent-orange border border-accent-orange/30 text-[10px] px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                                <Crown className="w-3 h-3" />
+                                <span>Ketua</span>
+                              </span>
+                            ) : (
+                              <span className="bg-paper-2 text-ink-muted border border-rule text-[10px] px-2 py-0.5 rounded-full font-medium">
+                                Anggota
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

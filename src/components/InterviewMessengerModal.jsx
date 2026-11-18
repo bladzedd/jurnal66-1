@@ -138,8 +138,8 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                   witnessId={w.id} 
                   role={w.role} 
                   avatar={w.avatar} 
-                  className={`w-7 h-7 rounded-lg shrink-0 ${isSelected ? "bg-accent-ink/20 text-accent-ink" : "bg-paper text-ink"}`} 
-                  iconClassName="w-3.5 h-3.5" 
+                  className="w-8 h-8 rounded-full shrink-0 border border-rule/80" 
+                  iconClassName="w-4 h-4" 
                 />
                 <div className="text-left">
                   <div className="text-xs truncate max-w-[130px] font-medium leading-tight">
@@ -157,17 +157,17 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
 
         {/* Selected Witness Info Bar & Trust Meter */}
         <div className="px-4 py-2.5 bg-paper-3/30 border-b border-rule/50 flex flex-wrap items-center justify-between gap-2 shrink-0 text-xs font-body">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <WitnessAvatar 
               witnessId={selectedWitness.id} 
               role={selectedWitness.role} 
               avatar={selectedWitness.avatar} 
-              className="w-7 h-7 rounded-lg shrink-0" 
-              iconClassName="w-3.5 h-3.5" 
+              className="w-9 h-9 rounded-full shrink-0 border border-rule/80 shadow-xs" 
+              iconClassName="w-4 h-4" 
             />
             <div>
-              <span className="font-semibold text-ink">{selectedWitness.name}</span>
-              <span className="text-ink-muted text-[11px] ml-1.5 hidden xs:inline">({selectedWitness.role})</span>
+              <span className="font-semibold text-ink text-sm sm:text-base">{selectedWitness.name}</span>
+              <span className="text-ink-muted text-xs ml-1.5 hidden xs:inline">({selectedWitness.role})</span>
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
               witnessId={selectedWitness.id} 
               role={selectedWitness.role} 
               avatar={selectedWitness.avatar} 
-              className="w-8 h-8 rounded-xl shrink-0 mt-1" 
+              className="w-9 h-9 rounded-full shrink-0 mt-1 border border-rule/80 shadow-xs" 
               iconClassName="w-4 h-4" 
             />
             <div className="glass p-3.5 rounded-2xl rounded-tl-xs border border-rule space-y-1.5 shadow-sm">
@@ -239,7 +239,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                     witnessId={selectedWitness.id} 
                     role={selectedWitness.role} 
                     avatar={selectedWitness.avatar} 
-                    className="w-8 h-8 rounded-xl shrink-0 mt-1" 
+                    className="w-9 h-9 rounded-full shrink-0 mt-1 border border-rule/80 shadow-xs" 
                     iconClassName="w-4 h-4" 
                   />
                   <div className="glass p-3.5 rounded-2xl rounded-tl-xs border border-rule space-y-2 shadow-sm">
@@ -267,7 +267,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                     {q.trustDelta < 0 && (
                       <div className="p-2.5 rounded-xl bg-accent-red/15 border border-accent-red/30 text-accent-red text-xs font-body font-medium flex items-center gap-1.5">
                         <Frown className="w-4 h-4 shrink-0" />
-                        <span>Pertanyaan dianggap menuduh/tidak sopan! Kepercayaan berkurang ({q.trustDelta}%).</span>
+                        <span>Aduh, pertanyaannya agak menuduh nih! Kepercayaan saksi jadi berkurang ({q.trustDelta}%).</span>
                       </div>
                     )}
                   </div>
@@ -284,7 +284,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                 <span>NARASUMBER MENOLAK MENJAWAB (NO COMMENT)</span>
               </span>
               <p className="text-ink-2">
-                "{selectedWitness.name} tersinggung oleh pertanyaan yang menuduh. Beliau menolak menjawab pertanyaan lebih lanjut dari biro kalian. Coba wawancarai saksi lainnya!"
+                "{selectedWitness.name} agak tersinggung karena pertanyaannya terkesan menuduh. Beliau gamau jawab lagi nih ke biro kalian. Coba ajak ngobrol saksi lain ya!"
               </p>
             </div>
           )}
@@ -293,7 +293,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
         {/* Bottom Question Choices Sheet */}
         <div className="p-3.5 sm:p-4 border-t border-rule bg-paper-2/70 space-y-2.5 shrink-0">
           <div className="flex justify-between items-center text-xs font-body text-ink-muted">
-            <span className="font-semibold text-ink-2">Pilih Taktik Pertanyaan Wartawan:</span>
+            <span className="font-semibold text-ink-2">Pilih Pertanyaan Wartawan:</span>
             <span>
               {questionsAsked.length} dari {selectedWitness.questions?.length || 0} Pertanyaan Diajukan
             </span>

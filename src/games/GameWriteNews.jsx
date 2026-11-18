@@ -33,17 +33,21 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
   });
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
-    const t = getTeamStageTimer(team, 3);
+    const t = getTeamStageTimer(team?.id || team, 3);
     return t.seconds;
   });
 
   useEffect(() => {
     if (team?.id) {
       startOrResumeTeamStageTimer(team.id, 3);
+      const init = getTeamStageTimer(team.id, 3);
+      setElapsedSeconds(init.seconds);
     }
     const interval = setInterval(() => {
-      const t = getTeamStageTimer(team, 3);
-      setElapsedSeconds(t.seconds);
+      if (team?.id) {
+        const t = getTeamStageTimer(team.id, 3);
+        setElapsedSeconds(t.seconds);
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [team?.id]);
@@ -298,7 +302,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
             <div className="p-3 bg-paper-2/40 border border-rule/80 rounded-xl font-body text-xs text-ink flex items-start gap-2 shadow-sm">
               <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               <div>
-                <strong className="text-accent font-semibold">Diskusi Tatap Muka:</strong> Bacakan konteks fakta di bawah ke rekan kelompokmu dan sepakati opsi kalimat terbaik secara offline sebelum menekan tombol jawaban!
+                <strong className="text-accent font-semibold">Diskusi Santai Bareng Tim:</strong> Bacain konteks fakta di bawah ke temen-temen se-tim ya. Rembukan bareng buat milih opsi kalimat yang paling netral, padat fakta, dan bebas dari opini pribadi!
               </div>
             </div>
 

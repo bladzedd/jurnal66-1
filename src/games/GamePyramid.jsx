@@ -33,17 +33,21 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
   const activeCase = cases[currentCaseIdx] || cases[0];
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
-    const t = getTeamStageTimer(team, 2);
+    const t = getTeamStageTimer(team?.id || team, 2);
     return t.seconds;
   });
 
   useEffect(() => {
     if (team?.id) {
       startOrResumeTeamStageTimer(team.id, 2);
+      const init = getTeamStageTimer(team.id, 2);
+      setElapsedSeconds(init.seconds);
     }
     const interval = setInterval(() => {
-      const t = getTeamStageTimer(team, 2);
-      setElapsedSeconds(t.seconds);
+      if (team?.id) {
+        const t = getTeamStageTimer(team.id, 2);
+        setElapsedSeconds(t.seconds);
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [team?.id]);
@@ -226,7 +230,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
           "{activeCase.topic}"
         </h3>
         <p className="font-body text-xs sm:text-sm text-ink-2 leading-relaxed">
-          Gunakan tombol panah <strong>[NAIK]</strong> dan <strong>[TURUN]</strong> untuk mengatur urutan 5 balok berita di bawah agar membentuk susunan piramida terbalik yang tepat dari informasi paling krusial di atas hingga rincian pelengkap!
+          Klik tombol panah <strong>[NAIK]</strong> dan <strong>[TURUN]</strong> buat ngatur urutan 5 balok berita di bawah ya. Urutin dari info paling penting di atas (Lead) sampai info pelengkap di bawah (Ekor)!
         </p>
       </div>
 
@@ -246,7 +250,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
       <div className="p-3.5 bg-paper-2/40 border border-rule/80 rounded-xl font-body text-xs text-ink flex items-start gap-2.5 shadow-sm">
         <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
         <div>
-          <strong className="text-accent font-semibold">Debat Meja Redaksi (Tatap Muka):</strong> <em>Redaktur Struktur & Hierarki</em> memimpin diskusi: "Mengapa informasi paling krusial harus di Lead dan bukan di Ekor?" Sepakati urutan balok piramida bersama tim sebelum menguji susunan!
+          <strong className="text-accent font-semibold">Rembukan Tim Redaksi:</strong> Obrolin bareng tim: info mana yang paling krusial buat pembaca? Sepakati dulu urutan balok piramidanya bareng temen kelompok sebelum klik uji kebenaran!
         </div>
       </div>
 

@@ -38,17 +38,21 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
   const [feedbackMsg, setFeedbackMsg] = useState(null);
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
-    const t = getTeamStageTimer(team, 1);
+    const t = getTeamStageTimer(team?.id || team, 1);
     return t.seconds;
   });
 
   useEffect(() => {
     if (team?.id) {
       startOrResumeTeamStageTimer(team.id, 1);
+      const init = getTeamStageTimer(team.id, 1);
+      setElapsedSeconds(init.seconds);
     }
     const interval = setInterval(() => {
-      const t = getTeamStageTimer(team, 1);
-      setElapsedSeconds(t.seconds);
+      if (team?.id) {
+        const t = getTeamStageTimer(team.id, 1);
+        setElapsedSeconds(t.seconds);
+      }
     }, 1000);
     return () => clearInterval(interval);
   }, [team?.id]);
@@ -190,14 +194,14 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       sound.playSuccess();
       sound.playStamp();
       setIsCaseFinished(true);
-      setFeedbackMsg(`Sempurna! Semua 6 unsur 5W+1H pada Kasus #${currentCaseIdx + 1} tepat dan valid.`);
+      setFeedbackMsg(`Keren banget! Semua 6 unsur 5W+1H pada Kasus #${currentCaseIdx + 1} udah tepat dan valid. Mantap!`);
 
       if (currentCaseIdx === cases.length - 1) {
         confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
       }
     } else {
       sound.playError();
-      setFeedbackMsg(`Masih ada ${6 - correctCount} unsur yang tertukar atau kurang tepat. Periksa kembali pembagian tugas dengan timmu!`);
+      setFeedbackMsg(`Ups, masih ada ${6 - correctCount} unsur yang ketuker nih! Yuk cek lagi bareng temen-temen se-tim!`);
     }
   };
 
@@ -285,7 +289,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
         </div>
 
         <p className="font-body text-xs text-ink-muted">
-          <strong>Instruksi:</strong> Ketuk potongan fakta di bawah, lalu ketuk slot 5W+1H yang sesuai untuk mengisi lembar berita!
+          <strong>Cara Main:</strong> Klik potongan fakta di bawah, terus pasang ke kotak 5W+1H yang paling pas ya!
         </p>
       </div>
 
@@ -307,7 +311,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       <div className="p-3.5 bg-paper-2/40 border border-rule/80 rounded-xl font-body text-xs text-ink flex items-start gap-2.5 shadow-sm">
         <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
         <div>
-          <strong className="text-accent font-semibold">Instruksi Musyawarah Tatap Muka:</strong> Anggota pembawa data (Wartawan TKP & Wawancara) membacakan temuan secara offline. Diskusikan bersama tim sebelum menempatkan fakta ke slot 5W+1H!
+          <strong className="text-accent font-semibold">Diskusi Bareng Tim:</strong> Bacain temuan fakta ini ke temen-temen se-tim secara santai. Saring mana fakta asli dan mana yang cuma gosip sebelum dipasang!
         </div>
       </div>
 

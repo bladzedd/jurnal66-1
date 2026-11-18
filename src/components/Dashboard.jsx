@@ -5,7 +5,7 @@ import {
   MessageSquare, BookOpen, Coins, Megaphone, Lightbulb, PenTool, Crown, Radio, Clock
 } from 'lucide-react';
 import { journalismStages } from '../data/journalismData';
-import { getCurrentUser, getClassroomStage, isStageCompleted, getActiveClassroomCase } from '../utils/storage';
+import { getCurrentUser, setCurrentUser, getClassroomStage, isStageCompleted, getActiveClassroomCase } from '../utils/storage';
 import { sound } from '../utils/sound';
 import StageWaitingRoom from './StageWaitingRoom';
 import { WitnessAvatar, CoinBadge } from './ui/ProfessionalIcon';
@@ -22,7 +22,31 @@ export default function Dashboard({
 }) {
   const [confirmDisband, setConfirmDisband] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [, setUserTick] = useState(0);
   const currentUser = getCurrentUser();
+
+  const handleSwitchActiveMember = (m, isLeader) => {
+    sound.playClick();
+    const cleanName = typeof m === "string" ? m : m.name;
+    const cleanClass = typeof m === "string" ? "" : (m.classInfo || "");
+    const cleanRole = typeof m === "string" ? (isLeader ? "Pemimpin Redaksi" : "Wartawan") : (m.role || (isLeader ? "Pemimpin Redaksi" : "Wartawan"));
+
+    const userObj = {
+      role: isLeader ? "leader" : "member",
+      name: cleanName,
+      classInfo: cleanClass,
+      memberRole: cleanRole,
+      teamId: team.id,
+      teamName: team.name,
+      code: isLeader ? team.leaderCode : team.memberCode,
+      isLeader
+    };
+    setCurrentUser(userObj);
+    setUserTick(t => t + 1);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("storage"));
+    }
+  };
 
   const handleCopyMemberCode = () => {
     sound.playClick();
@@ -162,7 +186,7 @@ export default function Dashboard({
           </div>
           <div className="font-body text-xs text-ink-2 bg-paper-3/60 border border-rule/60 p-3 rounded-xl sm:max-w-xs leading-relaxed flex items-start gap-2">
             <Lightbulb className="w-4 h-4 text-accent-orange shrink-0 mt-0.5" />
-            <span><strong>Instruksi Ketua:</strong> Bagikan kode ini kepada rekan tim di kelas. Anggota cukup membuka web dan memasukkan kode di atas pada halaman utama.</span>
+            <span><strong>Info buat Ketua:</strong> Langsung bagiin kode ini ke temen kelompokmu ya! Mereka tinggal buka web dan masukin kode ini di halaman awal buat gabung bareng kamu.</span>
           </div>
         </div>
 
@@ -207,46 +231,59 @@ export default function Dashboard({
               const classTag = typeof m === "string" ? null : m.classInfo;
               const roleTitle = typeof m === "string" ? (idx === 0 ? "Pemimpin Redaksi" : "Wartawan") : (m.role || "Wartawan");
               const isLeader = typeof m === "string" ? idx === 0 : m.isLeader;
+              const isCurrentUser = currentUser?.name?.toLowerCase() === name.toLowerCase();
 
               return (
                 <div
                   key={idx}
-                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-lg px-2.5 py-1 font-medium border ${
-                    isLeader 
-                      ? "bg-accent/15 border-accent/35 text-ink" 
-                      : "bg-paper-2/60 border-rule text-ink-2"
+                  onClick={() => handleSwitchActiveMember(m, isLeader)}
+                  title={isCurrentUser ? "Profil aktif kamu saat ini" : `Klik untuk jadikan ${name} sebagai pengguna aktif di perangkat ini`}
+                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-xl px-3 py-1.5 font-medium border cursor-pointer transition-all active:scale-95 shadow-xs ${
+                    isCurrentUser 
+                      ? "bg-accent/25 border-accent text-ink shadow-sm ring-1 ring-accent/40" 
+                      : isLeader 
+                        ? "bg-accent/15 border-accent/35 text-ink hover:bg-accent/20" 
+                        : "bg-paper-2/60 border-rule text-ink-2 hover:bg-paper-2 hover:border-rule/80"
                   }`}
                 >
                   <span className="inline-flex items-center gap-1">
                     {isLeader ? (
-                      <Crown className="w-3 h-3 text-accent-orange shrink-0" />
+                      <Crown className="w-3.5 h-3.5 text-accent-orange shrink-0" />
                     ) : (
-                      <PenTool className="w-3 h-3 text-accent shrink-0" />
+                      <PenTool className="w-3.5 h-3.5 text-accent shrink-0" />
                     )}
-                    <span>{idx + 1}. {name}</span>
+                    <span className="font-semibold">{idx + 1}. {name}</span>
                   </span>
                   {classTag && (
-                    <span className="bg-paper-3 border border-rule/60 text-ink-muted text-[10px] px-1.5 py-0.2 rounded">
+                    <span className="bg-paper-3 border border-rule/60 text-ink-muted text-[10px] px-1.5 py-0.2 rounded font-mono">
                       {classTag}
                     </span>
                   )}
                   <span className="text-[10px] text-ink-muted border-l border-rule/50 pl-1.5">
                     {roleTitle}
                   </span>
+                  {isCurrentUser && (
+                    <span className="bg-accent text-accent-ink text-[9px] px-1.5 py-0.2 rounded-full font-bold ml-0.5">
+                      Kamu
+                    </span>
+                  )}
                 </div>
               );
             })}
           </div>
+          <span className="font-body text-[10px] text-ink-muted/80 block mt-1.5">
+            *Tip: Klik nama salah satu anggota di atas untuk berganti pengguna aktif yang sedang memegang perangkat ini.
+          </span>
         </div>
 
         {/* Offline Discussion Prompt */}
         <div className="p-3.5 bg-paper-2/40 border border-rule/80 rounded-xl text-xs text-ink space-y-1">
           <div className="flex items-center gap-1.5 font-body text-xs font-semibold text-accent-orange">
             <Users className="w-3.5 h-3.5 text-accent-orange shrink-0" />
-            <span>Konsensus Offline Meja Redaksi:</span>
+            <span>Diskusi Santai Meja Redaksi:</span>
           </div>
           <p className="font-body text-xs text-ink-muted leading-relaxed">
-            Sebelum memutuskan jawaban di web, seluruh anggota (Wartawan 5W+1H, Redaktur Piramida, Penyelidik Narasumber, & Copy Editor) wajib <strong>berdiskusi tatap muka secara langsung</strong> memeriksa bukti. Keputusan final diambil atas kesepakatan bersama!
+            Sebelum klik dan kunci jawaban di web, rembukan langsung dulu ya bareng temen se-tim! Semua peran (Wartawan 5W+1H, Redaktur Piramida, Penyelidik Narasumber, & Copy Editor) saling tukar pendapat biar naskah kalian akurat dan kompak!
           </p>
         </div>
 
@@ -339,12 +376,12 @@ export default function Dashboard({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <WitnessAvatar witnessId={w.id} role={w.role} avatar={w.avatar} className="w-9 h-9 rounded-xl" iconClassName="w-4 h-4" />
+                      <WitnessAvatar witnessId={w.id} role={w.role} avatar={w.avatar} className="w-12 h-12 rounded-full border-2 border-accent/40 shadow-sm shrink-0" iconClassName="w-5 h-5" />
                       <div className="min-w-0">
-                        <span className="font-display font-medium text-xs text-ink truncate block">
+                        <span className="font-display font-medium text-xs sm:text-sm text-ink truncate block">
                           {w.name}
                         </span>
-                        <span className="font-body text-[10px] text-ink-muted truncate block">
+                        <span className="font-body text-[10px] sm:text-xs text-ink-muted truncate block">
                           {w.role}
                         </span>
                       </div>
@@ -352,7 +389,7 @@ export default function Dashboard({
 
                     <div className="shrink-0 text-right">
                       {hasScoop ? (
-                        <span className="bg-accent-orange/20 text-accent-orange text-[10px] px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                        <span className="bg-accent-orange/20 text-accent-orange text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 shadow-2xs">
                           <Sparkles className="w-3 h-3" />
                           <span>SCOOP</span>
                         </span>
@@ -374,7 +411,7 @@ export default function Dashboard({
 
             <div className="font-body text-[11px] text-ink-muted flex items-start gap-1.5 pt-1">
               <Lightbulb className="w-3.5 h-3.5 text-accent-orange shrink-0 mt-0.5" />
-              <span>Wawancarai seluruh saksi untuk mengantongi fakta emas (<em>cover both sides</em>) yang akan memperkuat naskah berita kalian di Tahap 3!</span>
+              <span><strong>Tips Jitu:</strong> Wawancarai semua saksi di atas ya! Cari kutipan emas dan fakta berimbang (<em>cover both sides</em>) biar naskah berita biro kalian makin mantap di Tahap 3!</span>
             </div>
           </section>
         );

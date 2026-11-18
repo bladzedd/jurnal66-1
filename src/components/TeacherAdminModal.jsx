@@ -34,13 +34,13 @@ export default function TeacherAdminModal({ onClose, onClassUpdated }) {
   const handleLoginPin = (e) => {
     e.preventDefault();
     sound.playClick();
-    if (pin.trim() === "GURU2026" || pin.trim() === "admin" || pin.trim() === "guru") {
+    if (pin.trim() === "040498") {
       sound.playSuccess();
       setIsAuthenticated(true);
       setAuthError(null);
     } else {
       sound.playError();
-      setAuthError("PIN Guru tidak cocok! (Default: GURU2026)");
+      setAuthError("PIN Admin tidak cocok. Silakan coba lagi.");
     }
   };
 
@@ -147,7 +147,7 @@ export default function TeacherAdminModal({ onClose, onClassUpdated }) {
             <form onSubmit={handleLoginPin} className="space-y-3 w-full max-w-xs">
               <input
                 type="password"
-                placeholder="PIN Guru (cth: GURU2026)"
+                placeholder="Masukkan 6-Digit PIN Admin"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 className="w-full border-[2.5px] border-ink bg-paper-card p-2.5 text-center font-mono font-extrabold text-base focus:outline-none"
@@ -160,13 +160,6 @@ export default function TeacherAdminModal({ onClose, onClassUpdated }) {
                 BUKA MEJA GURU
               </button>
             </form>
-
-            <button
-              onClick={() => { setPin("GURU2026"); }}
-              className="text-xs font-mono text-ink-muted underline hover:text-ink pt-2"
-            >
-              (Gunakan PIN Default Kelas: GURU2026)
-            </button>
           </div>
         ) : (
           /* AUTHENTICATED TEACHER DASHBOARD */

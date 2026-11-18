@@ -60,9 +60,25 @@ function classroomSyncPlugin() {
         try {
           const incoming = JSON.parse(body || '{}');
           const existing = readState() || {};
+
+          // Smart merge for registeredUsers (master roster of users across devices)
+          let mergedUsers = existing.registeredUsers || [];
+          if (Array.isArray(incoming.registeredUsers)) {
+            const userMap = new Map();
+            (existing.registeredUsers || []).forEach(u => { if (u && u.id) userMap.set(u.id, u); });
+            incoming.registeredUsers.forEach(u => {
+              if (u && u.id) {
+                const old = userMap.get(u.id);
+                userMap.set(u.id, { ...old, ...u, lastUsedAt: Math.max(old?.lastUsedAt || 0, u.lastUsedAt || 0) });
+              }
+            });
+            mergedUsers = Array.from(userMap.values());
+          }
+
           const merged = {
             ...existing,
             ...incoming,
+            ...(mergedUsers.length > 0 ? { registeredUsers: mergedUsers } : {}),
             updatedAt: new Date().toISOString()
           };
           writeState(merged);

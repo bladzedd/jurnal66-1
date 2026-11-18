@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Key, Shield, ArrowRight, CheckCircle2, UserCheck, 
   HelpCircle, PenTool, Crown, Sparkles, ArrowLeft, Loader2,
-  AlertTriangle, Users, Search, Layers, Scale
+  AlertTriangle, Users, Search, Layers, Scale, Trash2, Clock, User
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { 
@@ -12,7 +12,10 @@ import {
   activatePendingTeam, 
   setActiveTeam, 
   setCurrentUser, 
-  initDefaultTeamIfNeeded 
+  initDefaultTeamIfNeeded,
+  getSavedUsers,
+  removeSavedUser,
+  loginAsSavedUser
 } from '../utils/storage';
 
 export const editorialRoles = [
@@ -79,6 +82,58 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
   const [memberClass, setMemberClass] = useState("");
   const [selectedRole, setSelectedRole] = useState(editorialRoles[0].title);
 
+  // Saved Users / Profiles on this Device
+  const [savedUsers, setSavedUsers] = useState(() => getSavedUsers());
+
+  // 1-Click Quick Login as Saved User
+  const handleQuickLogin = (profileId) => {
+    sound.playClick();
+    setErrorMsg(null);
+    const res = loginAsSavedUser(profileId);
+    if (res.success) {
+      sound.playSuccess();
+      onLoginSuccess(res.team);
+    } else {
+      sound.playError();
+      setErrorMsg(res.message);
+      setSavedUsers(getSavedUsers());
+    }
+  };
+
+  // Remove / Forget Saved User on this Device
+  const handleRemoveSaved = (profileId, e) => {
+    if (e) e.stopPropagation();
+    sound.playClick();
+    removeSavedUser(profileId);
+    setSavedUsers(getSavedUsers());
+  };
+
+  // Quick Select an Existing Member from the Team Roster
+  const handleSelectExistingMember = (m) => {
+    sound.playClick();
+    const cleanName = typeof m === "string" ? m : m.name;
+    const cleanClass = typeof m === "string" ? "" : (m.classInfo || "");
+    const cleanRole = typeof m === "string" ? editorialRoles[0].title : (m.role || editorialRoles[0].title);
+    
+    setMemberName(cleanName);
+    if (cleanClass) setMemberClass(cleanClass);
+    if (cleanRole) setSelectedRole(cleanRole);
+
+    const res = joinTeamAsMember(matchedData.team.id, {
+      name: cleanName,
+      classInfo: cleanClass || "Kelas",
+      role: cleanRole
+    });
+
+    if (res.success) {
+      sound.playSuccess();
+      onLoginSuccess(res.team);
+    } else {
+      setErrorMsg(res.message);
+      sound.playError();
+    }
+  };
+
   // 1. Submit Code (Group Code or Direct Teacher PIN)
   const handleSubmitCode = async (e) => {
     if (e) e.preventDefault();
@@ -87,7 +142,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
     const cleanCode = codeInput.trim().toUpperCase();
 
     // Direct Teacher / Admin Access through the main single input!
-    if (cleanCode === "GURU2026" || cleanCode === "ADMIN" || cleanCode === "GURU") {
+    if (cleanCode === "040498" || cleanCode === "GURU2026") {
       sound.playSuccess();
       try {
         sessionStorage.setItem('redaksi_admin_auth', 'true');
@@ -263,6 +318,93 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
         )}
 
         {/* ========================================================================= */}
+        {/* SAVED USERS / PROFIL TERSIMPAN DI PERANGKAT INI */}
+        {/* ========================================================================= */}
+        {!matchedData && savedUsers.length > 0 && (
+          <div className="glass p-5 sm:p-6 space-y-3.5 shadow-card border border-accent/40 rounded-3xl animate-in fade-in duration-200 bg-gradient-to-br from-paper-2/80 via-paper-2/50 to-accent/5">
+            <div className="flex items-center justify-between border-b border-rule/60 pb-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/30 text-accent flex items-center justify-center shadow-xs">
+                  <UserCheck className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h3 className="font-display font-medium text-sm sm:text-base text-ink">
+                    Akun & Sesi Tersimpan
+                  </h3>
+                  <p className="font-body text-[11px] text-ink-muted">
+                    Lanjutkan aktivitas redaksi tanpa perlu mengetik ulang kode:
+                  </p>
+                </div>
+              </div>
+              <span className="font-mono text-[10px] bg-accent/15 text-accent border border-accent/30 rounded-full px-2 py-0.5 font-bold shrink-0">
+                {savedUsers.length} Profil
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-56 overflow-y-auto no-scrollbar">
+              {savedUsers.map((su) => (
+                <div
+                  key={su.id}
+                  className="p-3 rounded-2xl border border-rule hover:border-accent/60 bg-paper-2/70 hover:bg-paper-2 transition-all flex items-center justify-between gap-2.5 shadow-xs group"
+                >
+                  <div 
+                    onClick={() => handleQuickLogin(su.id)}
+                    className="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-accent/15 border border-accent/30 text-accent flex items-center justify-center shrink-0 font-display font-bold text-sm shadow-xs">
+                      {su.isLeader ? <Crown className="w-4 h-4 text-accent-orange" /> : <PenTool className="w-4 h-4 text-accent" />}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-display font-medium text-xs sm:text-sm text-ink truncate">
+                          {su.name}
+                        </span>
+                        {su.classInfo && (
+                          <span className="bg-paper-3 border border-rule text-[10px] px-1.5 py-0.2 rounded font-mono text-ink-muted shrink-0">
+                            {su.classInfo}
+                          </span>
+                        )}
+                        {su.isLeader && (
+                          <span className="bg-accent-orange/20 text-accent-orange border border-accent-orange/30 text-[9px] px-1.5 py-0.2 rounded font-bold shrink-0">
+                            Ketua
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-body text-[11px] text-ink-muted truncate block">
+                        {su.teamName ? `${su.teamName} • ` : ""}{su.memberRole || su.role}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickLogin(su.id)}
+                      className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-3 py-1.5 inline-flex items-center gap-1 transition-all shadow-sm min-h-[36px]"
+                    >
+                      <span>Masuk</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleRemoveSaved(su.id, e)}
+                      className="w-8 h-8 rounded-full hover:bg-accent-red/15 hover:text-accent-red text-ink-muted flex items-center justify-center transition-colors min-h-[32px] min-w-[32px]"
+                      title="Lupakan / Hapus akun tersimpan ini dari perangkat"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-1 text-center font-body text-[10px] text-ink-muted">
+              Profil di atas otomatis tersimpan di browser ini agar kamu bisa langsung lanjut mengerjakan tugas kapan saja.
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
         {/* VIEW 1: SINGLE 1-CODE INPUT (PRIMARY ULTRA-CLEAN LANDING PAGE) */}
         {/* ========================================================================= */}
         {!matchedData && (
@@ -271,7 +413,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               <div>
                 <h2 className="font-display font-medium text-lg text-ink flex items-center gap-2">
                   <Shield className="w-4 h-4 text-accent" />
-                  <span>Masukkan Kode Kelompok</span>
+                  <span>{savedUsers.length > 0 ? "Atau Masuk dengan Kode Baru" : "Masukkan Kode Kelompok"}</span>
                 </h2>
                 <p className="font-body text-xs text-ink-muted mt-0.5">
                   Kode biro pers atau PIN Guru Pengampu
@@ -315,7 +457,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                   </p>
                   <p className="text-[10px] text-ink-muted/80 flex items-center justify-center gap-1.5">
                     <Crown className="w-3 h-3 text-accent-orange shrink-0" />
-                    <span><strong>Untuk Guru:</strong> Ketik <strong>GURU2026</strong> di sini atau klik tombol <em>Meja Guru</em> di kanan atas.</span>
+                    <span><strong>Untuk Guru:</strong> Masuk ke <em>Meja Guru</em> melalui tombol di kanan atas dengan PIN keamanan.</span>
                   </p>
                 </div>
               </div>
@@ -456,7 +598,38 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               </div>
             </div>
 
+            {/* Quick Select for Returning Members of this Team */}
+            {matchedData.team.members?.filter(m => !m.isLeader).length > 0 && (
+              <div className="p-3.5 bg-accent/10 border border-accent/25 rounded-2xl space-y-2">
+                <span className="font-body text-xs font-semibold text-accent flex items-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Pernah daftar di biro ini sebelumnya? Klik nama kamu untuk langsung masuk:</span>
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {matchedData.team.members.filter(m => !m.isLeader).map((m, idx) => {
+                    const mName = typeof m === "string" ? m : m.name;
+                    const mRole = typeof m === "string" ? "Wartawan" : (m.role || "Wartawan");
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectExistingMember(m)}
+                        className="rounded-full bg-paper-2/90 hover:bg-accent hover:text-accent-ink border border-rule px-3 py-1.5 text-xs font-body font-medium transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                      >
+                        <PenTool className="w-3 h-3 text-accent" />
+                        <span className="font-semibold">{mName}</span>
+                        <span className="text-[10px] opacity-75">({mRole})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleMemberJoinSubmit} className="space-y-3.5">
+              <div className="text-xs font-semibold text-ink-2">
+                {matchedData.team.members?.filter(m => !m.isLeader).length > 0 ? "Atau daftar sebagai anggota baru di biro ini:" : "Daftar sebagai anggota di biro ini:"}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-body text-xs font-semibold text-ink-2 block mb-1">
