@@ -766,6 +766,43 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     </div>
                   </div>
 
+                  {/* Stage Working Times (Live / Paused) */}
+                  <div className="grid grid-cols-3 gap-1.5 pt-1 text-[11px] font-mono">
+                    {[1, 2, 3].map((stg) => {
+                      const timer = getTeamStageTimer(t, stg);
+                      const isDone = isStageCompleted(t, stg);
+                      return (
+                        <div 
+                          key={stg} 
+                          className={`p-1.5 rounded-lg border flex flex-col items-center justify-center text-center ${
+                            isDone 
+                              ? "bg-accent-green/10 border-accent-green/30 text-accent-green" 
+                              : timer.isRunning 
+                              ? "bg-accent/15 border-accent text-accent animate-pulse" 
+                              : "bg-paper-2 border-rule text-ink-muted"
+                          }`}
+                        >
+                          <span className="text-[9px] font-sans font-bold uppercase">Tahap {stg}</span>
+                          <span className="font-semibold flex items-center gap-1">
+                            {isDone ? (
+                              <>
+                                <Pause className="w-2.5 h-2.5 fill-current" />
+                                <span>{formatDuration(timer.seconds)}</span>
+                              </>
+                            ) : timer.isRunning ? (
+                              <>
+                                <Play className="w-2.5 h-2.5 fill-current" />
+                                <span>{formatDuration(timer.seconds)}</span>
+                              </>
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   {/* Badges Earned */}
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {t.badges?.length > 0 ? (
@@ -1241,7 +1278,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           </span>
                         ) : (
                           <span>
-                            Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo}) • Kas: <strong>{t.coins || 0} Koin</strong>
+                            Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo}) • Kas: <strong>{t.coins || 0} Koin</strong> • Waktu Tugas: <strong>{formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</strong>
                           </span>
                         )}
                       </p>
@@ -1777,8 +1814,23 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <span className="font-display font-medium text-sm text-ink">
                           {t.name}
                         </span>
-                        <div className="font-body text-xs text-ink-muted">
-                          Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> • Tuntas: {completed.length}/3 Tahap
+                        <div className="font-body text-xs text-ink-muted flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <span>Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong></span>
+                          <span>•</span>
+                          <span>Tuntas: <strong>{completed.length}/3 Tahap</strong></span>
+                          <span>•</span>
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                            <Clock className="w-3 h-3 text-accent" />
+                            <span>T1: {formatDuration(t.stageTimes?.stage_1 || 0)}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                            <Clock className="w-3 h-3 text-accent" />
+                            <span>T2: {formatDuration(t.stageTimes?.stage_2 || 0)}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                            <Clock className="w-3 h-3 text-accent" />
+                            <span>T3: {formatDuration(t.stageTimes?.stage_3 || 0)}</span>
+                          </span>
                         </div>
                       </div>
 
@@ -2034,16 +2086,20 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           </span>
                         </div>
 
-                        {/* Scores Pills */}
-                        <div className="flex items-center gap-2 font-mono text-xs">
+                        {/* Scores & Working Times Pills */}
+                        <div className="flex items-center gap-2 font-mono text-xs flex-wrap">
                           <span className="bg-paper-2 border border-rule px-2.5 py-1 rounded-lg">
-                            5W1H: <strong className="text-ink">{s1}</strong>
+                            5W1H: <strong className="text-ink">{s1}</strong> <span className="text-ink-muted text-[10px]">({formatDuration(t.stageTimes?.stage_1 || 0)})</span>
                           </span>
                           <span className="bg-paper-2 border border-rule px-2.5 py-1 rounded-lg">
-                            Piramida: <strong className="text-ink">{s2}</strong>
+                            Piramida: <strong className="text-ink">{s2}</strong> <span className="text-ink-muted text-[10px]">({formatDuration(t.stageTimes?.stage_2 || 0)})</span>
                           </span>
                           <span className="bg-paper-2 border border-rule px-2.5 py-1 rounded-lg">
-                            Menulis: <strong className="text-ink">{s3}</strong>
+                            Menulis: <strong className="text-ink">{s3}</strong> <span className="text-ink-muted text-[10px]">({formatDuration(t.stageTimes?.stage_3 || 0)})</span>
+                          </span>
+                          <span className="bg-accent/15 text-accent border border-accent/30 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>Total: {formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</span>
                           </span>
                         </div>
                       </div>
