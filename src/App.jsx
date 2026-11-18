@@ -82,9 +82,13 @@ export default function App() {
     };
   }, [activeTeam]);
 
+  // Scroll to top ONLY when user explicitly navigates to a new view/module, never on background data sync
+  const activeModuleId = activeModule?.id || activeModule?.number || null;
+  const activeTeamId = activeTeam?.id || null;
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeModule, activeTeam, stageTick, isAdminView]);
+  }, [activeModuleId, activeTeamId, isAdminView]);
 
   // If Admin View is active, show the Dedicated Admin Dashboard page
   if (isAdminView) {
