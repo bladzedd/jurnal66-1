@@ -7,14 +7,12 @@
 html, body {
   background-color: var(--color-paper);
   background-image: 
-    radial-gradient(ellipse 70% 50% at 50% -10%, oklch(24% 0.04 274 / 0.45), transparent 70%),
-    radial-gradient(ellipse 45% 45% at 90% 15%, oklch(70% 0.12 330 / 0.10), transparent 60%),
-    radial-gradient(ellipse 45% 45% at 10% 85%, oklch(83% 0.095 62 / 0.08), transparent 60%);
+    radial-gradient(ellipse 70% 50% at 50% -10%, var(--bg-gradient-top), transparent 70%),
+    radial-gradient(ellipse 45% 45% at 90% 15%, var(--bg-gradient-side), transparent 60%);
   background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-body);
-  overflow-x: hidden;
-  max-width: 100vw;
+  overflow-x: clip;
   min-height: 100vh;
   margin: 0;
   padding: 0;
@@ -22,11 +20,36 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Theme Selection Surface */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* Focus Visible instantly at 3:1 */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion Fallback */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Dusk Typography Accents */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: var(--display-weight);
   letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .num {
@@ -59,7 +82,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .neo-box:hover {
-  border-color: oklch(35% 0.02 266);
+  border-color: var(--color-rule-hover);
 }
 
 .neo-box-sm {
@@ -72,8 +95,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .neo-box-yellow {
-  background: oklch(77% 0.10 274 / 0.12);
-  border: 1px solid oklch(77% 0.10 274 / 0.35);
+  background: var(--color-box-yellow-bg);
+  border: 1px solid var(--color-box-yellow-border);
   border-radius: var(--radius-card);
   -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
@@ -89,22 +112,22 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-pill);
-  box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.12), var(--shadow-neo-sm);
+  box-shadow: var(--shadow-btn-hi), var(--shadow-neo-sm);
   cursor: pointer;
   user-select: none;
-  transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms ease;
 }
 
 .neo-btn:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
-  border-color: oklch(40% 0.02 266);
-  box-shadow: inset 0 1px 0 oklch(100% 0 0 / 0.22), 0 12px 24px -6px oklch(8% 0.02 268 / 0.6);
+  border-color: var(--color-rule-btn-hover);
+  box-shadow: var(--shadow-btn-hover);
 }
 
 .neo-btn:active {
   transform: translateY(1px);
-  box-shadow: inset 0 1px 0 oklch(0% 0 0 / 0.2);
+  box-shadow: var(--shadow-btn-active);
 }
 
 .neo-btn-sm {
@@ -113,24 +136,25 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.75rem;
 }
 
-/* Dusk Signal Stamps / Badges */
+/* Dusk Signal Stamps / Badges - Sentence Case Untracked */
 .neo-stamp {
   font-family: var(--font-body);
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 500;
   border: 1px solid var(--color-accent-2);
-  background: oklch(83% 0.095 62 / 0.14);
+  background: var(--color-accent-2-soft);
   color: var(--color-accent-2);
   padding: 0.25rem 0.75rem;
   border-radius: var(--radius-pill);
-  display: inline-block;
-  letter-spacing: 0.04em;
-  box-shadow: 0 0 16px oklch(83% 0.095 62 / 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  box-shadow: 0 0 12px var(--color-accent-2-glow);
 }
 
 /* Inputs, Textareas, Selects in Dusk Smoked Glass */
 input, textarea, select {
-  background-color: oklch(15% 0.015 268 / 0.75) !important;
+  background-color: var(--color-input-bg) !important;
   color: var(--color-ink) !important;
   border-color: var(--color-rule) !important;
   border-radius: var(--radius-inner);
@@ -171,7 +195,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 1px var(--color-accent), inset 0 1px 0 oklch(100% 0 0 / 0.1) !important;
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-input-focus-hi) !important;
   outline: none;
 }
 

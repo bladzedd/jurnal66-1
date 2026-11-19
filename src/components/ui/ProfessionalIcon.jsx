@@ -71,8 +71,9 @@ export function WitnessAvatar({ witnessId = "", role = "", avatar = "", classNam
         <img
           src={photoUrl}
           alt={role || "Saksi Liputan"}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-          loading="lazy"
+          className="w-full h-full object-cover"
+          loading="eager"
+          fetchPriority="high"
           onError={() => setHasError(true)}
         />
       </div>

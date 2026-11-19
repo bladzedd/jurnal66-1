@@ -15,6 +15,7 @@ import {
   initDefaultTeamIfNeeded,
   getSavedUsers,
   removeSavedUser,
+  clearAllSavedUsers,
   loginAsSavedUser
 } from '../utils/storage';
 
@@ -291,7 +292,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
         {/* Top Masthead Meta */}
         <div className="flex justify-between items-center text-xs font-body text-ink-muted">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse shadow-[0_0_8px_var(--color-accent-green)]"></span>
+            <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none shadow-[0_0_8px_var(--color-accent-green)]"></span>
             <span className="text-[11px] sm:text-xs">Portal Jurnal66 Task</span>
           </div>
 
@@ -300,7 +301,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               sound.playClick();
               if (onOpenAdmin) onOpenAdmin();
             }}
-            className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange text-xs font-body font-semibold gap-1.5 px-3.5 py-1.5 transition-all shadow-sm flex items-center min-h-[36px]"
+            className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange text-xs font-body font-semibold gap-1.5 px-3.5 py-1.5 transition-colors shadow-sm flex items-center min-h-[36px]"
             title="Buka Pusat Komando Dewan Redaksi / Meja Guru"
           >
             <Key className="w-3.5 h-3.5" />
@@ -348,16 +349,30 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                   </p>
                 </div>
               </div>
-              <span className="font-mono text-[10px] bg-accent/15 text-accent border border-accent/30 rounded-full px-2 py-0.5 font-bold shrink-0">
-                {savedUsers.length} Profil
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-body text-[11px] bg-accent/15 text-accent border border-accent/30 rounded-full px-2.5 py-0.5 font-medium">
+                  {savedUsers.length} Profil
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    clearAllSavedUsers();
+                    setSavedUsers([]);
+                  }}
+                  className="font-body text-[10px] text-ink-muted hover:text-accent-red underline transition-colors px-1 py-0.5"
+                  title="Hapus seluruh profil tersimpan di perangkat ini"
+                >
+                  Hapus Semua
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2 max-h-56 overflow-y-auto no-scrollbar">
               {savedUsers.map((su) => (
                 <div
                   key={su.id}
-                  className="p-3 rounded-2xl border border-rule hover:border-accent/60 bg-paper-2/70 hover:bg-paper-2 transition-all flex items-center justify-between gap-2.5 shadow-xs group"
+                  className="p-3 rounded-2xl border border-rule hover:border-accent/60 bg-paper-2/70 hover:bg-paper-2 transition-colors flex items-center justify-between gap-2.5 shadow-xs group"
                 >
                   <div 
                     onClick={() => handleQuickLogin(su.id)}
@@ -392,7 +407,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                     <button
                       type="button"
                       onClick={() => handleQuickLogin(su.id)}
-                      className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-3 py-1.5 inline-flex items-center gap-1 transition-all shadow-sm min-h-[36px]"
+                      className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-3 py-1.5 inline-flex items-center gap-1 transition-colors shadow-sm min-h-[36px]"
                     >
                       <span>Masuk</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -431,8 +446,8 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                   Kode biro pers atau PIN Guru Pengampu
                 </p>
               </div>
-              <span className="font-mono text-xs bg-accent/15 text-accent border border-accent/30 rounded-full px-2.5 py-0.5 font-bold">
-                KODE MASUK
+              <span className="font-body text-xs bg-accent/15 text-accent border border-accent/30 rounded-full px-2.5 py-0.5 font-medium">
+                Kode Masuk
               </span>
             </div>
 
@@ -457,7 +472,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                       setCodeInput(pasted.trim().toUpperCase());
                       setErrorMsg(null);
                     }}
-                    className="w-full p-4 font-mono font-bold text-2xl sm:text-3xl tracking-widest text-center uppercase rounded-2xl border border-rule bg-paper-2/60 text-ink focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all shadow-inner"
+                    className="w-full p-4 font-mono font-bold text-2xl sm:text-3xl tracking-widest text-center uppercase rounded-2xl border border-rule bg-paper-2/60 text-ink focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors shadow-inner"
                     autoFocus
                     required
                   />
@@ -477,12 +492,12 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               <button
                 type="submit"
                 disabled={isVerifying}
-                className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-lg min-h-[46px] disabled:opacity-60"
+                className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-colors shadow-lg min-h-[46px] disabled:opacity-60 whitespace-nowrap"
               >
                 {isVerifying ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin text-accent-ink" />
-                    <span>Memverifikasi Kode...</span>
+                    <span>Memverifikasi Kode…</span>
                   </>
                 ) : (
                   <>
@@ -506,9 +521,9 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
           <div className="glass p-6 sm:p-8 space-y-4 shadow-card border border-accent/40 rounded-3xl animate-in fade-in zoom-in-95 duration-200">
             <div className="border-b border-rule/60 pb-3 flex items-center justify-between">
               <div>
-                <div className="inline-flex items-center gap-1.5 bg-accent/20 text-accent border border-accent/30 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full mb-1">
+                <div className="inline-flex items-center gap-1.5 bg-accent/20 text-accent border border-accent/30 text-[11px] font-body font-medium px-2.5 py-0.5 rounded-full mb-1">
                   <Crown className="w-3 h-3" />
-                  <span>KODE MANDAT KETUA TERVERIFIKASI</span>
+                  <span>Mandat ketua terverifikasi</span>
                 </div>
                 <h3 className="font-display font-medium text-xl text-ink">
                   Daftarkan Biro Kelompokmu
@@ -572,7 +587,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               <div className="pt-2 flex flex-col gap-2">
                 <button
                   type="submit"
-                  className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-lg min-h-[46px]"
+                  className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-colors shadow-lg min-h-[46px] whitespace-nowrap"
                 >
                   <span>Aktifkan Biro & Buka Meja Redaksi</span>
                   <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -581,7 +596,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                 <button
                   type="button"
                   onClick={handleResetCode}
-                  className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink-muted hover:text-ink text-center py-2.5 px-4 inline-flex items-center justify-center gap-1.5 transition-all min-h-[44px]"
+                  className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink-muted hover:text-ink text-center py-2.5 px-4 inline-flex items-center justify-center gap-1.5 transition-colors min-h-[44px] whitespace-nowrap"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Ganti / Masukkan Kode Lain</span>
@@ -598,8 +613,8 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
           <div className="glass p-6 sm:p-8 space-y-4 shadow-card border border-rule rounded-3xl animate-in fade-in zoom-in-95 duration-200">
             <div className="border-b border-rule/60 pb-3 flex items-start justify-between gap-2">
               <div>
-                <span className="font-mono text-[10px] bg-accent-green/15 text-accent-green border border-accent-green/30 px-2 py-0.5 rounded-full font-bold uppercase inline-block mb-1">
-                  KODE ANGGOTA COCOK
+                <span className="font-body text-[11px] bg-accent-green/15 text-accent-green border border-accent-green/30 px-2.5 py-0.5 rounded-full font-medium inline-block mb-1">
+                  Kode anggota cocok
                 </span>
                 <h3 className="font-display font-medium text-xl text-ink">
                   {matchedData.team.name}
@@ -626,7 +641,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                         key={idx}
                         type="button"
                         onClick={() => handleSelectExistingMember(m)}
-                        className="rounded-full bg-paper-2/90 hover:bg-accent hover:text-accent-ink border border-rule px-3 py-1.5 text-xs font-body font-medium transition-all inline-flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                        className="rounded-full bg-paper-2/90 hover:bg-accent hover:text-accent-ink border border-rule px-3 py-1.5 text-xs font-body font-medium transition-colors inline-flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
                       >
                         <PenTool className="w-3 h-3 text-accent" />
                         <span className="font-semibold">{mName}</span>
@@ -684,7 +699,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                       <div
                         key={r.id}
                         onClick={() => { sound.playClick(); setSelectedRole(r.title); }}
-                        className={`p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-start gap-2.5 min-h-[44px] ${
+                        className={`p-3 rounded-xl border text-xs cursor-pointer transition-colors flex items-start gap-2.5 min-h-[44px] ${
                           isSelected 
                             ? "bg-accent/15 border-accent/40 shadow-sm" 
                             : "bg-paper-2/50 border-rule hover:border-rule/80 hover:bg-paper-2"
@@ -711,7 +726,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
               <div className="pt-2 flex flex-col gap-2">
                 <button
                   type="submit"
-                  className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-lg min-h-[46px]"
+                  className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-colors shadow-lg min-h-[46px] whitespace-nowrap"
                 >
                   <span>Bergabung ke Meja Redaksi</span>
                   <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -720,7 +735,7 @@ export default function GroupLoginScreen({ onLoginSuccess, onOpenAdmin }) {
                 <button
                   type="button"
                   onClick={handleResetCode}
-                  className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink-muted hover:text-ink text-center py-2.5 px-4 inline-flex items-center justify-center gap-1.5 transition-all min-h-[44px]"
+                  className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink-muted hover:text-ink text-center py-2.5 px-4 inline-flex items-center justify-center gap-1.5 transition-colors min-h-[44px] whitespace-nowrap"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Bukan biromu? Masukkan Kode Lain</span>

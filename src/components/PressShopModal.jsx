@@ -98,16 +98,16 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="glass border border-rule w-full max-w-2xl my-auto relative max-h-[92vh] flex flex-col rounded-3xl shadow-card overflow-hidden">
+      <div className="bg-paper border border-rule w-full max-w-2xl my-auto relative max-h-[92vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden">
         {/* Top Header */}
         <div className="bg-paper-2/70 border-b border-rule px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-wider text-ink min-w-0">
+          <div className="flex items-center gap-2 font-body text-xs font-semibold text-ink min-w-0">
             <ShoppingBag className="w-4 h-4 text-accent-orange shrink-0" />
             <span className="truncate">Toko Peralatan & Bursa Strategi Pers</span>
           </div>
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="w-10 h-10 rounded-full bg-paper-3/60 hover:bg-paper-3 text-ink flex items-center justify-center shrink-0 ml-2 transition-all min-h-[40px] min-w-[40px]"
+            className="w-10 h-10 rounded-full bg-paper-3/60 hover:bg-paper-3 text-ink flex items-center justify-center shrink-0 ml-2 transition-colors min-h-[40px] min-w-[40px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
             aria-label="Tutup Toko"
           >
             <X className="w-4 h-4" />
@@ -124,7 +124,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
               </span>
             )}
             {team.activeDebuffs?.length > 0 && (
-              <span className="bg-accent-red/15 text-accent-red border border-accent-red/30 px-2 py-0.5 rounded-full text-[10px] font-medium animate-pulse shrink-0 inline-flex items-center gap-1">
+              <span className="bg-accent-red/15 text-accent-red border border-accent-red/30 px-2 py-0.5 rounded-full text-[10px] font-medium animate-pulse motion-reduce:animate-none shrink-0 inline-flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
                 <span>Sabotase ({team.activeDebuffs.length})</span>
               </span>
@@ -142,7 +142,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
         <div className="flex border-b border-rule bg-paper-2/30 p-1.5 gap-1.5 font-body text-xs font-medium overflow-x-auto shrink-0 no-scrollbar touch-pan-x">
           <button
             onClick={() => { sound.playClick(); setActiveTab("buy"); setFeedbackMsg(null); }}
-            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all min-h-[40px] ${
+            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors min-h-[40px] ${
               activeTab === "buy" ? "bg-accent text-accent-ink font-semibold shadow-sm" : "hover:bg-paper-2 text-ink-muted hover:text-ink"
             }`}
           >
@@ -152,7 +152,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("inventory"); setFeedbackMsg(null); }}
-            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all min-h-[40px] ${
+            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors min-h-[40px] ${
               activeTab === "inventory" ? "bg-accent text-accent-ink font-semibold shadow-sm" : "hover:bg-paper-2 text-ink-muted hover:text-ink"
             }`}
           >
@@ -162,7 +162,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("transfer"); setFeedbackMsg(null); }}
-            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all min-h-[40px] ${
+            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors min-h-[40px] ${
               activeTab === "transfer" ? "bg-accent text-accent-ink font-semibold shadow-sm" : "hover:bg-paper-2 text-ink-muted hover:text-ink"
             }`}
           >
@@ -172,7 +172,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("logs"); setFeedbackMsg(null); }}
-            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-all min-h-[40px] ${
+            className={`py-2 px-3.5 rounded-full flex items-center gap-1.5 whitespace-nowrap shrink-0 transition-colors min-h-[40px] ${
               activeTab === "logs" ? "bg-accent text-accent-ink font-semibold shadow-sm" : "hover:bg-paper-2 text-ink-muted hover:text-ink"
             }`}
           >
@@ -213,7 +213,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
                   return (
                     <div 
                       key={card.id}
-                      className={`glass p-4 rounded-2xl border flex flex-col justify-between transition-all ${
+                      className={`glass p-4 rounded-2xl border flex flex-col justify-between transition-colors ${
                         isSabotage 
                           ? "border-accent-red/30 hover:border-accent-red/60" 
                           : "border-rule hover:border-accent/40"
@@ -258,7 +258,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
                         <button
                           onClick={() => handleBuy(card)}
                           disabled={!canAfford}
-                          className={`rounded-full px-3.5 py-1.5 text-xs font-body font-semibold transition-all min-h-[36px] ${
+                          className={`rounded-full px-3.5 py-1.5 text-xs font-body font-semibold transition-colors min-h-[36px] ${
                             canAfford 
                               ? isSabotage 
                                 ? "bg-accent-red/20 text-accent-red border border-accent-red/40 hover:bg-accent-red/30" 
@@ -336,7 +336,7 @@ export default function PressShopModal({ team, onUpdateTeam, onClose }) {
                           <div className="mt-3 pt-2.5 border-t border-rule/60 flex justify-end">
                             <button
                               onClick={() => handleUseItem(item)}
-                              className={`rounded-full px-4 py-1.5 text-xs font-body font-semibold transition-all min-h-[36px] ${
+                              className={`rounded-full px-4 py-1.5 text-xs font-body font-semibold transition-colors min-h-[36px] ${
                                 isSabotage
                                   ? "bg-accent-red text-white hover:bg-accent-red/90 shadow-sm"
                                   : "bg-accent-green text-white hover:bg-accent-green/90 shadow-sm"

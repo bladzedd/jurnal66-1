@@ -116,7 +116,7 @@ export default function Dashboard({
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <button
               onClick={() => { sound.playClick(); onOpenShop(); }}
-              className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-4 py-2 text-xs font-body font-semibold flex items-center gap-1.5 transition-all shadow-sm flex-1 sm:flex-none justify-center min-h-[42px]"
+              className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-4 py-2 text-xs font-body font-semibold flex items-center gap-1.5 transition-colors shadow-sm flex-1 sm:flex-none justify-center min-h-[42px] focus-visible:outline-2 focus-visible:outline-accent"
             >
               <Coins className="w-3.5 h-3.5" />
               <span><strong>{team?.coins || 0}</strong> Koin</span>
@@ -125,7 +125,7 @@ export default function Dashboard({
 
             <button
               onClick={() => { sound.playClick(); onOpenPressCard(); }}
-              className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule px-4 py-2 text-xs font-body text-ink font-medium shrink-0 transition-all shadow-sm min-h-[42px]"
+              className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule px-4 py-2 text-xs font-body text-ink font-medium shrink-0 transition-colors shadow-sm min-h-[42px] focus-visible:outline-2 focus-visible:outline-accent"
             >
               Kartu Pers
             </button>
@@ -133,7 +133,7 @@ export default function Dashboard({
             {onDisbandTeam && (
               <button
                 onClick={() => { sound.playClick(); setConfirmDisband(true); }}
-                className="rounded-full bg-accent-red/10 hover:bg-accent-red hover:text-white border border-accent-red/25 px-3.5 py-2 text-xs font-body text-accent-red font-medium shrink-0 transition-all shadow-sm inline-flex items-center gap-1 min-h-[42px]"
+                className="rounded-full bg-accent-red/10 hover:bg-accent-red hover:text-white border border-accent-red/25 px-3.5 py-2 text-xs font-body text-accent-red font-medium shrink-0 transition-colors shadow-sm inline-flex items-center gap-1 min-h-[42px] focus-visible:outline-2 focus-visible:outline-accent"
                 title="Bubarkan biro ini"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -150,8 +150,8 @@ export default function Dashboard({
               <Megaphone className="w-6 h-6" />
             </div>
             <div className="min-w-0">
-              <span className="font-body text-[11px] uppercase tracking-wider text-accent font-semibold block">
-                Kode Khusus Anggota Kelompokmu:
+              <span className="font-body text-xs text-accent font-medium block">
+                Kode khusus anggota biro:
               </span>
               <div className="flex flex-wrap items-center gap-2 pt-1.5">
                 <span className="font-mono font-bold text-2xl sm:text-3xl tracking-widest text-ink bg-paper-3/90 px-3.5 py-1.5 rounded-xl border border-rule select-all shadow-sm">
@@ -160,7 +160,7 @@ export default function Dashboard({
 
                 <button
                   onClick={handleCopyMemberCode}
-                  className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                  className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                   title="Salin kode anggota untuk dibagikan ke teman kelompok"
                 >
                   {copiedCode ? <Check className="w-4 h-4 text-accent-green" /> : <Copy className="w-4 h-4" />}
@@ -221,7 +221,7 @@ export default function Dashboard({
               return (
                 <div
                   key={idx}
-                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-xl px-3 py-1.5 font-medium border select-none transition-all shadow-xs ${
+                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-xl px-3 py-1.5 font-medium border select-none transition-colors shadow-xs ${
                     isCurrentUser 
                       ? "bg-accent/20 border-accent text-ink shadow-sm ring-1 ring-accent/40" 
                       : isLeader 
@@ -271,8 +271,8 @@ export default function Dashboard({
         <div className="pt-2 border-t border-rule/60 flex items-center gap-3">
           <div className="flex-1 bg-paper-3/80 border border-rule h-2 rounded-full overflow-hidden">
             <div 
-              className="bg-accent h-full rounded-full transition-all duration-300 shadow-[0_0_8px_var(--color-accent)]"
-              style={{ width: `${Math.max(8, progressPct)}%` }}
+              className="bg-accent h-full w-full rounded-full transition-transform duration-300 shadow-[0_0_8px_var(--color-accent)] origin-left"
+              style={{ transform: `scaleX(${Math.max(0.08, progressPct / 100)})` }}
             />
           </div>
           <span className="font-body text-xs font-medium text-ink-muted shrink-0">
@@ -299,8 +299,8 @@ export default function Dashboard({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold bg-accent-orange/20 text-accent-orange border border-accent-orange/30 px-2 py-0.2 rounded-full uppercase">
-                      LIPUTAN KHUSUS KELAS
+                    <span className="font-body text-[11px] font-medium bg-accent-orange/20 text-accent-orange border border-accent-orange/30 px-2.5 py-0.5 rounded-full">
+                      Liputan khusus kelas
                     </span>
                     <span className="text-[11px] font-body text-ink-muted">
                       {interviewedCount}/{witnesses.length} Saksi Terwawancarai
@@ -316,7 +316,7 @@ export default function Dashboard({
                 {onOpenPocketNotes && (
                   <button
                     onClick={() => { sound.playClick(); onOpenPocketNotes(); }}
-                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-ink text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[42px] flex-1 sm:flex-none justify-center"
+                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-ink text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[42px] flex-1 sm:flex-none justify-center whitespace-nowrap"
                     title="Buka Catatan Saku Hasil Wawancara"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-accent-orange" />
@@ -327,7 +327,7 @@ export default function Dashboard({
                 {onOpenInterview && (
                   <button
                     onClick={() => { sound.playClick(); onOpenInterview(); }}
-                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-all shadow-md min-h-[42px] flex-1 sm:flex-none justify-center"
+                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-colors shadow-md min-h-[42px] flex-1 sm:flex-none justify-center whitespace-nowrap"
                     title="Mulai Wawancara Saksi Mata"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
@@ -349,7 +349,7 @@ export default function Dashboard({
                   <div 
                     key={w.id}
                     onClick={() => { sound.playClick(); if (onOpenInterview) onOpenInterview(); }}
-                    className={`p-3 rounded-xl border flex items-center justify-between gap-2 cursor-pointer transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between gap-2 cursor-pointer transition-colors ${
                       hasInterviewed 
                         ? "bg-accent/10 border-accent/30" 
                         : "bg-paper-2/40 border-rule hover:bg-paper-2/70"
@@ -402,9 +402,9 @@ export default function Dashboard({
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent-green animate-pulse shadow-[0_0_6px_var(--color-accent-green)]"></span>
-              <span className="font-body text-xs font-semibold uppercase tracking-wider text-ink-muted">
-                Berkas Tugas Aktif Kelas (Serentak)
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none shadow-[0_0_6px_var(--color-accent-green)]"></span>
+              <span className="font-body text-xs font-medium text-ink-muted">
+                Berkas tugas aktif kelas (serentak)
               </span>
             </div>
             <span className="font-body text-xs text-ink-muted font-medium">
@@ -450,19 +450,19 @@ export default function Dashboard({
             </div>
 
             {!isLeader && team?.liveTask?.activeStage === activeStageData.number && (
-              <div className="mt-3 p-3 bg-accent-orange/15 border border-accent-orange/35 rounded-xl font-body text-xs text-ink flex items-center justify-between gap-2 shadow-sm animate-pulse">
+              <div className="mt-3 p-3 bg-accent-orange/15 border border-accent-orange/35 rounded-xl font-body text-xs text-ink flex items-center justify-between gap-2 shadow-sm animate-pulse motion-reduce:animate-none">
                 <div className="flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-accent-orange shrink-0 animate-pulse" />
+                  <Radio className="w-4 h-4 text-accent-orange shrink-0 animate-pulse motion-reduce:animate-none" />
                   <span><strong>Ketua Sedang Aktif Mengerjakan:</strong> {team?.leaderName || "Ketua Kelompok"} sedang menjalankan tugas ini secara real-time. Masuk untuk memantau langsung!</span>
                 </div>
-                <span className="shrink-0 text-[10px] font-bold bg-accent-orange text-white px-2 py-0.5 rounded-full uppercase">Live</span>
+                <span className="shrink-0 text-[10px] font-bold bg-accent-orange text-white px-2 py-0.5 rounded-full">Live</span>
               </div>
             )}
 
             <div className="mt-6 pt-4 border-t border-rule/60 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <button
                 onClick={() => { sound.playClick(); onOpenShop(); }}
-                className="text-xs font-body text-accent-orange hover:bg-accent-orange/10 border border-transparent hover:border-accent-orange/30 rounded-full px-3 py-2 font-medium flex items-center justify-center sm:justify-start gap-1.5 transition-all min-h-[42px]"
+                className="text-xs font-body text-accent-orange hover:bg-accent-orange/10 border border-transparent hover:border-accent-orange/30 rounded-full px-3 py-2 font-medium flex items-center justify-center sm:justify-start gap-1.5 transition-colors min-h-[42px] whitespace-nowrap"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Buka Toko Power-Up & Debuff Rival</span>
@@ -470,7 +470,7 @@ export default function Dashboard({
 
               <button
                 onClick={() => { sound.playClick(); onSelectModule(activeStageData); }}
-                className={`neo-btn p-3.5 sm:p-4 px-7 sm:px-9 font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-all min-h-[48px] ${
+                className={`neo-btn p-3.5 sm:p-4 px-7 sm:px-9 font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-colors min-h-[48px] whitespace-nowrap ${
                   isLeader 
                     ? "bg-accent text-accent-ink hover:bg-accent-hi" 
                     : "bg-accent-orange text-white hover:bg-accent-orange/90"
@@ -518,8 +518,9 @@ export default function Dashboard({
           return (
             <section className="glass p-6 sm:p-8 rounded-3xl text-center space-y-5 shadow-card border border-accent-green/40 bg-gradient-to-b from-paper-2/90 via-paper-2/60 to-accent-green/5 animate-in fade-in zoom-in-95 duration-300">
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-xs sm:text-sm font-semibold">
-                  🏆 Akademi Jurnalistik Selesai!
+                <span className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5">
+                  <Trophy className="w-4 h-4 text-accent-yellow" />
+                  <span>Akademi jurnalistik tuntas!</span>
                 </span>
                 <span className="neo-stamp bg-accent/20 text-accent border-accent/40 text-xs sm:text-sm font-semibold">
                   Peringkat #{myRankData.rank} di Kelas
@@ -546,12 +547,10 @@ export default function Dashboard({
                   <div className="font-mono text-2xl font-bold text-ink">
                     {myRankData.formattedTotalDuration}
                   </div>
-                  <div className="text-[10px] font-mono text-ink-muted flex justify-center gap-1.5 pt-0.5">
-                    <span>T1: {myRankData.formattedT1}</span>
-                    <span>•</span>
-                    <span>T2: {myRankData.formattedT2}</span>
-                    <span>•</span>
-                    <span>T3: {myRankData.formattedT3}</span>
+                  <div className="text-[10px] font-mono text-ink-muted flex justify-center items-center divide-x divide-rule/60 pt-0.5">
+                    <span className="px-1.5">T1: {myRankData.formattedT1}</span>
+                    <span className="px-1.5">T2: {myRankData.formattedT2}</span>
+                    <span className="px-1.5">T3: {myRankData.formattedT3}</span>
                   </div>
                 </div>
 
@@ -593,7 +592,7 @@ export default function Dashboard({
               <div className="pt-2 flex flex-wrap justify-center gap-3">
                 <button
                   onClick={() => { sound.playClick(); onOpenPressCard(); }}
-                  className="neo-btn p-3.5 px-8 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full gap-2 transition-all shadow-lg min-h-[46px] inline-flex items-center justify-center"
+                  className="neo-btn p-3.5 px-8 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full gap-2 transition-colors shadow-lg min-h-[46px] inline-flex items-center justify-center whitespace-nowrap"
                 >
                   <Award className="w-4 h-4 text-accent-ink" />
                   <span>Buka & Cetak Kartu Biro Pers Kelompok</span>
@@ -606,7 +605,7 @@ export default function Dashboard({
 
       {/* Confirmation Modal to Disband Bureau (Dusk Modern-Minimal) */}
       {confirmDisband && (
-        <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4">
           <div className="glass p-6 sm:p-7 rounded-3xl border border-accent-red/40 max-w-md w-full space-y-4 shadow-card text-center animate-in fade-in zoom-in-95 duration-200">
             <div className="w-14 h-14 rounded-2xl bg-accent-red/20 text-accent-red border border-accent-red/40 flex items-center justify-center mx-auto text-2xl shadow-sm">
               <Trash2 className="w-7 h-7" />
@@ -629,7 +628,7 @@ export default function Dashboard({
               <button
                 type="button"
                 onClick={() => setConfirmDisband(false)}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-all min-h-[42px] flex-1"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-colors min-h-[42px] flex-1"
               >
                 Batal
               </button>
@@ -642,7 +641,7 @@ export default function Dashboard({
                     onDisbandTeam(team.id);
                   }
                 }}
-                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-all shadow-md min-h-[42px] flex-1"
+                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-colors shadow-md min-h-[42px] flex-1"
               >
                 Ya, Bubarkan Biro
               </button>

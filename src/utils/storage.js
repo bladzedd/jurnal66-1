@@ -54,7 +54,30 @@ export const getSavedUsers = () => {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(DEVICE_SAVED_USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const users = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(users) || users.length === 0) return [];
+
+    const allTeams = getAllTeams();
+    // Validate against current teams in classroom
+    const valid = users.filter((u) => {
+      if (!u || !u.teamId || !u.name) return false;
+      const team = allTeams.find((t) => t.id === u.teamId);
+      if (!team) return false;
+
+      const normName = u.name.trim().toLowerCase();
+      const isLeader = team.leaderName && team.leaderName.trim().toLowerCase() === normName;
+      const isInMembers = (team.members || []).some((m) => {
+        const mName = typeof m === "string" ? m : m.name;
+        return mName && mName.trim().toLowerCase() === normName;
+      });
+
+      return isLeader || isInMembers;
+    });
+
+    if (valid.length !== users.length) {
+      localStorage.setItem(DEVICE_SAVED_USERS_KEY, JSON.stringify(valid));
+    }
+    return valid;
   } catch {
     return [];
   }

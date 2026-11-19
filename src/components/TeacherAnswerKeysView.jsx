@@ -92,7 +92,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200 motion-reduce:animate-none">
       {/* 1. Header Banner & Actions */}
       <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-4">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-rule/60 pb-4">
@@ -105,8 +105,8 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                 <h3 className="font-display font-medium text-xl sm:text-2xl text-ink">
                   Kunci Jawaban Guru & Panduan Redaksi Senior
                 </h3>
-                <span className="bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  Pegangan Resmi Pengampu
+                <span className="bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full font-medium">
+                  Pegangan resmi pengampu
                 </span>
               </div>
               <p className="font-body text-xs sm:text-sm text-ink-muted mt-1 leading-relaxed">
@@ -118,7 +118,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
           <div className="flex items-center gap-2 self-end lg:self-auto shrink-0">
             <button
               onClick={handleCopySummary}
-              className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-semibold text-ink px-3.5 py-2 inline-flex items-center gap-1.5 transition-all shadow-xs min-h-[40px]"
+              className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-semibold text-ink px-3.5 py-2 inline-flex items-center gap-1.5 transition-colors shadow-xs min-h-[40px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
               title="Salin ringkasan kunci jawaban ini ke clipboard"
             >
               {copiedText ? <Check className="w-4 h-4 text-accent-green" /> : <Copy className="w-4 h-4 text-ink-muted" />}
@@ -127,7 +127,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
 
             <button
               onClick={() => { sound.playClick(); window.print(); }}
-              className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[40px]"
+              className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[40px] focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
               title="Cetak lembar pegangan kunci jawaban untuk guru di kelas"
             >
               <Printer className="w-4 h-4" />
@@ -138,8 +138,8 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
 
         {/* 2. Stage Filter Navigation */}
         <div className="space-y-2">
-          <label className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider block">
-            PILIH MATERI TAHAP LIPUTAN:
+          <label className="text-[11px] font-semibold text-ink-muted font-medium block">
+            Pilih materi tahap liputan:
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
@@ -154,7 +154,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                 <button
                   key={tab.id}
                   onClick={() => { sound.playClick(); setSelectedStage(tab.id); }}
-                  className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-2.5 ${
+                  className={`p-3 rounded-2xl border text-left transition-colors flex items-center gap-2.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden ${
                     isActive
                       ? "bg-accent text-accent-ink border-accent font-semibold shadow-sm"
                       : "bg-paper-2/60 hover:bg-paper-2 border-rule text-ink hover:border-rule/80"
@@ -178,11 +178,11 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
         {/* 3. Desk Variation Selector */}
         <div className="space-y-2 pt-2 border-t border-rule/50">
           <div className="flex justify-between items-center">
-            <label className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-ink-muted font-medium block">
               PILIH MEJA DESK REDAKSI (VARIASI TUGAS KELOMPOK):
             </label>
             {assignedTeams.length > 0 && (
-              <span className="text-[11px] font-mono text-accent-green bg-accent-green/10 border border-accent-green/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span className="text-[11px] font-body text-accent font-medium-green bg-accent-green/10 border border-accent-green/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Users className="w-3 h-3" />
                 <span>Dikerjakan oleh: {assignedTeams.map(t => t.name).join(", ")}</span>
               </span>
@@ -196,7 +196,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                 <button
                   key={d.id}
                   onClick={() => { sound.playClick(); setSelectedDesk(d.id); }}
-                  className={`px-3 py-2 rounded-xl text-xs font-body font-semibold border transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-2 rounded-xl text-xs font-body font-semibold border transition-colors flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden ${
                     isActive
                       ? "bg-accent text-accent-ink border-accent shadow-xs"
                       : "bg-paper-2/60 hover:bg-paper-2 border-rule text-ink"
@@ -221,7 +221,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
           <div className="space-y-5">
             {/* Case Overview */}
             <div className="glass p-5 rounded-2xl border border-rule shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-accent-orange text-xs font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-accent-orange text-xs font-semibold font-medium">
                 <FileText className="w-4 h-4" />
                 <span>Naskah Kasus Investigasi: {c.topic}</span>
               </div>
@@ -244,7 +244,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                 {c.clues.map((clue, idx) => (
                   <div key={idx} className="glass p-4 rounded-2xl border border-accent-green/30 bg-accent-green/5 space-y-2 shadow-xs">
                     <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 rounded-full bg-accent-green/20 text-accent-green border border-accent-green/30 font-mono text-[11px] font-bold">
+                      <span className="px-2.5 py-0.5 rounded-full bg-accent-green/20 text-accent-green border border-accent-green/30 font-body text-[11px] font-semibold">
                         {clue.element.toUpperCase()}
                       </span>
                       <span className="text-[11px] text-ink-muted font-medium">Unsur #{idx + 1}</span>
@@ -280,7 +280,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                   {c.distractors.map((dist, dIdx) => (
                     <div key={dIdx} className="p-3.5 rounded-xl bg-paper border border-rule space-y-2 text-left">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-red/15 text-accent-red border border-accent-red/25 uppercase font-mono">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent-red/15 text-accent-red border border-accent-red/25  font-mono">
                           Pengecoh #{dIdx + 1}
                         </span>
                         <XCircle className="w-4 h-4 text-accent-red shrink-0" />
@@ -313,7 +313,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
           <div className="space-y-5">
             {/* Case Overview */}
             <div className="glass p-5 rounded-2xl border border-rule shadow-sm space-y-2">
-              <div className="flex items-center gap-2 text-accent text-xs font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-accent text-xs font-semibold font-medium">
                 <Layers className="w-4 h-4" />
                 <span>Kasus Struktur Piramida Terbalik: {c.topic}</span>
               </div>
@@ -329,7 +329,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                   <CheckCircle2 className="w-5 h-5 text-accent-green" />
                   <span>Kunci Urutan Balok Berita (Tingkat 1 s.d. Tingkat 5):</span>
                 </h4>
-                <span className="text-xs text-ink-muted font-mono">Paling Penting ➔ Detail Pelengkap</span>
+                <span className="text-xs text-ink-muted font-body">Paling Penting ➔ Detail Pelengkap</span>
               </div>
 
               <div className="space-y-3">
@@ -340,7 +340,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                     <div 
                       key={block.id}
                       style={{ width: `${widthPercent}%` }}
-                      className="mx-auto glass p-4 rounded-2xl border border-accent/40 bg-accent/5 shadow-xs space-y-2 transition-all hover:scale-[1.01]"
+                      className="mx-auto glass p-4 rounded-2xl border border-accent/40 bg-accent/5 shadow-xs space-y-2 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span className="px-2.5 py-0.5 rounded-full bg-accent/20 text-accent border border-accent/30 font-mono text-[11px] font-bold">
@@ -378,9 +378,9 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
           <div className="space-y-5">
             {/* Case Overview */}
             <div className="glass p-5 rounded-2xl border border-rule shadow-sm space-y-2">
-              <div className="flex items-center gap-2 text-accent-orange text-xs font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-accent-orange text-xs font-semibold font-medium">
                 <PenTool className="w-4 h-4" />
-                <span>Naskah Proyek Berita: {v.topic}</span>
+                <span>Naskah proyek berita: {v.topic}</span>
               </div>
               <p className="font-body text-xs text-ink-muted leading-relaxed">
                 Di tahap akhir ini, biro redaksi diuji dalam 5 langkah kritis jurnalistik. Setiap langkah memiliki 1 opsi emas yang memenuhi etika dan standar pers:
@@ -404,7 +404,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                           {ch.stepTitle}
                         </h4>
                       </div>
-                      <span className="text-[11px] text-ink-muted font-mono bg-paper-2 border border-rule px-2 py-0.5 rounded-full">
+                      <span className="text-[11px] text-ink-muted font-body bg-paper-2 border border-rule px-2 py-0.5 rounded-full">
                         Langkah {idx + 1} dari 5
                       </span>
                     </div>
@@ -416,9 +416,9 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                     {/* Correct Option Container */}
                     <div className="p-4 rounded-xl bg-accent-green/10 border border-accent-green/30 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="px-2.5 py-0.5 rounded-full bg-accent-green/20 text-accent-green border border-accent-green/30 font-mono text-[11px] font-bold flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 rounded-full bg-accent-green/20 text-accent-green border border-accent-green/30 font-body text-[11px] font-semibold flex items-center gap-1">
                           <Check className="w-3.5 h-3.5" />
-                          <span>KUNCI JAWABAN BENAR:</span>
+                          <span>Kunci jawaban benar:</span>
                         </span>
                         <span className="text-xs font-semibold text-accent-green">+100 Poin Standar Pers</span>
                       </div>
@@ -435,7 +435,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
 
                     {/* Wrong Options Brief */}
                     <div className="space-y-1.5 pt-1">
-                      <span className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider block">
+                      <span className="text-[11px] font-semibold text-ink-muted font-medium block">
                         Opsi-opsi yang Harus Ditolak Siswa:
                       </span>
                       <div className="space-y-1.5">
@@ -468,9 +468,9 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
           <div className="space-y-5">
             {/* School Case Overview */}
             <div className="glass p-5 rounded-2xl border border-rule shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-accent text-xs font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-2 text-accent text-xs font-semibold font-medium">
                 <MessageSquare className="w-4 h-4" />
-                <span>Kasus Wawancara Sekolah: {sc.title}</span>
+                <span>Kasus wawancara sekolah: {sc.title}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-ink-muted">
                 <div className="p-2.5 rounded-xl bg-paper-2 border border-rule">
@@ -519,7 +519,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                           </div>
                         </div>
 
-                        <span className="text-[11px] text-accent font-mono bg-accent/10 border border-accent/20 px-2.5 py-0.5 rounded-full">
+                        <span className="text-[11px] text-accent font-body bg-accent/10 border border-accent/20 px-2.5 py-0.5 rounded-full">
                           Trust Awal: {w.initialTrust}%
                         </span>
                       </div>
@@ -544,7 +544,7 @@ export default function TeacherAnswerKeysView({ teams = [] }) {
                           </p>
 
                           <div className="pt-2 border-t border-accent-yellow/20 space-y-1">
-                            <span className="text-[11px] font-semibold text-accent-yellow block uppercase tracking-wider">
+                            <span className="text-[11px] font-semibold text-accent-yellow block font-medium">
                               Kutipan Resmi Siap Salin ke Buku Saku Wartawan:
                             </span>
                             <p className="font-serif text-xs sm:text-sm text-ink bg-paper p-3 rounded-lg border border-rule italic">

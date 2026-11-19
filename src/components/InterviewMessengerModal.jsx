@@ -66,7 +66,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4">
-      <div className="glass max-w-2xl w-full h-[95vh] sm:h-[88vh] rounded-3xl border border-rule shadow-card flex flex-col justify-between overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="glass max-w-2xl w-full h-[95vh] sm:h-[88vh] rounded-3xl border border-rule shadow-card flex flex-col justify-between overflow-hidden animate-in fade-in zoom-in-95 duration-200 motion-reduce:animate-none">
         
         {/* Top Header */}
         <div className="p-3.5 sm:p-4 border-b border-rule bg-paper-2/70 flex items-center justify-between gap-2 shrink-0">
@@ -76,8 +76,8 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="bg-accent-orange/15 text-accent-orange border border-accent-orange/30 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  RUANG LIPUTAN NARASUMBER
+                <span className="bg-accent-orange/15 text-accent-orange border border-accent-orange/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                  Ruang Liputan Narasumber
                 </span>
                 <span className="font-mono text-[11px] text-ink-muted hidden xs:inline">
                   {currentCase?.category || "Investigasi Sekolah"}
@@ -93,7 +93,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
             {onOpenPocketNotes && (
               <button
                 onClick={() => { sound.playClick(); onOpenPocketNotes(); }}
-                className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1.5 min-h-[38px] transition-all shadow-sm"
+                className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1.5 min-h-[38px] transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
                 title="Buka Catatan Saku"
               >
                 <BookOpen className="w-3.5 h-3.5" />
@@ -128,7 +128,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
               <button
                 key={w.id}
                 onClick={() => { sound.playClick(); setSelectedWitnessId(w.id); }}
-                className={`p-2 px-3 rounded-2xl border transition-all flex items-center gap-2 shrink-0 min-h-[44px] ${
+                className={`p-2 px-3 rounded-2xl border transition-colors flex items-center gap-2 shrink-0 min-h-[44px] ${
                   isSelected 
                     ? "bg-accent text-accent-ink border-accent font-semibold shadow-sm" 
                     : "glass border-rule hover:border-rule/80 text-ink"
@@ -176,10 +176,10 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
             <span className="text-[11px] text-ink-muted hidden sm:inline">Kepercayaan Saksi:</span>
             <div className="w-24 sm:w-32 bg-paper-2 rounded-full h-2.5 overflow-hidden border border-rule">
               <div 
-                className={`h-full rounded-full transition-all duration-300 ${
+                className={`h-full w-full rounded-full origin-left transition-transform duration-300 ${
                   trustScore >= 70 ? "bg-accent-green" : trustScore >= 40 ? "bg-accent-orange" : "bg-accent-red"
                 }`}
-                style={{ width: `${Math.max(5, trustScore)}%` }}
+                style={{ transform: `scaleX(${Math.max(0.05, trustScore / 100)})` }}
               ></div>
             </div>
             <span className={`font-mono text-xs font-bold ${
@@ -224,7 +224,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                 {/* Student Question Bubble (Right) */}
                 <div className="flex justify-end">
                   <div className="bg-accent text-accent-ink p-3.5 rounded-2xl rounded-tr-xs max-w-[88%] sm:max-w-[78%] shadow-sm space-y-1">
-                    <span className="font-body text-[10px] text-accent-ink/75 block uppercase font-bold tracking-wider">
+                    <span className="font-body text-[10px] text-accent-ink/75 block font-semibold">
                       Pertanyaan Wartawan Biro:
                     </span>
                     <p className="font-body text-xs sm:text-sm font-medium leading-relaxed">
@@ -308,7 +308,7 @@ export default function InterviewMessengerModal({ team, onClose, onOpenPocketNot
                   key={q.id}
                   onClick={() => handleAskQuestion(q.id)}
                   disabled={hasAsked || isNoComment || isSubmitting}
-                  className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm font-body transition-all flex items-start justify-between gap-2 min-h-[44px] ${
+                  className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm font-body transition-colors flex items-start justify-between gap-2 min-h-[44px] ${
                     hasAsked 
                       ? "bg-paper-2/30 border-rule/50 text-ink-muted opacity-60 cursor-not-allowed" 
                       : isNoComment 

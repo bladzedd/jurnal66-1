@@ -14,7 +14,7 @@
   --color-ink-2: oklch(85% 0.010 262);
   --color-ink-muted: oklch(70% 0.016 262);
   --color-muted: oklch(70% 0.016 262);
-  --color-light: oklch(100% 0 0);
+  --color-light: oklch(99% 0.006 274);
 
   /* Rules & Hairlines */
   --color-rule: oklch(30% 0.016 266);
@@ -30,6 +30,9 @@
   --color-accent-soft: oklch(91% 0.038 274);
   --color-focus: oklch(80% 0.10 274);
   --color-accent-2: oklch(83% 0.095 62);
+  --color-accent-2-soft: oklch(83% 0.095 62 / 0.14);
+  --color-accent-2-glow: oklch(83% 0.095 62 / 0.2);
+  --color-input-bg: oklch(15% 0.015 268 / 0.75);
   --color-dusk: oklch(70% 0.12 330);
 
   /* Aliased App Signals to Dusk Palette */
@@ -49,6 +52,18 @@
   --shadow-neo: 0 1px 0 oklch(100% 0 0 / 0.08) inset, 0 20px 40px -12px oklch(8% 0.02 268 / 0.6);
   --shadow-neo-sm: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 8px 20px -6px oklch(8% 0.02 268 / 0.4);
   --shadow-neo-lg: 0 1px 0 oklch(100% 0 0 / 0.10) inset, 0 40px 80px -28px oklch(8% 0.02 268 / 0.75);
+
+  /* Gradients, Button Shadows & Focus Elevation */
+  --bg-gradient-top: oklch(24% 0.04 274 / 0.35);
+  --bg-gradient-side: oklch(21% 0.02 268 / 0.25);
+  --color-rule-hover: oklch(35% 0.02 266);
+  --color-rule-btn-hover: oklch(40% 0.02 266);
+  --color-box-yellow-bg: oklch(77% 0.10 274 / 0.12);
+  --color-box-yellow-border: oklch(77% 0.10 274 / 0.35);
+  --shadow-btn-hi: inset 0 1px 0 oklch(100% 0 0 / 0.12);
+  --shadow-btn-hover: inset 0 1px 0 oklch(100% 0 0 / 0.22), 0 12px 24px -6px oklch(8% 0.02 268 / 0.6);
+  --shadow-btn-active: inset 0 1px 0 oklch(0% 0 0 / 0.2);
+  --shadow-input-focus-hi: inset 0 1px 0 oklch(100% 0 0 / 0.1);
 
   /* Radii */
   --radius-card: 18px;

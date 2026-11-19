@@ -43,23 +43,23 @@ export default function Header({
       ];
 
   return (
-    <header className="backdrop-blur-xl bg-paper/90 border-b border-rule sticky top-0 z-40 max-w-full overflow-hidden">
+    <header className="bg-paper/95 border-b border-rule sticky top-0 z-40 max-w-full overflow-hidden shadow-xs">
       {/* Top Meta Bar */}
-      <div className="bg-paper-2/60 border-b border-rule/50 py-1.5 px-3 sm:px-4 flex justify-between items-center text-xs font-body tracking-tight text-ink-muted">
+      <div className="bg-paper-2/70 border-b border-rule/50 py-1.5 px-3 sm:px-4 flex justify-between items-center text-xs font-body tracking-tight text-ink-muted">
         <div className="flex items-center gap-2 min-w-0">
           <span className="inline-block w-2 h-2 rounded-full bg-accent-green shrink-0 shadow-[0_0_8px_var(--color-accent-green)]"></span>
           <span className="truncate">Biro: <strong className="text-ink font-semibold">{team?.name || "Tim Redaksi"}</strong></span>
-          <span className="bg-accent/15 text-accent border border-accent/30 rounded-full px-2 py-0.2 text-[10px] font-mono font-bold tracking-wider hidden xs:inline shrink-0">
-            KODE: {team?.memberCode || "UD19J"}
+          <span className="bg-accent/15 text-accent border border-accent/30 rounded-full px-2 py-0.5 text-[11px] font-body font-medium hidden xs:inline shrink-0">
+            Kode: <span className="font-mono font-bold">{team?.memberCode || "UD19J"}</span>
           </span>
           {team?.activeShield && (
             <span className="bg-accent-green/15 text-accent-green border border-accent-green/30 rounded-full px-2 py-0.5 text-[10px] font-medium hidden sm:inline-flex items-center gap-1 shrink-0">
               <ShieldCheck className="w-3 h-3 text-accent-green" />
-              <span>Perisai Aktif</span>
+              <span>Perisai aktif</span>
             </span>
           )}
           {team?.activeDebuffs?.length > 0 && (
-            <span className="bg-accent-red/15 text-accent-red border border-accent-red/30 rounded-full px-2 py-0.5 text-[10px] font-medium animate-pulse hidden sm:inline-flex items-center gap-1 shrink-0">
+            <span className="bg-accent-red/15 text-accent-red border border-accent-red/30 rounded-full px-2 py-0.5 text-[10px] font-medium animate-pulse motion-reduce:animate-none hidden sm:inline-flex items-center gap-1 shrink-0">
               <AlertTriangle className="w-3 h-3 text-accent-red" />
               <span>Sabotase ({team.activeDebuffs.length})</span>
             </span>
@@ -70,19 +70,19 @@ export default function Header({
             <div 
               className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 shrink-0 ${
                 timerState.remainingSeconds <= 300
-                  ? "bg-accent-red/20 text-accent-red border border-accent-red/40 animate-pulse"
+                  ? "bg-accent-red/20 text-accent-red border border-accent-red/40 animate-pulse motion-reduce:animate-none"
                   : "bg-accent-orange/15 text-accent-orange border border-accent-orange/30"
               }`}
               title="Sisa Waktu Sesi / Ujian Jurnalistik"
             >
-              <Clock className="w-3.5 h-3.5 animate-spin" />
+              <Clock className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" />
               <span>{Math.floor(timerState.remainingSeconds / 60)}:{(timerState.remainingSeconds % 60).toString().padStart(2, '0')}</span>
             </div>
           )}
           {onOpenTeacherModal && (
             <button
               onClick={() => { sound.playClick(); onOpenTeacherModal(); }}
-              className="text-accent hover:text-accent-hi text-xs font-semibold inline-flex items-center gap-1 transition-colors min-h-[38px] px-2 py-1 rounded-full bg-accent/10 border border-accent/25 hover:bg-accent/20"
+              className="text-accent hover:text-accent-hi text-xs font-semibold inline-flex items-center gap-1 transition-colors min-h-[38px] px-2.5 py-1 rounded-full bg-accent/10 border border-accent/25 hover:bg-accent/20 focus-visible:outline-2 focus-visible:outline-accent"
               title="Panel Guru"
               aria-label="Panel Meja Guru"
             >
@@ -91,7 +91,7 @@ export default function Header({
             </button>
           )}
           <span className="hidden sm:inline text-xs text-ink-muted">Tim: {team?.members?.length || 0} Siswa</span>
-          <span className="bg-white/5 border border-rule px-2 py-0.5 rounded-full text-[11px] font-medium text-ink">
+          <span className="bg-paper-3/90 border border-rule px-2 py-0.5 rounded-full text-[11px] font-medium text-ink">
             Tahap {Math.min(3, completedCount + 1)}/3
           </span>
         </div>
@@ -104,7 +104,7 @@ export default function Header({
           onClick={() => { sound.playClick(); onBackToHome(); }}
           className="cursor-pointer flex items-center gap-2.5 sm:gap-3.5 group min-w-0"
         >
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-display font-bold text-sm sm:text-base tracking-wider shadow-sm group-hover:bg-accent group-hover:text-accent-ink transition-all shrink-0">
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-display font-semibold text-sm sm:text-base tracking-tight shadow-sm group-hover:bg-accent group-hover:text-accent-ink transition-colors shrink-0">
             J66
           </div>
           <div className="min-w-0">
@@ -139,7 +139,7 @@ export default function Header({
             onClick={() => { sound.playClick(); onOpenShop(); }}
             title="Buka Toko Peralatan & Pasar Strategi Pers"
             aria-label="Toko Peralatan & Koin"
-            className="rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/25 px-2.5 sm:px-3 py-1.5 text-xs font-body font-semibold flex items-center gap-1.5 transition-all shadow-sm min-h-[42px]"
+            className="rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/25 px-2.5 sm:px-3 py-1.5 text-xs font-body font-semibold flex items-center gap-1.5 transition-colors shadow-sm min-h-[42px]"
           >
             <Coins className="w-3.5 h-3.5 shrink-0 text-accent-orange" />
             <span>{team?.coins || 0}</span>
@@ -151,7 +151,7 @@ export default function Header({
           <button
             onClick={toggleSound}
             title={muted ? "Nyalakan Efek Suara" : "Matikan Efek Suara"}
-            className="w-10 h-10 sm:w-10 sm:h-10 rounded-full border border-rule bg-paper-2/60 hover:bg-paper-2 text-ink flex items-center justify-center transition-all min-h-[42px] min-w-[42px]"
+            className="w-10 h-10 sm:w-10 sm:h-10 rounded-full border border-rule bg-paper-2/60 hover:bg-paper-2 text-ink flex items-center justify-center transition-colors min-h-[42px] min-w-[42px]"
             aria-label="Toggle Sound"
           >
             {muted ? <VolumeX className="w-4 h-4 text-ink-muted" /> : <Volume2 className="w-4 h-4 text-ink" />}
@@ -160,7 +160,7 @@ export default function Header({
           {/* Press Card Button */}
           <button
             onClick={() => { sound.playClick(); onOpenPressCard(); }}
-            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule px-2.5 sm:px-3 py-1.5 text-xs font-body text-ink flex items-center gap-1.5 transition-all shadow-sm min-h-[42px]"
+            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule px-2.5 sm:px-3 py-1.5 text-xs font-body text-ink flex items-center gap-1.5 transition-colors shadow-sm min-h-[42px]"
             title="Kartu Biro Pers"
             aria-label="Kartu Pers"
           >
@@ -175,7 +175,7 @@ export default function Header({
           <button
             onClick={() => { sound.playClick(); onLogoutTeam(); }}
             title="Ganti Pengguna / Profil Biro"
-            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule p-2 sm:px-3 sm:py-1.5 text-xs font-body text-ink-muted hover:text-ink flex items-center justify-center gap-1 transition-all shadow-sm min-h-[42px] min-w-[42px]"
+            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule p-2 sm:px-3 sm:py-1.5 text-xs font-body text-ink-muted hover:text-ink flex items-center justify-center gap-1 transition-colors shadow-sm min-h-[42px] min-w-[42px]"
           >
             <LogOut className="w-3.5 h-3.5 text-accent-red" />
             <span className="hidden lg:inline">Ganti Pengguna</span>
@@ -185,8 +185,8 @@ export default function Header({
 
       {/* Ticker Bar (Kawat Berita Redaksi) */}
       <div className="bg-paper-3/40 border-t border-rule/60 py-1.5 px-3 text-xs font-body text-ink-muted flex items-center overflow-hidden max-w-full">
-        <div className="rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-2.5 py-0.5 text-[10px] font-semibold tracking-wider mr-2 shrink-0">
-          KAWAT PERS
+        <div className="rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-2.5 py-0.5 text-[10px] font-semibold mr-2 shrink-0">
+          Kawat Berita
         </div>
         <div className="ticker-wrapper flex-1">
           <div className="animate-ticker text-ink-2">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Shield, Users, Key, Plus, RefreshCw, Trash2, Coins, Megaphone, 
+  Trophy, Shield, Users, Key, Plus, RefreshCw, Trash2, Coins, Megaphone, 
   CheckCircle2, ArrowRight, Printer, AlertTriangle, Sparkles, BookOpen, 
   ArrowLeft, Edit3, ShieldAlert, FileText, Award, UserCheck, Eye, EyeOff, LogOut,
   Clock, Pause, Play, Download, Copy, Tv, Check, Flame, Crown, X, Pencil, MessageSquare,
@@ -332,7 +332,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         <div className="max-w-md mx-auto w-full pt-10 sm:pt-16 space-y-6">
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 bg-paper-2/70 border border-rule px-3 py-1 rounded-full text-xs font-body text-ink-muted shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-accent-orange animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-accent-orange animate-pulse motion-reduce:animate-none"></span>
               <span className="text-ink font-medium">Gerbang Otoritas Dewan Redaksi & Guru</span>
             </div>
             <h1 className="font-display font-medium text-3xl sm:text-4xl text-ink tracking-tight">
@@ -366,7 +366,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     maxLength={15}
                     value={pinInput}
                     onChange={(e) => { setPinInput(e.target.value); setPinError(null); }}
-                    className="w-full p-3 text-center font-mono font-bold text-lg sm:text-xl tracking-widest uppercase pr-12 rounded-xl border border-rule bg-paper text-ink"
+                    className="w-full p-3 text-center font-mono font-bold text-lg sm:text-xl tracking-normal pr-12 rounded-xl border border-rule bg-paper text-ink"
                     autoFocus
                   />
                   <button
@@ -389,10 +389,10 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
               <button
                 type="submit"
-                className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-lg min-h-[44px]"
+                className="neo-btn p-3.5 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full w-full flex items-center justify-center gap-2 transition-colors shadow-lg min-h-[44px] whitespace-nowrap"
               >
-                <span>Buka Pusat Komando Otoritas</span>
-                <ArrowRight className="w-4 h-4 text-accent-ink" />
+                <span>Buka Pusat Komando</span>
+                <ArrowRight className="w-4 h-4 text-accent-ink shrink-0" />
               </button>
             </form>
 
@@ -719,9 +719,9 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-rule pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-accent-green animate-pulse"></span>
-                <span className="font-mono text-xs uppercase text-accent font-bold tracking-widest">
-                  DEWAN PERS PENDIDIKAN SISWA • PAPAN SKOR PROYEKTOR SMARTBOARD
+                <span className="w-3 h-3 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none"></span>
+                <span className="font-body text-xs text-accent font-semibold">
+                  Dewan pers pendidikan siswa • Papan skor proyektor smartboard
                 </span>
               </div>
               <h1 className="font-display font-medium text-3xl sm:text-5xl text-ink tracking-tight mt-1">
@@ -732,13 +732,13 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             <div className="flex items-center gap-3">
               {timerState.isRunning && (
                 <div className="bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-4 py-2 rounded-2xl flex items-center gap-2 font-mono text-lg font-bold shadow-sm">
-                  <Clock className="w-5 h-5 animate-spin" />
+                  <Clock className="w-5 h-5 animate-spin motion-reduce:animate-none" />
                   <span>Sisa: {formatTimer(timerState.remainingSeconds)}</span>
                 </div>
               )}
               <button
                 onClick={() => { sound.playClick(); setIsProjectorMode(false); }}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-4 py-2 text-xs font-body font-semibold text-ink transition-all shadow-sm min-h-[44px]"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-4 py-2 text-xs font-body font-semibold text-ink transition-colors shadow-sm min-h-[44px]"
               >
                 Keluar Mode Proyektor
               </button>
@@ -754,7 +754,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               return (
                 <div 
                   key={item.id}
-                  className={`glass p-5 rounded-2xl border transition-all shadow-card space-y-3 ${
+                  className={`glass p-5 rounded-2xl border transition-colors shadow-card space-y-3 ${
                     isFirst ? "border-accent ring-2 ring-accent/30 bg-accent/5" : "border-rule"
                   }`}
                 >
@@ -779,7 +779,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       <span className="font-display font-bold text-xl text-accent block">
                         {item.finalScore} <span className="text-xs text-ink-muted font-normal">/ 100</span>
                       </span>
-                      <span className="font-mono text-xs text-accent-orange font-bold inline-flex items-center gap-1">
+                      <span className="font-body text-xs text-accent-orange font-semibold inline-flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" />
                         <span>Total: {item.formattedTotalDuration}</span>
                       </span>
@@ -793,15 +793,12 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       <span className="font-semibold text-ink">{item.completedCount}/3 Tahap Selesai</span>
                     </div>
                     <div className="w-full bg-paper-2 rounded-full h-2 overflow-hidden border border-rule">
-                      <div 
-                        className="bg-accent h-full rounded-full transition-all duration-500"
-                        style={{ width: `${(item.completedCount / 3) * 100}%` }}
-                      ></div>
+                      <div className="bg-accent h-full w-full rounded-full origin-left transition-transform duration-500" style={{ transform: `scaleX(${item.completedCount / 3})` }}></div>
                     </div>
                   </div>
 
                   {/* Stage Working Times (Live / Paused) */}
-                  <div className="grid grid-cols-3 gap-1.5 pt-1 text-[11px] font-mono">
+                  <div className="grid grid-cols-3 gap-1.5 pt-1 text-[11px] font-body">
                     {[1, 2, 3].map((stg) => {
                       const timer = getTeamStageTimer(t, stg);
                       const isDone = isStageCompleted(t, stg);
@@ -812,11 +809,11 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                             isDone 
                               ? "bg-accent-green/10 border-accent-green/30 text-accent-green" 
                               : timer.isRunning 
-                              ? "bg-accent/15 border-accent text-accent animate-pulse" 
+                              ? "bg-accent/15 border-accent text-accent animate-pulse motion-reduce:animate-none" 
                               : "bg-paper-2 border-rule text-ink-muted"
                           }`}
                         >
-                          <span className="text-[9px] font-sans font-bold uppercase">Tahap {stg}</span>
+                          <span className="text-[10px] font-body font-semibold text-ink-muted">Tahap {stg}</span>
                           <span className="font-semibold flex items-center gap-1">
                             {isDone ? (
                               <>
@@ -855,7 +852,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             RADAR PERS LIVE
           </span>
           <div className="overflow-hidden flex-1 relative font-body text-xs text-ink-2">
-            <div className="animate-ticker">
+            <div className="animate-ticker motion-reduce:animate-none">
               {logs.map((l, i) => (
                 <span key={i} className="mr-8 font-medium">
                   {l.text}
@@ -877,7 +874,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-rule/60 pb-3.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl">🏆</span>
+              <Trophy className="w-5 h-5 text-accent-yellow inline shrink-0" />
               <h3 className="font-display font-medium text-xl text-ink">
                 Papan Peringkat & Penilaian Akhir (Leaderboard Siapa yang Duluan)
               </h3>
@@ -913,7 +910,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-body">
               <thead>
-                <tr className="border-b border-rule/60 text-ink-muted uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-rule/60 text-ink-muted font-medium text-[10px]">
                   <th className="py-3 px-3">Peringkat</th>
                   <th className="py-3 px-3">Biro Redaksi</th>
                   <th className="py-3 px-3">Status</th>
@@ -928,7 +925,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               <tbody className="divide-y divide-rule/40 font-body">
                 {leaderboard.map((item) => {
                   const isTop1 = item.rank === 1;
-                  const rankIcon = item.rank === 1 ? "🥇 #1" : item.rank === 2 ? "🥈 #2" : item.rank === 3 ? "🥉 #3" : `#${item.rank}`;
+                  const rankIcon = item.rank === 1 ? "#1" : item.rank === 2 ? "#2" : item.rank === 3 ? "#3" : `#${item.rank}`;
 
                   return (
                     <tr 
@@ -1064,7 +1061,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
             <button
               onClick={() => { sound.playClick(); setActiveTab("solutions"); }}
-              className={`rounded-full text-xs font-body font-semibold gap-1.5 px-3.5 py-2 shadow-sm inline-flex items-center min-h-[42px] transition-all ${
+              className={`rounded-full text-xs font-body font-semibold gap-1.5 px-3.5 py-2 shadow-sm inline-flex items-center min-h-[42px] transition-colors ${
                 activeTab === "solutions"
                   ? "bg-accent-yellow text-paper font-bold shadow-md"
                   : "bg-accent-yellow/20 hover:bg-accent-yellow/30 text-accent-yellow border border-accent-yellow/40"
@@ -1078,7 +1075,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             {/* Reset Exercise Trigger */}
             <button
               onClick={() => { sound.playClick(); setIsResetModalOpen(true); }}
-              className="rounded-full bg-accent-red/20 hover:bg-accent-red hover:text-white text-accent-red border border-accent-red/40 text-xs font-body font-semibold gap-1.5 px-3.5 py-2 shadow-sm inline-flex items-center min-h-[42px] transition-all"
+              className="rounded-full bg-accent-red/20 hover:bg-accent-red hover:text-white text-accent-red border border-accent-red/40 text-xs font-body font-semibold gap-1.5 px-3.5 py-2 shadow-sm inline-flex items-center min-h-[42px] transition-colors"
               title="Reset Progres Latihan Kelas untuk Mengulang Simulasi"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -1119,26 +1116,26 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         {/* Quick Stats Metrics Row */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TOTAL BIRO AKTIF</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">Total biro aktif</span>
             <span className="font-display font-medium text-2xl text-ink tracking-tight mt-1 block">{teams.length} Kelompok</span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TOTAL SISWA TERDAFTAR</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">Total siswa terdaftar</span>
             <span className="font-display font-medium text-2xl text-accent-orange tracking-tight mt-1 block">{totalMembers} Siswa</span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TAHAP KELAS AKTIF</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">Tahap kelas aktif</span>
             <span className="font-display font-medium text-2xl text-accent-green tracking-tight mt-1 block">Tahap #{currentStage}</span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TIM SEDANG KERJA</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">Tim sedang kerja</span>
             <span className="font-display font-medium text-xl text-accent tracking-tight mt-1 flex items-center gap-1.5">
-              <Clock className={`w-5 h-5 ${activeWorkingCount > 0 ? "text-accent animate-spin" : "text-ink-muted"}`} />
+              <Clock className={`w-5 h-5 ${activeWorkingCount > 0 ? "text-accent animate-spin motion-reduce:animate-none" : "text-ink-muted"}`} />
               <span>{activeWorkingCount} Biro Berjalan</span>
             </span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
-            <span className="font-body text-xs text-ink-muted block font-medium">TOTAL KOIN KAS KELAS</span>
+            <span className="font-body text-xs text-ink-muted block font-medium">Total koin kas kelas</span>
             <span className="font-display font-medium text-2xl text-accent tracking-tight mt-1 flex items-center gap-1.5">
               <Coins className="w-6 h-6 text-accent-orange" />
               <span>{totalCoins}</span>
@@ -1162,7 +1159,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   ? "bg-accent-green/20 text-accent-green border border-accent-green/30" 
                   : "bg-paper-2 text-ink-muted border border-rule"
               }`}>
-                {timerState.isRunning ? `BERJALAN: ${formatTimer(timerState.remainingSeconds)}` : "TIDAK AKTIF"}
+                {timerState.isRunning ? `BERJALAN: ${formatTimer(timerState.remainingSeconds)}` : "Tidak aktif"}
               </span>
             </div>
 
@@ -1173,27 +1170,27 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             <div className="flex flex-wrap gap-2 pt-1">
               <button
                 onClick={() => handleStartTimer(30)}
-                className="rounded-full bg-accent/20 hover:bg-accent hover:text-accent-ink text-accent border border-accent/30 text-xs font-body font-semibold px-3.5 py-2 transition-all shadow-sm min-h-[40px]"
+                className="rounded-full bg-accent/20 hover:bg-accent hover:text-accent-ink text-accent border border-accent/30 text-xs font-body font-semibold px-3.5 py-2 transition-colors shadow-sm min-h-[40px]"
               >
                 Mulai 30 Menit
               </button>
               <button
                 onClick={() => handleStartTimer(45)}
-                className="rounded-full bg-accent/20 hover:bg-accent hover:text-accent-ink text-accent border border-accent/30 text-xs font-body font-semibold px-3.5 py-2 transition-all shadow-sm min-h-[40px]"
+                className="rounded-full bg-accent/20 hover:bg-accent hover:text-accent-ink text-accent border border-accent/30 text-xs font-body font-semibold px-3.5 py-2 transition-colors shadow-sm min-h-[40px]"
               >
                 Mulai 45 Menit
               </button>
               <button
                 onClick={() => handleAddMinutes(5)}
                 disabled={!timerState.isRunning}
-                className="rounded-full bg-accent-orange/20 hover:bg-accent-orange hover:text-white text-accent-orange border border-accent-orange/30 text-xs font-body font-semibold px-3.5 py-2 transition-all shadow-sm disabled:opacity-40 min-h-[40px]"
+                className="rounded-full bg-accent-orange/20 hover:bg-accent-orange hover:text-white text-accent-orange border border-accent-orange/30 text-xs font-body font-semibold px-3.5 py-2 transition-colors shadow-sm disabled:opacity-40 min-h-[40px]"
               >
                 +5 Menit
               </button>
               <button
                 onClick={handleStopTimer}
                 disabled={!timerState.isRunning}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-3.5 py-2 transition-all shadow-sm disabled:opacity-40 min-h-[40px]"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-3.5 py-2 transition-colors shadow-sm disabled:opacity-40 min-h-[40px]"
               >
                 Hentikan Timer
               </button>
@@ -1201,22 +1198,22 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
           </div>
 
           {/* Card 2: Screen Freeze / Focus Mode ("Pena Diturunkan!") */}
-          <div className={`glass p-5 rounded-2xl border transition-all shadow-card space-y-3 ${
+          <div className={`glass p-5 rounded-2xl border transition-colors shadow-card space-y-3 ${
             freezeState.isFrozen ? "border-accent-red/60 bg-accent-red/5" : "border-rule"
           }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldAlert className={`w-4 h-4 ${freezeState.isFrozen ? "text-accent-red animate-pulse" : "text-accent"}`} />
+                <ShieldAlert className={`w-4 h-4 ${freezeState.isFrozen ? "text-accent-red animate-pulse motion-reduce:animate-none" : "text-accent"}`} />
                 <span className="font-display font-medium text-sm text-ink">
                   Mode Perhatian Guru (Kunci Layar)
                 </span>
               </div>
               <span className={`font-mono text-xs font-bold px-2.5 py-0.5 rounded-full ${
                 freezeState.isFrozen 
-                  ? "bg-accent-red/20 text-accent-red border border-accent-red/30 animate-pulse" 
+                  ? "bg-accent-red/20 text-accent-red border border-accent-red/30 animate-pulse motion-reduce:animate-none" 
                   : "bg-paper-2 text-ink-muted border border-rule"
               }`}>
-                {freezeState.isFrozen ? "LAYAR DIKUNCI" : "BEBAS AKTIF"}
+                {freezeState.isFrozen ? "Layar dikunci" : "Bebas aktif"}
               </span>
             </div>
 
@@ -1234,7 +1231,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               />
               <button
                 onClick={handleToggleFreeze}
-                className={`rounded-full px-5 py-2.5 text-xs font-body font-semibold whitespace-nowrap transition-all shadow-sm min-h-[44px] ${
+                className={`rounded-full px-5 py-2.5 text-xs font-body font-semibold whitespace-nowrap transition-colors shadow-sm min-h-[44px] ${
                   freezeState.isFrozen
                     ? "bg-accent-green text-white hover:bg-accent-green/90"
                     : "bg-accent-red text-white hover:bg-accent-red/90"
@@ -1270,19 +1267,19 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         <div className="flex p-1 bg-paper-2/50 border border-rule rounded-2xl shadow-card backdrop-blur-md overflow-x-auto gap-1 no-scrollbar touch-pan-x w-full">
           <button
             onClick={() => { sound.playClick(); setActiveTab("leaderboard"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "leaderboard" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
             }`}
           >
             <Award className="w-4 h-4 shrink-0 text-accent-yellow" />
-            <span className="text-xs sm:text-sm font-semibold">🏆 Papan Peringkat & Penilaian</span>
+            <span className="text-xs sm:text-sm font-semibold">Papan Peringkat & Penilaian</span>
           </button>
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("teams"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "teams" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1295,7 +1292,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("stages"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "stages" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1308,7 +1305,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("economy"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "economy" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1321,7 +1318,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("broadcast"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "broadcast" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1334,7 +1331,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("grades"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "grades" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1347,7 +1344,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("cases"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "cases" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1360,7 +1357,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           <button
             onClick={() => { sound.playClick(); setActiveTab("solutions"); }}
-            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-colors min-h-[44px] ${
               activeTab === "solutions" 
                 ? "bg-accent text-accent-ink font-semibold shadow-sm" 
                 : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
@@ -1394,8 +1391,8 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     Guru hanya memberikan kode 5-karakter. Identitas biro (Nama Biro, Nama Siswa Ketua, dan Kelas) akan diisi langsung oleh siswa.
                   </p>
                 </div>
-                <span className="font-mono text-xs bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-3 py-1 rounded-full font-bold">
-                  SISTEM MANDAT SISWA
+                <span className="font-body text-xs bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-3 py-1 rounded-full font-medium">
+                  Sistem Mandat Siswa
                 </span>
               </div>
 
@@ -1408,7 +1405,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   <button
                     type="button"
                     onClick={() => handleGenerateLeaderCode()}
-                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-md min-h-[44px]"
+                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-md min-h-[44px]"
                     title="Terbitkan 1 kode ketua baru secara instan"
                   >
                     <Plus className="w-4 h-4" />
@@ -1418,7 +1415,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   <button
                     type="button"
                     onClick={() => handleBatchGenerateLeaderCodes(3)}
-                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     title="Terbitkan 3 kode ketua sekaligus untuk 3 kelompok"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-accent-orange" />
@@ -1428,7 +1425,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   <button
                     type="button"
                     onClick={() => handleBatchGenerateLeaderCodes(5)}
-                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                    className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     title="Terbitkan 5 kode ketua sekaligus untuk 5 kelompok"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-accent-orange" />
@@ -1445,12 +1442,12 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       maxLength={12}
                       value={customLeaderCode}
                       onChange={(e) => setCustomLeaderCode(e.target.value)}
-                      className="w-full p-2.5 font-mono text-base sm:text-xs font-bold tracking-widest uppercase rounded-xl border border-rule bg-paper-2/60 text-ink"
+                      className="w-full p-2.5 font-mono text-base sm:text-xs font-bold tracking-normal rounded-xl border border-rule bg-paper-2/60 text-ink"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2.5 transition-all min-h-[44px] shrink-0 shadow-sm"
+                    className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-4 py-2.5 transition-colors min-h-[44px] shrink-0 shadow-sm"
                   >
                     Terbitkan Kode Khusus
                   </button>
@@ -1479,7 +1476,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           {t.name}
                         </h4>
                         {t.isPendingSetup ? (
-                          <span className="font-body text-xs bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-2.5 py-0.5 rounded-full font-semibold animate-pulse inline-flex items-center gap-1">
+                          <span className="font-body text-xs bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-2.5 py-0.5 rounded-full font-semibold animate-pulse motion-reduce:animate-none inline-flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>Menunggu Diisi Ketua</span>
                           </span>
@@ -1497,11 +1494,15 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       <p className="font-body text-xs text-ink-2 mt-0.5">
                         {t.isPendingSetup ? (
                           <span className="text-accent-orange font-medium">
-                            Kode telah terbit. Berikan Kode Ketua di bawah kepada siswa untuk mendaftarkan nama biro & nama ketua.
+                            Kode telah terbit: serahkan kode ketua kepada siswa untuk melengkapi identitas biro.
                           </span>
                         ) : (
                           <span>
-                            Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo}) • Kas: <strong>{t.coins || 0} Koin</strong> • Total Pengerjaan: <strong className="text-accent">{formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</strong>
+                            <span>Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong> ({t.leaderClass || t.members?.[0]?.classInfo})</span>
+                            <span className="mx-1.5 opacity-40">|</span>
+                            <span>Kas: <strong>{t.coins || 0} Koin</strong></span>
+                            <span className="mx-1.5 opacity-40">|</span>
+                            <span>Total Pengerjaan: <strong className="text-accent">{formatDuration((t.stageTimes?.stage_1 || 0) + (t.stageTimes?.stage_2 || 0) + (t.stageTimes?.stage_3 || 0))}</strong></span>
                           </span>
                         )}
                       </p>
@@ -1509,18 +1510,18 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       {/* Live Working Timer & Stages Bar */}
                       {!t.isPendingSetup && (
                         <div className="flex items-center gap-2 flex-wrap pt-2 mt-1 border-t border-rule/50">
-                          <span className="text-[11px] font-semibold text-ink-muted uppercase tracking-wider">Durasi per Tahap:</span>
+                          <span className="text-[11px] font-semibold text-ink-muted font-medium">Durasi per Tahap:</span>
                           {[1, 2, 3].map(stg => {
                             const timer = getTeamStageTimer(t, stg);
                             const isDone = isStageCompleted(t, stg);
                             return (
                               <span 
                                 key={stg} 
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-mono text-xs font-semibold ${
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
                                   isDone 
                                     ? "bg-accent-green/15 text-accent-green border border-accent-green/30" 
                                     : timer.isRunning 
-                                    ? "bg-accent/20 text-accent border border-accent/40 animate-pulse" 
+                                    ? "bg-accent/20 text-accent border border-accent/40 animate-pulse motion-reduce:animate-none" 
                                     : "bg-paper-2 border border-rule text-ink-muted"
                                 }`}
                               >
@@ -1531,7 +1532,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                                 ) : (
                                   <Clock className="w-3 h-3 text-ink-muted" />
                                 )}
-                                <span>T{stg}: {isDone ? `${formatDuration(timer.seconds)} (Selesai)` : timer.isRunning ? `${formatDuration(timer.seconds)} (Berjalan)` : "-"}</span>
+                                <span>T{stg}: <span className="font-mono">{isDone ? `${formatDuration(timer.seconds)} (Selesai)` : timer.isRunning ? `${formatDuration(timer.seconds)} (Berjalan)` : "-"}</span></span>
                               </span>
                             );
                           })}
@@ -1555,7 +1556,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                             setEditTeamVariationIndex(t.assignedVariationIndex !== undefined ? t.assignedVariationIndex : getTeamVariationIndex(t));
                           }
                         }}
-                        className={`rounded-full border text-xs font-body font-medium gap-1 px-3.5 py-2 inline-flex items-center min-h-[40px] transition-all ${
+                        className={`rounded-full border text-xs font-body font-medium gap-1 px-3.5 py-2 inline-flex items-center min-h-[40px] transition-colors ${
                           editingTeamId === t.id 
                             ? "bg-accent text-accent-ink border-accent font-semibold shadow" 
                             : "bg-paper-2 hover:bg-paper-3 border-rule text-ink"
@@ -1594,7 +1595,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           <Edit3 className="w-4 h-4 text-accent" />
                           <span>Ubah Nama, Identitas & Kode Ruang Redaksi</span>
                         </span>
-                        <span className="text-[11px] font-mono text-ink-muted bg-paper-2 px-2 py-0.5 rounded-full border border-rule">
+                        <span className="text-[11px] font-body text-ink-muted bg-paper-2 px-2 py-0.5 rounded-full border border-rule">
                           ID: {t.id}
                         </span>
                       </div>
@@ -1644,7 +1645,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                             type="text"
                             value={editTeamLeaderCode}
                             onChange={(e) => setEditTeamLeaderCode(e.target.value)}
-                            className="w-full p-2.5 text-base sm:text-xs font-mono font-bold tracking-widest uppercase rounded-xl border border-rule bg-paper text-accent-orange"
+                            className="w-full p-2.5 text-base sm:text-xs font-mono font-bold tracking-normal rounded-xl border border-rule bg-paper text-accent-orange"
                             placeholder="cth: RJWL1"
                             maxLength={12}
                           />
@@ -1657,7 +1658,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                             type="text"
                             value={editTeamMemberCode}
                             onChange={(e) => setEditTeamMemberCode(e.target.value)}
-                            className="w-full p-2.5 text-base sm:text-xs font-mono font-bold tracking-widest uppercase rounded-xl border border-rule bg-paper text-accent-green"
+                            className="w-full p-2.5 text-base sm:text-xs font-mono font-bold tracking-normal rounded-xl border border-rule bg-paper text-accent-green"
                             placeholder="cth: RJWL2"
                             maxLength={12}
                           />
@@ -1683,14 +1684,14 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <button
                           type="button"
                           onClick={() => setEditingTeamId(null)}
-                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium px-4 py-2 text-ink transition-all min-h-[42px]"
+                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium px-4 py-2 text-ink transition-colors min-h-[42px]"
                         >
                           Batal
                         </button>
                         <button
                           type="button"
                           onClick={() => handleSaveTeamDetails(t.id)}
-                          className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-5 py-2 shadow inline-flex items-center gap-1.5 transition-all min-h-[42px]"
+                          className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-5 py-2 shadow inline-flex items-center gap-1.5 transition-colors min-h-[42px]"
                         >
                           <Check className="w-3.5 h-3.5" />
                           <span>Simpan Perubahan Biro & Kode</span>
@@ -1705,9 +1706,9 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       t.isPendingSetup ? "border-accent-orange/40 bg-accent-orange/5" : "border-rule"
                     }`}>
                       <div>
-                        <span className="text-[10px] text-ink-muted uppercase block font-semibold flex items-center gap-1">
+                        <span className="text-[10px] text-ink-muted block font-semibold flex items-center gap-1">
                           <Crown className="w-3.5 h-3.5 text-accent-orange" />
-                          <span>KODE KETUA (BERIKAN KE SISWA KETUA):</span>
+                          <span>Kode ketua (berikan ke siswa ketua):</span>
                         </span>
                         <span className="text-xl sm:text-2xl font-bold text-accent-orange tracking-widest select-all">
                           {t.leaderCode || "1X88H"}
@@ -1717,7 +1718,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <button
                           type="button"
                           onClick={() => handleCopy(t.leaderCode || "1X88H", `Kode Ketua ${t.name}`)}
-                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule p-2 px-3 text-xs text-ink inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-all"
+                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule p-2 px-3 text-xs text-ink inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-colors"
                           title="Salin Kode Ketua"
                         >
                           {copiedCode === (t.leaderCode || "1X88H") ? <Check className="w-3.5 h-3.5 text-accent-green" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1726,7 +1727,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <button
                           type="button"
                           onClick={() => handleCopyLink(t.leaderCode || "1X88H", `Ketua (${t.name})`)}
-                          className="rounded-full bg-accent/15 hover:bg-accent/25 border border-accent/30 p-2 px-3 text-xs text-accent inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-all font-semibold"
+                          className="rounded-full bg-accent/15 hover:bg-accent/25 border border-accent/30 p-2 px-3 text-xs text-accent inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-colors font-semibold"
                           title="Salin Tautan Masuk Otomatis (bisa langsung dikirim ke WhatsApp)"
                         >
                           {copiedCode === ((t.leaderCode || "1X88H") + "_link") ? <Check className="w-3.5 h-3.5 text-accent-green" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -1737,9 +1738,9 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
                     <div className="glass p-3.5 rounded-xl border border-rule flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <div>
-                        <span className="text-[10px] text-ink-muted uppercase block font-semibold flex items-center gap-1">
+                        <span className="text-[10px] text-ink-muted block font-semibold flex items-center gap-1">
                           <Users className="w-3.5 h-3.5 text-accent" />
-                          <span>KODE ANGGOTA (5 KARAKTER):</span>
+                          <span>Kode anggota (5 karakter):</span>
                         </span>
                         <span className="text-xl sm:text-2xl font-bold text-accent-green tracking-widest select-all">
                           {t.memberCode || "UD19J"}
@@ -1754,7 +1755,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <button
                           type="button"
                           onClick={() => handleCopy(t.memberCode || "UD19J", `Kode Anggota ${t.name}`)}
-                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule p-2 px-3 text-xs text-ink inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-all"
+                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule p-2 px-3 text-xs text-ink inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-colors"
                           title="Salin Kode Anggota"
                         >
                           {copiedCode === (t.memberCode || "UD19J") ? <Check className="w-3.5 h-3.5 text-accent-green" /> : <Copy className="w-3.5 h-3.5" />}
@@ -1763,7 +1764,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <button
                           type="button"
                           onClick={() => handleCopyLink(t.memberCode || "UD19J", `Anggota (${t.name})`)}
-                          className="rounded-full bg-accent-green/15 hover:bg-accent-green/25 border border-accent-green/30 p-2 px-3 text-xs text-accent-green inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-all font-semibold"
+                          className="rounded-full bg-accent-green/15 hover:bg-accent-green/25 border border-accent-green/30 p-2 px-3 text-xs text-accent-green inline-flex items-center gap-1 min-h-[40px] shadow-sm transition-colors font-semibold"
                           title="Salin Tautan Masuk Otomatis untuk Anggota"
                         >
                           {copiedCode === ((t.memberCode || "UD19J") + "_link") ? <Check className="w-3.5 h-3.5 text-accent-green" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -1841,7 +1842,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-left font-body text-xs">
-                          <thead className="bg-paper-2/40 border-b border-rule text-[11px] text-ink-muted uppercase">
+                          <thead className="bg-paper-2/40 border-b border-rule text-[11px] text-ink-muted font-medium">
                             <tr>
                               <th className="p-2.5 text-center">No</th>
                               <th className="p-2.5">Nama Siswa</th>
@@ -1913,7 +1914,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                                         <button
                                           type="button"
                                           onClick={() => handleSaveMemberDetails(t.id, idx)}
-                                          className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi px-3.5 py-1.5 text-xs font-semibold inline-flex items-center gap-1 shadow-sm transition-all min-h-[38px]"
+                                          className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi px-3.5 py-1.5 text-xs font-semibold inline-flex items-center gap-1 shadow-sm transition-colors min-h-[38px]"
                                           title="Simpan perubahan anggota"
                                         >
                                           <Check className="w-3.5 h-3.5" />
@@ -1922,7 +1923,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                                         <button
                                           type="button"
                                           onClick={() => setEditingMemberKey(null)}
-                                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-3 py-1.5 text-xs font-medium text-ink transition-all min-h-[38px]"
+                                          className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-3 py-1.5 text-xs font-medium text-ink transition-colors min-h-[38px]"
                                           title="Batal"
                                         >
                                           Batal
@@ -1958,7 +1959,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                                     {isLeader ? (
                                       <span className="bg-accent-orange/20 border border-accent-orange/30 text-accent-orange px-2.5 py-1 rounded-full text-[10px] font-semibold inline-flex items-center gap-1">
                                         <Crown className="w-3 h-3" />
-                                        <span>KETUA (PEMRED)</span>
+                                        <span>Ketua (Pemred)</span>
                                       </span>
                                     ) : (
                                       <button
@@ -2026,7 +2027,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     </p>
                   </div>
                 </div>
-                <span className="font-mono text-xs bg-accent-green/20 text-accent-green border border-accent-green/30 rounded-full px-3 py-1 font-bold">
+                <span className="font-body text-xs bg-accent-green/20 text-accent-green border border-accent-green/30 rounded-full px-3 py-1 font-semibold">
                   {allClassroomUsers.length} Siswa di Server
                 </span>
               </div>
@@ -2038,7 +2039,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left font-body text-xs">
-                    <thead className="bg-paper-2/60 border-b border-rule text-[11px] text-ink-muted uppercase">
+                    <thead className="bg-paper-2/60 border-b border-rule text-[11px] text-ink-muted font-medium">
                       <tr>
                         <th className="p-2.5 text-center">No</th>
                         <th className="p-2.5">Nama Lengkap Siswa</th>
@@ -2092,7 +2093,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   onClick={() => handleSetGlobalStage(1)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-all min-h-[44px] ${
+                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
                     currentStage === 1 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
                   }`}
                 >
@@ -2100,7 +2101,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 </button>
                 <button
                   onClick={() => handleSetGlobalStage(2)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-all min-h-[44px] ${
+                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
                     currentStage === 2 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
                   }`}
                 >
@@ -2108,7 +2109,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 </button>
                 <button
                   onClick={() => handleSetGlobalStage(3)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-all min-h-[44px] ${
+                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
                     currentStage === 3 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
                   }`}
                 >
@@ -2135,22 +2136,22 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <span className="font-display font-medium text-sm text-ink">
                           {t.name}
                         </span>
-                        <div className="font-body text-xs text-ink-muted flex items-center gap-1.5 flex-wrap mt-0.5">
+                        <div className="font-body text-xs text-ink-muted flex items-center gap-2 flex-wrap mt-0.5">
                           <span>Ketua: <strong>{t.leaderName || t.members?.[0]?.name}</strong></span>
-                          <span>•</span>
+                          <span className="opacity-40">|</span>
                           <span>Tuntas: <strong>{completed.length}/3 Tahap</strong></span>
-                          <span>•</span>
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                          <span className="opacity-40">|</span>
+                          <span className="inline-flex items-center gap-1 font-body text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
                             <Clock className="w-3 h-3 text-accent" />
-                            <span>T1: {formatDuration(t.stageTimes?.stage_1 || 0)}</span>
+                            <span>T1: <span className="font-mono">{formatDuration(t.stageTimes?.stage_1 || 0)}</span></span>
                           </span>
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 font-body text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
                             <Clock className="w-3 h-3 text-accent" />
-                            <span>T2: {formatDuration(t.stageTimes?.stage_2 || 0)}</span>
+                            <span>T2: <span className="font-mono">{formatDuration(t.stageTimes?.stage_2 || 0)}</span></span>
                           </span>
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 font-body text-[11px] bg-paper-2 border border-rule px-2 py-0.5 rounded">
                             <Clock className="w-3 h-3 text-accent" />
-                            <span>T3: {formatDuration(t.stageTimes?.stage_3 || 0)}</span>
+                            <span>T3: <span className="font-mono">{formatDuration(t.stageTimes?.stage_3 || 0)}</span></span>
                           </span>
                         </div>
                       </div>
@@ -2215,12 +2216,12 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       {t.activeShield ? (
                         <span className="font-body text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 px-2 py-0.5 rounded-full font-semibold inline-flex items-center gap-1">
                           <ShieldCheck className="w-3 h-3" />
-                          <span>PERISAI AKTIF</span>
+                          <span>Perisai aktif</span>
                         </span>
                       ) : t.activeDebuffs?.length > 0 ? (
-                        <span className="font-body text-[10px] bg-accent-red/20 text-accent-red border border-accent-red/30 px-2 py-0.5 rounded-full font-semibold animate-pulse inline-flex items-center gap-1">
+                        <span className="font-body text-[10px] bg-accent-red/20 text-accent-red border border-accent-red/30 px-2 py-0.5 rounded-full font-semibold animate-pulse motion-reduce:animate-none inline-flex items-center gap-1">
                           <AlertTriangle className="w-3 h-3" />
-                          <span>{t.activeDebuffs.length} DEBUFF MENYERANG</span>
+                          <span>{t.activeDebuffs.length} Debuff menyerang</span>
                         </span>
                       ) : (
                         <span className="font-body text-[10px] bg-paper-2 text-ink-muted px-2 py-0.5 rounded-full font-medium border border-rule">
@@ -2231,7 +2232,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
                     {/* Adjust Coins Buttons */}
                     <div>
-                      <span className="font-body text-[11px] text-ink-muted uppercase block mb-1">
+                      <span className="font-body text-[11px] text-ink-muted block mb-1 font-medium">
                         Sesuaikan Anggaran Liputan (Hibah / Denda):
                       </span>
                       <div className="flex flex-wrap gap-1.5">
@@ -2263,7 +2264,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                       </span>
                       <button
                         onClick={() => handleClearDebuffs(t.id)}
-                        className="rounded-full bg-accent-green/20 hover:bg-accent-green hover:text-white text-accent-green border border-accent-green/30 text-xs font-body font-semibold px-3.5 py-1.5 transition-all min-h-[36px] inline-flex items-center gap-1"
+                        className="rounded-full bg-accent-green/20 hover:bg-accent-green hover:text-white text-accent-green border border-accent-green/30 text-xs font-body font-semibold px-3.5 py-1.5 transition-colors min-h-[36px] inline-flex items-center gap-1"
                       >
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span>Pemutihan & Beri Perisai</span>
@@ -2313,7 +2314,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
                 <button
                   type="submit"
-                  className="neo-btn p-3 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full w-full justify-center shadow-lg transition-all min-h-[44px] inline-flex items-center gap-2"
+                  className="neo-btn p-3 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full w-full justify-center shadow-lg transition-colors min-h-[44px] inline-flex items-center gap-2"
                 >
                   <span>Siarkan Sekarang ke Seluruh Biro Redaksi</span>
                   <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -2400,7 +2401,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-display font-medium text-lg text-ink">{t.name}</h4>
-                            <span className="font-mono text-xs text-accent-orange font-bold inline-flex items-center gap-1">
+                            <span className="font-body text-xs text-accent-orange font-semibold inline-flex items-center gap-1">
                               <Coins className="w-3.5 h-3.5" />
                               <span>Kas: {t.coins || 0} Koin</span>
                             </span>
@@ -2540,7 +2541,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
                 <button
                   onClick={() => setIsCreatingCase(!isCreatingCase)}
-                  className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[40px]"
+                  className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold px-4 py-2 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[40px]"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{isCreatingCase ? "Tutup Form Kasus" : "+ Buat Kasus Kustom"}</span>
@@ -2555,7 +2556,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   return (
                     <div 
                       key={c.id} 
-                      className={`glass p-4 rounded-2xl border transition-all shadow-sm flex flex-col justify-between space-y-3 ${
+                      className={`glass p-4 rounded-2xl border transition-colors shadow-sm flex flex-col justify-between space-y-3 ${
                         isActive 
                           ? "border-accent ring-2 ring-accent/30 bg-accent/5" 
                           : "border-rule hover:border-rule/80"
@@ -2569,7 +2570,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                           {isActive ? (
                             <span className="bg-accent-green/20 text-accent-green border border-accent-green/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
                               <Check className="w-3 h-3" />
-                              <span>AKTIF DI KELAS</span>
+                              <span>Aktif di kelas</span>
                             </span>
                           ) : (
                             <span className="text-[10px] text-ink-muted bg-paper-2 border border-rule px-2 py-0.5 rounded-full font-mono">
@@ -2579,7 +2580,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         </div>
 
                         <div>
-                          <span className="text-[10px] text-accent font-semibold block uppercase tracking-wider">
+                          <span className="text-[10px] text-accent font-semibold block font-medium">
                             {c.category}
                           </span>
                           <h4 className="font-display font-medium text-base text-ink line-clamp-2 mt-0.5">
@@ -2610,7 +2611,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                         ) : (
                           <button
                             onClick={() => handleSelectClassCase(c.id)}
-                            className="w-full rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-semibold text-ink py-2 transition-all shadow-xs min-h-[40px] flex items-center justify-center gap-1.5"
+                            className="w-full rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-semibold text-ink py-2 transition-colors shadow-xs min-h-[40px] flex items-center justify-center gap-1.5"
                           >
                             <span>Aktifkan untuk Kelas</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -2784,14 +2785,14 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     Pantau secara langsung biro mana saja yang sudah mengumpulkan kutipan resmi atau saksi mana yang no-comment.
                   </p>
                 </div>
-                <span className="font-mono text-xs bg-paper-2 text-ink-muted border border-rule px-3 py-1 rounded-full">
+                <span className="font-body text-xs bg-paper-2 text-ink-muted border border-rule px-3 py-1 rounded-full">
                   Total {teams.length} Biro Terpantau
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left font-body text-xs">
-                  <thead className="bg-paper-2/40 border-b border-rule text-[11px] text-ink-muted uppercase">
+                  <thead className="bg-paper-2/40 border-b border-rule text-[11px] text-ink-muted font-medium">
                     <tr>
                       <th className="p-3 text-center">No</th>
                       <th className="p-3">Nama Biro & Pemred</th>
@@ -2831,7 +2832,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                             </div>
                           </td>
                           <td className="p-3">
-                            <span className="font-mono text-xs font-semibold text-ink">
+                            <span className="font-body text-xs font-semibold text-ink">
                               {notes.length} Catatan
                             </span>
                           </td>
@@ -2901,14 +2902,14 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               <button
                 type="button"
                 onClick={() => setTeamToDisband(null)}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-all min-h-[42px] flex-1"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-colors min-h-[42px] flex-1"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={() => confirmDisbandTeam()}
-                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-all shadow-md min-h-[42px] flex-1"
+                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-colors shadow-md min-h-[42px] flex-1"
               >
                 Ya, Bubarkan Biro
               </button>
@@ -2940,7 +2941,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 type="button"
                 disabled={isResetting}
                 onClick={() => handleResetExercise(true)}
-                className="w-full p-4 rounded-2xl border border-accent/40 bg-accent/10 hover:bg-accent/20 text-left transition-all group flex items-start gap-3 shadow-xs"
+                className="w-full p-4 rounded-2xl border border-accent/40 bg-accent/10 hover:bg-accent/20 text-left transition-colors group flex items-start gap-3 shadow-xs"
               >
                 <div className="w-9 h-9 rounded-xl bg-accent/20 text-accent border border-accent/40 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                   <RefreshCw className="w-4 h-4" />
@@ -2950,7 +2951,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     <span className="font-display font-semibold text-sm text-ink">
                       Ulang Latihan dari Tahap 1 (Biro & Kode Tetap Aktif)
                     </span>
-                    <span className="bg-accent text-accent-ink text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">
+                    <span className="bg-accent text-accent-ink text-[9px] font-bold px-1.5 py-0.2 rounded font-medium">
                       Direkomendasikan
                     </span>
                   </div>
@@ -2965,7 +2966,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 type="button"
                 disabled={isResetting}
                 onClick={() => handleResetExercise(false)}
-                className="w-full p-4 rounded-2xl border border-accent-red/30 bg-accent-red/5 hover:bg-accent-red/15 text-left transition-all group flex items-start gap-3"
+                className="w-full p-4 rounded-2xl border border-accent-red/30 bg-accent-red/5 hover:bg-accent-red/15 text-left transition-colors group flex items-start gap-3"
               >
                 <div className="w-9 h-9 rounded-xl bg-accent-red/20 text-accent-red border border-accent-red/40 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                   <Trash2 className="w-4 h-4" />
@@ -2986,7 +2987,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 type="button"
                 disabled={isResetting}
                 onClick={() => setIsResetModalOpen(false)}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-6 py-2.5 text-xs font-body font-medium text-ink transition-all min-h-[42px] w-full"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-6 py-2.5 text-xs font-body font-medium text-ink transition-colors min-h-[42px] w-full"
               >
                 Batal
               </button>

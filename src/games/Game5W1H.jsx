@@ -46,7 +46,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
     }
   });
 
-  const [assignments, setAssignments] = useState(() => initialLive.assignments || {}); // { what: clueObj, who: clueObj, ... }
+  const [assignments, setAssignments] = useState(() => initialLive.assignments || {}); // { what: clueObj, who: clueObj, … }
   const [selectedClue, setSelectedClue] = useState(null);
   const [leaderSelectedClueId, setLeaderSelectedClueId] = useState(() => initialLive.selectedClueId || null);
   const [isCaseFinished, setIsCaseFinished] = useState(() => Boolean(initialLive.isCaseFinished));
@@ -374,7 +374,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       <div className="flex items-center justify-between border-b border-rule pb-3.5 gap-2">
         <button
           onClick={() => { sound.playClick(); handleCleanBack(); }}
-          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-1.5 text-xs font-body font-medium text-ink inline-flex items-center transition-all shadow-sm"
+          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-1.5 text-xs font-body font-medium text-ink inline-flex items-center transition-colors shadow-sm"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Kembali ke Meja Redaksi</span>
@@ -382,9 +382,9 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
         </button>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule font-mono text-xs font-semibold text-ink shadow-2xs">
-            <Clock className="w-3.5 h-3.5 text-accent animate-spin" />
-            <span>Waktu: {formatDuration(elapsedSeconds)}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-xs font-semibold text-ink shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-accent animate-spin motion-reduce:animate-none" />
+            <span>Waktu: <span className="font-mono">{formatDuration(elapsedSeconds)}</span></span>
           </div>
 
           <span className="font-body text-xs font-semibold bg-accent/15 text-accent border border-accent/30 rounded-full px-3 py-1">
@@ -417,7 +417,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
               <span>{isLeader ? "Mode Ketua Kelompok (Pengambil Keputusan)" : "Mode Pantau Anggota (Real-Time Spectator)"}</span>
               {!isLeader && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none" />
                   Live Sync
                 </span>
               )}
@@ -431,7 +431,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
         </div>
         {!isLeader && (
           <div className="shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-[11px] text-ink-muted font-medium">
-            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse" />
+            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse motion-reduce:animate-none" />
             <span>Memantau Ketua</span>
           </div>
         )}
@@ -448,7 +448,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       {/* Case Briefing Box */}
       <div className="glass p-5 sm:p-7 rounded-2xl border border-rule space-y-3 shadow-card">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent-orange uppercase">
+          <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent-orange">
             <HelpCircle className="w-4 h-4" />
             <span>Berkas Investigasi #{currentCaseIdx + 1}</span>
             {currentCaseIdx === (assignedVarIdx % cases.length) && (
@@ -509,7 +509,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
               key={elem.key}
               data-slot={elem.key}
               onClick={isLeader ? () => handleAssignToSlot(elem.key) : undefined}
-              className={`p-4 rounded-xl border transition-all duration-150 relative ${
+              className={`p-4 rounded-xl border transition-colors duration-150 relative ${
                 isLeader ? "cursor-pointer" : "cursor-default"
               } ${
                 assigned
@@ -557,7 +557,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                   <div className="text-xs font-body text-ink-muted italic w-full text-center py-2.5 border border-dashed border-rule/60 rounded-lg min-h-[44px] flex items-center justify-center">
                     {isLeader 
                       ? (selectedClue ? "Ketuk di sini untuk memasukkan fakta terpilih" : "Kotak masih kosong")
-                      : "Menunggu Ketua memasukkan fakta..."}
+                      : "Menunggu Ketua memasukkan fakta…"}
                   </div>
                 )}
               </div>
@@ -569,7 +569,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
       {/* Clues Pool */}
       <div className="glass p-5 rounded-2xl border border-rule shadow-card space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-body text-xs font-semibold uppercase tracking-wider text-ink-muted">
+          <span className="font-body text-xs font-semibold text-ink-muted">
             Potongan Fakta Tersedia ({availableClues.length} tersisa):
           </span>
           {isLeader ? (
@@ -609,11 +609,11 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                   data-clue-btn="true"
                   onClick={isLeader ? () => handleSelectClue(clue) : undefined}
                   disabled={!isLeader}
-                  className={`text-left p-3 px-3.5 rounded-xl border text-xs sm:text-sm transition-all min-h-[44px] ${
+                  className={`text-left p-3 px-3.5 rounded-xl border text-xs sm:text-sm transition-colors min-h-[44px] ${
                     isLeader ? "cursor-pointer" : "cursor-default"
                   } ${
                     isAnySelected
-                      ? "bg-accent text-accent-ink border-accent font-semibold shadow-md ring-2 ring-accent animate-pulse"
+                      ? "bg-accent text-accent-ink border-accent font-semibold shadow-md ring-2 ring-accent animate-pulse motion-reduce:animate-none"
                       : "bg-paper-2/60 border-rule text-ink-2 hover:bg-paper-2 hover:border-rule/80 font-medium"
                   }`}
                 >
@@ -623,9 +623,9 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                       <span>{clue.text}</span>
                     </span>
                     {isSelectedByLeader && (
-                      <span className="font-mono text-[9px] bg-accent text-accent-ink px-1.5 py-0.5 rounded font-bold uppercase w-fit inline-flex items-center gap-1">
+                      <span className="font-body text-[9px] bg-accent text-accent-ink px-1.5 py-0.5 rounded font-semibold w-fit inline-flex items-center gap-1">
                         <Crown className="w-2.5 h-2.5" />
-                        Sedang Dipilih Ketua
+                        Sedang dipilih ketua
                       </span>
                     )}
                   </div>
@@ -673,7 +673,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
                   sound.playStamp();
                   handleCleanComplete(1, 100, moduleData?.badge || "Master 5W+1H");
                 }}
-                className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] shrink-0 w-full sm:w-auto justify-center inline-flex items-center gap-2"
+                className="neo-btn bg-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-colors min-h-[44px] shrink-0 w-full sm:w-auto justify-center inline-flex items-center gap-2"
               >
                 <span>Klaim Lencana & Masuk Ruang Tunggu</span>
                 <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -682,7 +682,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
               <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
                 <div className="px-4 py-2.5 rounded-xl bg-accent-orange/15 border border-accent-orange/30 text-accent-orange text-xs font-semibold inline-flex items-center gap-2">
                   <Crown className="w-4 h-4" />
-                  <span>Menunggu Ketua Mengklaim Lencana...</span>
+                  <span>Menunggu Ketua Mengklaim Lencana…</span>
                 </div>
                 <button
                   onClick={() => {
@@ -702,7 +702,7 @@ export default function Game5W1H({ moduleData, team, onComplete, onBack }) {
             {isLeader ? (
               <button
                 onClick={handleNextCase}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center gap-1.5 transition-all min-h-[38px]"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center gap-1.5 transition-colors min-h-[38px]"
               >
                 <span>Jelajahi Kasus Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
                 <ArrowRight className="w-3.5 h-3.5" />

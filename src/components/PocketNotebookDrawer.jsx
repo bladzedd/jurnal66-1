@@ -10,9 +10,9 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
   const totalScoops = notes.filter(n => n.isScoop).length;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex justify-end animate-in fade-in duration-200 motion-reduce:animate-none">
       <div 
-        className="w-full max-w-md bg-paper border-l border-rule shadow-2xl h-full flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-250"
+        className="w-full max-w-md bg-paper border-l border-rule shadow-2xl h-full flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-250 motion-reduce:animate-none"
       >
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-rule bg-paper-2/60 flex items-center justify-between">
@@ -32,7 +32,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
 
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="w-10 h-10 min-h-[40px] min-w-[40px] rounded-full bg-paper-2 hover:bg-paper-3 border border-rule flex items-center justify-center text-ink transition-colors"
+            className="w-10 h-10 min-h-[40px] min-w-[40px] rounded-full bg-paper-2 hover:bg-paper-3 border border-rule flex items-center justify-center text-ink transition-colors focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
             title="Tutup Catatan Saku"
           >
             <X className="w-4 h-4" />
@@ -53,7 +53,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
               {onOpenInterview && (
                 <button
                   onClick={() => { sound.playClick(); onClose(); onOpenInterview(); }}
-                  className="rounded-full bg-accent text-accent-ink font-semibold text-xs px-4 py-2.5 shadow min-h-[42px] inline-flex items-center gap-1.5"
+                  className="rounded-full bg-accent text-accent-ink font-semibold text-xs px-4 py-2.5 shadow min-h-[42px] inline-flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Buka Ruang Wawancara Sekarang</span>
@@ -64,7 +64,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
             notes.map((note, idx) => (
               <div 
                 key={note.id || idx}
-                className={`p-4 rounded-2xl border transition-all shadow-card space-y-2.5 ${
+                className={`p-4 rounded-2xl border transition-colors shadow-card space-y-2.5 ${
                   note.isScoop 
                     ? "bg-accent-orange/10 border-accent-orange/40 ring-1 ring-accent-orange/20" 
                     : "glass border-rule"
@@ -119,7 +119,7 @@ export default function PocketNotebookDrawer({ team, isOpen, onClose, onOpenInte
           {onOpenInterview && (
             <button
               onClick={() => { sound.playClick(); onClose(); onOpenInterview(); }}
-              className="w-full rounded-full bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm py-3 transition-all shadow min-h-[44px] flex items-center justify-center gap-2"
+              className="w-full rounded-full bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm py-3 transition-colors shadow min-h-[44px] flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
             >
               <Sparkles className="w-4 h-4" />
               <span>Wawancarai Saksi Lain di Ruang Wawancara</span>

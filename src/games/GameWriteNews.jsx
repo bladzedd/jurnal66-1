@@ -316,7 +316,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
       <div className="flex items-center justify-between border-b border-rule pb-3.5 gap-2">
         <button
           onClick={() => { sound.playClick(); handleCleanBack(); }}
-          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-2 text-xs font-body font-medium text-ink inline-flex items-center transition-all shadow-sm min-h-[40px]"
+          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-2 text-xs font-body font-medium text-ink inline-flex items-center transition-colors shadow-sm min-h-[40px]"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Kembali ke Meja Redaksi</span>
@@ -324,15 +324,15 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
         </button>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule font-mono text-xs font-semibold text-ink shadow-2xs">
-            <Clock className="w-3.5 h-3.5 text-accent animate-spin" />
-            <span>Waktu: {formatDuration(elapsedSeconds)}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-xs font-semibold text-ink shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-accent animate-spin motion-reduce:animate-none" />
+            <span>Waktu: <span className="font-mono">{formatDuration(elapsedSeconds)}</span></span>
           </div>
 
           {onOpenPocketNotes && (
             <button
               onClick={() => { sound.playClick(); onOpenPocketNotes(); }}
-              className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1 min-h-[38px] transition-all shadow-sm"
+              className="rounded-full bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1 min-h-[38px] transition-colors shadow-sm"
               title="Buka Catatan Saku Hasil Wawancara"
             >
               <BookOpen className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
               <span>{isLeader ? "Mode Ketua Kelompok (Pengambil Keputusan)" : "Mode Pantau Anggota (Real-Time Spectator)"}</span>
               {!isLeader && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none" />
                   Live Sync
                 </span>
               )}
@@ -385,7 +385,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
         </div>
         {!isLeader && (
           <div className="shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-[11px] text-ink-muted font-medium">
-            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse" />
+            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse motion-reduce:animate-none" />
             <span>Memantau Ketua</span>
           </div>
         )}
@@ -462,7 +462,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
               {isLeader ? (
                 <button
                   onClick={handleUseLens}
-                  className="text-xs font-body font-medium bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-3 py-1.5 rounded-full hover:bg-accent-orange/25 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[38px]"
+                  className="text-xs font-body font-medium bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-3 py-1.5 rounded-full hover:bg-accent-orange/25 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[38px]"
                 >
                   <Lightbulb className="w-3.5 h-3.5" />
                   <span>Lensa Eliminasi</span>
@@ -513,7 +513,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                     data-opt-idx={idx}
                     onClick={isLeader && !selectedOpt ? () => handleSelect(opt) : undefined}
                     disabled={!isLeader || !!selectedOpt}
-                    className={`w-full text-left p-4 rounded-xl border font-body text-xs sm:text-sm transition-all min-h-[44px] ${
+                    className={`w-full text-left p-4 rounded-xl border font-body text-xs sm:text-sm transition-colors min-h-[44px] ${
                       isSelected
                         ? isCorrect
                           ? "bg-accent-green/20 border-accent-green text-ink shadow-sm ring-1 ring-accent-green/50"
@@ -527,15 +527,15 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <span className="font-mono text-xs font-bold bg-accent/20 text-accent border border-accent/30 px-2 py-0.5 rounded shrink-0">
+                        <span className="font-body text-xs font-bold bg-accent/20 text-accent border border-accent/30 px-2 py-0.5 rounded shrink-0">
                           Opsi #{String.fromCharCode(65 + idx)}
                         </span>
                         <span className="font-medium text-ink-2 leading-relaxed">"{opt.text}"</span>
                       </div>
                       {isSelected && !isLeader && (
-                        <span className="font-mono text-[9px] bg-accent text-accent-ink px-1.5 py-0.5 rounded font-bold uppercase shrink-0 inline-flex items-center gap-1">
+                        <span className="font-body text-[9px] bg-accent text-accent-ink px-1.5 py-0.5 rounded font-semibold shrink-0 inline-flex items-center gap-1">
                           <Crown className="w-2.5 h-2.5" />
-                          Pilihan Ketua
+                          Pilihan ketua
                         </span>
                       )}
                     </div>
@@ -561,7 +561,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
             {!selectedOpt && !isLeader && (
               <div className="p-3 bg-paper-2/40 border border-rule/60 rounded-xl font-body text-xs text-ink-muted text-center italic flex items-center justify-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
-                <span>Menunggu Ketua ({team?.leaderName || "Ketua Kelompok"}) memilih opsi naskah...</span>
+                <span>Menunggu Ketua ({team?.leaderName || "Ketua Kelompok"}) memilih opsi naskah…</span>
               </div>
             )}
           </div>
@@ -572,7 +572,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
               {isLeader ? (
                 <button
                   onClick={handleNext}
-                  className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-all min-h-[44px]"
+                  className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-colors min-h-[44px]"
                 >
                   <span>{currentStepIdx < challenges.length - 1 ? "Langkah Berikutnya" : "Selesaikan Penulisan Berita"}</span>
                   <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -580,7 +580,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
               ) : (
                 <div className="px-4 py-2 rounded-full bg-paper-2 border border-rule text-xs font-medium text-ink-muted flex items-center gap-2">
                   <Lock className="w-3.5 h-3.5" />
-                  <span>Menunggu Ketua melanjutkan ke langkah berikutnya...</span>
+                  <span>Menunggu Ketua melanjutkan ke langkah berikutnya…</span>
                 </div>
               )}
             </div>
@@ -611,7 +611,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                       sound.playStamp();
                       handleCleanComplete(moduleData.number, finalScore, moduleData.badge);
                     }}
-                    className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-8 py-3.5 text-sm rounded-full shadow-lg transition-all min-h-[44px] inline-flex items-center gap-2"
+                    className="neo-btn bg-accent text-accent-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden hover:bg-accent-hi font-body font-semibold px-8 py-3.5 text-sm rounded-full shadow-lg transition-colors min-h-[44px] inline-flex items-center gap-2"
                   >
                     <span>Klaim Lencana & Masuk Ruang Tunggu Redaksi</span>
                     <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -620,7 +620,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                   <div className="flex flex-col items-center gap-2">
                     <div className="px-5 py-2.5 rounded-xl bg-accent-orange/15 border border-accent-orange/30 text-accent-orange text-xs font-semibold inline-flex items-center gap-2">
                       <Crown className="w-4 h-4" />
-                      <span>Menunggu Ketua ({team?.leaderName || "Ketua"}) Mengklaim Lencana...</span>
+                      <span>Menunggu Ketua ({team?.leaderName || "Ketua"}) Mengklaim Lencana…</span>
                     </div>
                     <button
                       onClick={() => {
@@ -651,14 +651,14 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                   <>
                     <button
                       onClick={handleRestart}
-                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     >
                       <RotateCcw className="w-4 h-4" />
                       <span>Ulangi Tahap Ini</span>
                     </button>
                     <button
                       onClick={() => { sound.playClick(); handleCleanBack(); }}
-                      className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                      className="rounded-full bg-accent text-accent-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden hover:bg-accent-hi text-xs font-body font-semibold px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     >
                       <span>Kembali ke Meja Redaksi</span>
                       <ArrowRight className="w-4 h-4 text-accent-ink" />
@@ -667,11 +667,11 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
                 ) : (
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-xs text-ink-muted italic">
-                      Menunggu keputusan Ketua ({team?.leaderName || "Ketua"}) untuk mengulang naskah...
+                      Menunggu keputusan Ketua ({team?.leaderName || "Ketua"}) untuk mengulang naskah…
                     </span>
                     <button
                       onClick={() => { sound.playClick(); handleCleanBack(); }}
-                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-body font-medium text-ink px-5 py-2.5 inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     >
                       <span>Kembali ke Meja Redaksi</span>
                       <ArrowRight className="w-4 h-4 text-accent-ink" />

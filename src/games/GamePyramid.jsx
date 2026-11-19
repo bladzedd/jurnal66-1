@@ -299,7 +299,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
       <div className="flex items-center justify-between border-b border-rule pb-3.5 gap-2">
         <button
           onClick={() => { sound.playClick(); handleCleanBack(); }}
-          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-1.5 text-xs font-body font-medium text-ink inline-flex items-center transition-all shadow-sm"
+          className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-3.5 py-1.5 text-xs font-body font-medium text-ink inline-flex items-center transition-colors shadow-sm"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Kembali ke Meja Redaksi</span>
@@ -307,9 +307,9 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
         </button>
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule font-mono text-xs font-semibold text-ink shadow-2xs">
-            <Clock className="w-3.5 h-3.5 text-accent animate-spin" />
-            <span>Waktu: {formatDuration(elapsedSeconds)}</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule font-body text-xs font-semibold text-ink shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-accent animate-spin motion-reduce:animate-none" />
+            <span>Waktu: <span className="font-mono">{formatDuration(elapsedSeconds)}</span></span>
           </div>
           <span className="font-body text-xs font-semibold bg-accent-orange/15 text-accent-orange border border-accent-orange/30 rounded-full px-3 py-1">
             Kasus {currentCaseIdx + 1} dari {cases.length}
@@ -341,7 +341,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
               <span>{isLeader ? "Mode Ketua Kelompok (Pengambil Keputusan)" : "Mode Pantau Anggota (Real-Time Spectator)"}</span>
               {!isLeader && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-accent-green/20 text-accent-green border border-accent-green/30 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none" />
                   Live Sync
                 </span>
               )}
@@ -355,7 +355,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
         </div>
         {!isLeader && (
           <div className="shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-paper-2 border border-rule text-[11px] text-ink-muted font-medium">
-            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse" />
+            <Radio className="w-3.5 h-3.5 text-accent-orange animate-pulse motion-reduce:animate-none" />
             <span>Memantau Ketua</span>
           </div>
         )}
@@ -372,7 +372,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
       {/* Briefing Box */}
       <div className="glass p-5 sm:p-7 rounded-2xl border border-rule space-y-2.5 shadow-card">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent-orange uppercase">
+          <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent-orange">
             <Layers className="w-4 h-4" />
             <span>Tugas Penataan Piramida Berita #{currentCaseIdx + 1}</span>
             {currentCaseIdx === (assignedVarIdx % cases.length) && (
@@ -423,7 +423,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
               key={block.id}
               data-block-id={block.id}
               data-block-level={block.level}
-              className={`${pyramidWidths[idx] || "w-full"} transition-all duration-200`}
+              className={`${pyramidWidths[idx] || "w-full"} transition-colors duration-200`}
             >
               <div className={`glass p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3 shadow-sm ${
                 isCaseSuccess 
@@ -433,8 +433,8 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                 {/* Block Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
-                    <span className="font-mono text-[10px] font-bold bg-accent/20 text-accent border border-accent/30 px-2 py-0.5 rounded">
-                      TINGKAT #{idx + 1}
+                    <span className="font-body text-[10px] font-bold bg-accent/20 text-accent border border-accent/30 px-2 py-0.5 rounded">
+                      Tingkat #{idx + 1}
                     </span>
                     <span className="font-body text-xs font-semibold text-accent-orange">
                       {levelTargetRoles[idx]}
@@ -458,7 +458,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                       <button
                         onClick={() => moveUp(idx)}
                         disabled={idx === 0 || isCaseSuccess}
-                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
+                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-colors"
                         title="Pindahkan ke atas"
                         aria-label="Pindahkan ke atas"
                       >
@@ -467,7 +467,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                       <button
                         onClick={() => moveDown(idx)}
                         disabled={idx === blocks.length - 1 || isCaseSuccess}
-                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-all"
+                        className="w-11 h-11 sm:w-10 sm:h-10 min-w-[44px] min-h-[44px] rounded-xl bg-paper-2 border border-rule hover:bg-paper-3 text-ink flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-xs active:scale-95 transition-colors"
                         title="Pindahkan ke bawah"
                         aria-label="Pindahkan ke bawah"
                       >
@@ -475,7 +475,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                       </button>
                     </>
                   ) : (
-                    <div className="px-2.5 py-1.5 rounded-lg bg-paper-2 border border-rule text-[11px] font-mono font-medium text-ink-muted flex items-center gap-1 shrink-0">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-paper-2 border border-rule text-[11px] font-body font-medium text-ink-muted flex items-center gap-1 shrink-0">
                       <Eye className="w-3.5 h-3.5 text-accent-orange" />
                       <span className="hidden sm:inline">Urutan Live</span>
                     </div>
@@ -492,7 +492,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
         {isLeader ? (
           <button
             onClick={handleReset}
-            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-4 py-2.5 text-xs font-body font-medium text-ink inline-flex items-center justify-center transition-all shadow-sm min-h-[44px]"
+            className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule gap-1.5 px-4 py-2.5 text-xs font-body font-medium text-ink inline-flex items-center justify-center transition-colors shadow-sm min-h-[44px]"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Acak Ulang</span>
@@ -508,7 +508,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
           isLeader ? (
             <button
               onClick={handleValidate}
-              className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 justify-center shadow-lg transition-all min-h-[44px]"
+              className="neo-btn p-3 px-6 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-xs sm:text-sm rounded-full gap-2 justify-center shadow-lg transition-colors min-h-[44px]"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Uji Kebenaran Piramida</span>
@@ -528,7 +528,7 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                 </span>
                 {currentCaseIdx === (assignedVarIdx % cases.length) && (
                   <span className="font-body text-[11px] bg-accent/20 text-accent border border-accent/40 rounded-full px-2.5 py-0.5 font-bold">
-                    ⭐ Tugas Pokok Biro Anda
+                    Tugas Pokok Biro Anda
                   </span>
                 )}
               </div>
@@ -550,14 +550,14 @@ export default function GamePyramid({ moduleData, team, onComplete, onBack }) {
                         sound.playStamp();
                         handleCleanComplete(moduleData.number, 100, moduleData.badge || "Arsitek Struktur");
                       }}
-                      className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-all min-h-[44px] inline-flex items-center gap-2"
+                      className="neo-btn bg-accent text-accent-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden hover:bg-accent-hi font-body font-semibold px-7 py-3 text-sm rounded-full shadow-lg transition-colors min-h-[44px] inline-flex items-center gap-2"
                     >
                       <span>Klaim Lencana & Masuk Ruang Tunggu Redaksi</span>
                       <ArrowRight className="w-4 h-4 text-accent-ink" />
                     </button>
                     <button
                       onClick={handleNextCase}
-                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center justify-center gap-1.5 transition-all min-h-[44px]"
+                      className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-xs font-medium text-ink px-4 py-2 inline-flex items-center justify-center gap-1.5 transition-colors min-h-[44px]"
                     >
                       <span>Jelajahi Kasus Piramida Lainnya ({((currentCaseIdx + 1) % cases.length) + 1}/{cases.length})</span>
                       <ArrowRight className="w-3.5 h-3.5" />

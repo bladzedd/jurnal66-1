@@ -5,7 +5,6 @@ import Dashboard from './components/Dashboard';
 import GroupLoginScreen from './components/GroupLoginScreen';
 import PressCardModal from './components/PressCardModal';
 import PressShopModal from './components/PressShopModal';
-import TeacherAdminModal from './components/TeacherAdminModal';
 import AdminDashboard from './components/AdminDashboard';
 import InterviewMessengerModal from './components/InterviewMessengerModal';
 import PocketNotebookDrawer from './components/PocketNotebookDrawer';
@@ -36,7 +35,6 @@ export default function App() {
   const [activeModule, setActiveModuleState] = useState(() => getActiveModule());
   const [isPressCardOpen, setIsPressCardOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
-  const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
   const [isInterviewOpen, setIsInterviewOpen] = useState(false);
   const [isNotebookOpen, setIsNotebookOpen] = useState(false);
   const [stageTick, setStageTick] = useState(0); // trigger re-render on sync
@@ -309,18 +307,6 @@ export default function App() {
           onOpenInterview={() => {
             setIsNotebookOpen(false);
             setIsInterviewOpen(true);
-          }}
-        />
-      )}
-
-      {/* Teacher / Admin Panel Modal */}
-      {isTeacherModalOpen && (
-        <TeacherAdminModal
-          onClose={() => setIsTeacherModalOpen(false)}
-          onClassUpdated={() => {
-            const updated = getActiveTeam();
-            setActiveTeamState(updated);
-            setStageTick(prev => prev + 1);
           }}
         />
       )}

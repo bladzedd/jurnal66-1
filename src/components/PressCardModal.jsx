@@ -70,16 +70,16 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="glass border border-rule w-full max-w-xl my-auto relative max-h-[94vh] flex flex-col rounded-3xl shadow-card overflow-hidden">
+      <div className="bg-paper border border-rule w-full max-w-xl my-auto relative max-h-[94vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden">
         {/* Modal Top Bar */}
         <div className="bg-paper-2/70 border-b border-rule px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 font-body text-xs font-semibold uppercase tracking-wider text-ink min-w-0">
+          <div className="flex items-center gap-2 font-body text-xs font-semibold text-ink min-w-0">
             <Shield className="w-4 h-4 text-accent shrink-0" />
             <span className="truncate">Kartu Biro Pers Resmi</span>
           </div>
           <button
             onClick={() => { sound.playClick(); onClose(); }}
-            className="w-10 h-10 rounded-full bg-paper-3/60 hover:bg-paper-3 text-ink flex items-center justify-center shrink-0 ml-2 transition-all min-h-[40px] min-w-[40px]"
+            className="w-10 h-10 rounded-full bg-paper-3/60 hover:bg-paper-3 text-ink flex items-center justify-center shrink-0 ml-2 transition-colors min-h-[40px] min-w-[40px]"
             aria-label="Tutup Modal"
           >
             <X className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           {/* Group Press Card Physical Object */}
-          <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card relative overflow-hidden bg-gradient-to-br from-paper-card via-paper to-paper-2">
+          <div className="p-5 sm:p-6 rounded-2xl border border-rule shadow-card relative overflow-hidden bg-paper-2">
             {/* Lanyard Hole Clip */}
             <div className="w-14 h-3.5 bg-paper-3 border border-rule mx-auto -mt-6 mb-4 rounded-b-md flex items-center justify-center shadow-inner">
               <div className="w-6 h-1 bg-ink/30 rounded-full"></div>
@@ -97,11 +97,11 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
             {/* Press Pass Header */}
             <div className="border-b border-rule pb-3.5 mb-4 flex justify-between items-start gap-2">
               <div>
-                <span className="font-mono text-[10px] tracking-widest text-ink-muted uppercase block">
+                <span className="font-body text-[10px] text-ink-muted block font-medium">
                   JURNAL66 TASK • DEWAN PERS PENDIDIKAN
                 </span>
                 <h3 className="font-display font-medium text-xl sm:text-2xl text-ink tracking-tight">
-                  KARTU BIRO PERS
+                  Kartu Biro Pers
                 </h3>
               </div>
               <div className="text-right shrink-0">
@@ -117,8 +117,8 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
               <div className="sm:col-span-1 flex flex-col items-center">
                 <div className="w-24 h-28 border border-rule bg-accent/10 rounded-2xl shadow-sm flex flex-col items-center justify-center relative overflow-hidden">
                   <MascotIcon id={currentMascotObj.id} className="w-12 h-12 text-accent" />
-                  <div className="absolute bottom-0 inset-x-0 bg-accent text-accent-ink text-[9px] font-mono font-bold text-center py-0.5">
-                    BIRO RESMI
+                  <div className="absolute bottom-0 inset-x-0 bg-accent text-accent-ink text-[9px] font-body font-semibold text-center py-0.5">
+                    Biro Resmi
                   </div>
                 </div>
                 <span className="font-body text-xs text-ink-muted mt-1.5 font-medium text-center">
@@ -129,7 +129,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
               {/* Data Fields */}
               <div className="sm:col-span-2 space-y-2.5">
                 <div>
-                  <span className="font-body text-[11px] text-ink-muted uppercase block">Nama Biro Kelompok:</span>
+                  <span className="font-body text-[11px] text-ink-muted block font-medium">Nama Biro Kelompok:</span>
                   <div className="font-display font-medium text-lg sm:text-xl text-ink border-b border-dashed border-rule pb-1">
                     {team?.name}
                   </div>
@@ -137,7 +137,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
                 {/* Team Members List (Name & Individual Class) */}
                 <div>
-                  <span className="font-body text-[11px] text-ink-muted uppercase block mb-1">
+                  <span className="font-body text-[11px] text-ink-muted block font-medium mb-1">
                     Susunan Anggota Biro:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
@@ -161,11 +161,11 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
                 <div className="grid grid-cols-2 gap-2 pt-1 font-body text-xs">
                   <div>
-                    <span className="text-[10px] text-ink-muted block uppercase">Pangkat Redaksi:</span>
+                    <span className="text-[10px] text-ink-muted block font-medium">Pangkat redaksi:</span>
                     <span className="font-semibold text-ink">{currentRank.title}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-ink-muted block uppercase">Progres Materi:</span>
+                    <span className="text-[10px] text-ink-muted block font-medium">Progres materi:</span>
                     <span className="font-semibold text-accent">{completedCount} / 3 Tahap Tuntas</span>
                   </div>
                 </div>
@@ -174,8 +174,8 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
             {/* Badges Earned Section */}
             <div className="mt-4 pt-3.5 border-t border-rule">
-              <span className="font-body text-[11px] uppercase tracking-wider text-ink-muted block mb-2">
-                Lencana Siklus Berita Diraih:
+              <span className="font-body text-[11px] text-ink-muted block mb-2 font-medium">
+                Lencana siklus berita diraih:
               </span>
               <div className="flex flex-wrap gap-2">
                 {team?.badges?.length > 0 ? (
@@ -197,20 +197,20 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
             </div>
 
             {/* Barcode & Stamp Footer */}
-            <div className="mt-4 pt-3 border-t border-rule flex justify-between items-end text-xs font-mono text-ink-muted">
+            <div className="mt-4 pt-3 border-t border-rule flex justify-between items-end text-xs font-body text-ink-muted">
               <div>
-                <div className="tracking-widest font-bold">||||| | |||| ||| |||||||</div>
-                <div className="text-[10px]">ID: BIRO-PERS-{Math.abs((team?.name?.length || 5) * 883 + 1201)}</div>
+                <div className="font-mono text-xs opacity-75">||||| | |||| ||| |||||||</div>
+                <div className="text-[10px] font-mono">ID: BIRO-PERS-{Math.abs((team?.name?.length || 5) * 883 + 1201)}</div>
               </div>
               <div className="neo-stamp bg-accent-green/15 text-accent-green border-accent-green/30 text-[10px] font-semibold">
-                TERVERIFIKASI RESMI
+                Terverifikasi Resmi
               </div>
             </div>
           </div>
 
           {/* Edit Form Drawer */}
           {editing ? (
-            <form onSubmit={handleSave} className="glass p-4 sm:p-5 rounded-2xl border border-rule space-y-3 shadow-card">
+            <form onSubmit={handleSave} className="p-4 sm:p-5 rounded-2xl border border-rule space-y-3 shadow-card bg-paper-2">
               <h4 className="font-display font-medium text-sm text-ink">Sunting Data Biro Kelompok</h4>
               
               <div>
@@ -252,7 +252,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
                       key={m.id}
                       type="button"
                       onClick={() => { sound.playClick(); setSelectedMascot(m.id); }}
-                      className={`p-2 rounded-xl border flex flex-col items-center gap-1 transition-all ${
+                      className={`p-2 rounded-xl border flex flex-col items-center gap-1 transition-colors ${
                         selectedMascot === m.id 
                           ? "bg-accent/20 border-accent text-accent font-semibold" 
                           : "bg-paper-2 border-rule text-ink-muted hover:border-rule/80"
@@ -286,7 +286,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => { sound.playClick(); setEditing(true); }}
-                  className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                  className="rounded-full bg-paper-2/70 hover:bg-paper-2 border border-rule text-xs font-body font-medium text-ink px-4 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
                   <span>Ubah Anggota / Kelas</span>
@@ -295,7 +295,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
                 {onDisbandTeam && (
                   <button
                     onClick={() => { sound.playClick(); setConfirmDisband(true); }}
-                    className="rounded-full bg-accent-red/10 hover:bg-accent-red hover:text-white border border-accent-red/30 text-xs font-body font-medium text-accent-red px-4 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                    className="rounded-full bg-accent-red/10 hover:bg-accent-red hover:text-white border border-accent-red/30 text-xs font-body font-medium text-accent-red px-4 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
                     title="Bubarkan biro ini secara permanen"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -306,7 +306,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
 
               <button
                 onClick={handlePrint}
-                className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold px-5 py-2.5 inline-flex items-center gap-1.5 transition-all shadow-sm min-h-[44px]"
+                className="rounded-full bg-accent text-accent-ink focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden hover:bg-accent-hi text-xs font-body font-semibold px-5 py-2.5 inline-flex items-center gap-1.5 transition-colors shadow-sm min-h-[44px]"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Cetak Kartu Biro Pers</span>
@@ -319,7 +319,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
       {/* Confirmation Modal to Disband Bureau (Dusk Modern-Minimal) */}
       {confirmDisband && (
         <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass p-6 sm:p-7 rounded-3xl border border-accent-red/40 max-w-md w-full space-y-4 shadow-card text-center animate-in fade-in zoom-in-95 duration-200">
+          <div className="glass p-6 sm:p-7 rounded-3xl border border-accent-red/40 max-w-md w-full space-y-4 shadow-card text-center animate-in fade-in zoom-in-95 duration-200 motion-reduce:animate-none">
             <div className="w-14 h-14 rounded-2xl bg-accent-red/20 text-accent-red border border-accent-red/40 flex items-center justify-center mx-auto text-2xl shadow-sm">
               <Trash2 className="w-7 h-7" />
             </div>
@@ -341,7 +341,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
               <button
                 type="button"
                 onClick={() => setConfirmDisband(false)}
-                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-all min-h-[42px] flex-1"
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-5 py-2.5 text-xs font-body font-medium text-ink transition-colors min-h-[42px] flex-1"
               >
                 Batal
               </button>
@@ -354,7 +354,7 @@ export default function PressCardModal({ team, onSaveTeam, onDisbandTeam, onClos
                     onDisbandTeam(team.id);
                   }
                 }}
-                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-all shadow-md min-h-[42px] flex-1"
+                className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-colors shadow-md min-h-[42px] flex-1"
               >
                 Ya, Bubarkan Biro
               </button>

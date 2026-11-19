@@ -24,7 +24,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
   const completedCount = allTeams.filter(t => isStageCompleted(t, currentStage)).length;
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6 animate-in fade-in duration-200 motion-reduce:animate-none">
       {/* Waiting Room Hero Banner */}
       <section className="glass p-6 sm:p-8 rounded-2xl border border-rule text-center space-y-3 sm:space-y-4 shadow-card">
         <div className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-xs sm:text-sm font-semibold mx-auto">
@@ -41,8 +41,8 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
             <Pause className="w-5 h-5 fill-current" />
           </div>
           <div className="text-left">
-            <span className="text-[10px] sm:text-[11px] font-bold text-accent-green uppercase tracking-wider block">
-              WAKTU KERJA BIRO RESMI DI-PAUSE:
+            <span className="text-[11px] font-medium text-accent-green block">
+              Waktu kerja biro resmi di-pause:
             </span>
             <span className="font-mono text-base sm:text-lg font-bold text-ink flex items-center gap-2 flex-wrap">
               <span className="text-accent-green">{currentTeamTimer.formatted}</span>
@@ -57,7 +57,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
 
         {/* Live Status Indicator */}
         <div className="p-3 bg-accent/15 border border-accent/30 rounded-xl inline-flex items-center gap-2.5 shadow-sm text-xs font-body text-ink text-left">
-          <Clock className="w-4 h-4 text-accent-orange animate-spin shrink-0" />
+          <Clock className="w-4 h-4 text-accent-orange animate-spin motion-reduce:animate-none shrink-0" />
           <span>
             <strong>Progres Kelas:</strong> {completedCount} dari {allTeams.length} kelompok telah menyelesaikan Tahap {currentStage}
           </span>
@@ -71,7 +71,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
             <Users className="w-4 h-4 text-accent-orange shrink-0" />
             <span>Waktu Kerja & Status Kelompok Lain:</span>
           </h3>
-          <span className="font-body text-xs text-ink-muted shrink-0 font-mono">Tahap {currentStage}</span>
+          <span className="font-body text-xs text-ink-muted shrink-0">Tahap {currentStage}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -83,7 +83,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
             return (
               <div
                 key={t.id}
-                className={`p-3.5 rounded-xl border flex items-center justify-between gap-2.5 transition-all ${
+                className={`p-3.5 rounded-xl border flex items-center justify-between gap-2.5 transition-colors ${
                   isCurrentTeam 
                     ? "bg-accent/15 border-accent/40 shadow-sm" 
                     : "bg-paper-2/40 border-rule/80 hover:bg-paper-2/70"
@@ -143,7 +143,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
           <div className="mt-4">
             <button
               onClick={() => { sound.playClick(); onOpenShop(); }}
-              className="neo-btn bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange text-xs font-semibold w-full py-2.5 rounded-full transition-all min-h-[44px]"
+              className="neo-btn bg-accent-orange/15 hover:bg-accent-orange/25 border border-accent-orange/30 text-accent-orange text-xs font-semibold w-full py-2.5 rounded-full transition-colors min-h-[44px] focus-visible:outline-2 focus-visible:outline-accent-orange"
             >
               Belanja di Toko Redaksi
             </button>
@@ -154,7 +154,7 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
         <div className="glass p-5 rounded-2xl border border-rule flex flex-col justify-between shadow-card">
           <div>
             <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent mb-1">
-              <Radio className="w-4 h-4 text-accent animate-pulse" />
+              <Radio className="w-4 h-4 text-accent animate-pulse motion-reduce:animate-none" />
               <span>Status Otorisasi Kelas Terpusat</span>
             </div>
             <h4 className="font-display font-medium text-base text-ink flex items-center gap-2">
@@ -167,8 +167,8 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
           </div>
           <div className="mt-4 p-3 bg-paper-2/60 border border-rule/70 rounded-xl text-center">
             <span className="font-body text-xs text-accent font-medium inline-flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
-              <span>Menunggu komando Guru Pengampu di depan kelas...</span>
+              <span className="w-2 h-2 rounded-full bg-accent animate-ping motion-reduce:animate-none" />
+              <span>Menunggu komando Guru Pengampu di depan kelas…</span>
             </span>
           </div>
         </div>
