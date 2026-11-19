@@ -1,4 +1,13 @@
 /** @type {import('tailwindcss').Config} */
+function withOpacity(variableName) {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `color-mix(in srgb, var(${variableName}) calc(${opacityValue} * 100%), transparent)`;
+    }
+    return `var(${variableName})`;
+  };
+}
+
 export default {
   content: [
     "./index.html",
@@ -6,24 +15,32 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '420px',
+      },
       colors: {
-        paper: "var(--color-paper)",
-        "paper-card": "var(--color-paper-card)",
-        "paper-2": "var(--color-paper-2)",
-        "paper-3": "var(--color-paper-3)",
-        ink: "var(--color-ink)",
-        "ink-2": "var(--color-ink-2)",
-        "ink-muted": "var(--color-ink-muted)",
-        "accent-yellow": "var(--color-accent-yellow)", /* Dusk Periwinkle */
-        "accent-orange": "var(--color-accent-orange)", /* Dusk Apricot */
-        "accent-cyan": "var(--color-accent-cyan)",
-        "accent-green": "var(--color-accent-green)",
-        "accent-red": "var(--color-accent-red)",
-        rule: "var(--color-rule)",
-        periwinkle: "var(--color-accent)",
-        apricot: "var(--color-accent-2)",
-        dusk: "var(--color-dusk)",
-        glass: "var(--glass)",
+        paper: withOpacity('--color-paper'),
+        "paper-card": withOpacity('--color-paper-card'),
+        "paper-2": withOpacity('--color-paper-2'),
+        "paper-3": withOpacity('--color-paper-3'),
+        ink: withOpacity('--color-ink'),
+        "ink-2": withOpacity('--color-ink-2'),
+        "ink-muted": withOpacity('--color-ink-muted'),
+        accent: withOpacity('--color-accent'),
+        "accent-ink": withOpacity('--color-accent-ink'),
+        "accent-hi": withOpacity('--color-accent-hi'),
+        "accent-deep": withOpacity('--color-accent-deep'),
+        "accent-soft": withOpacity('--color-accent-soft'),
+        "accent-yellow": withOpacity('--color-accent-yellow'), /* Dusk Periwinkle */
+        "accent-orange": withOpacity('--color-accent-orange'), /* Dusk Apricot */
+        "accent-cyan": withOpacity('--color-accent-cyan'),
+        "accent-green": withOpacity('--color-accent-green'),
+        "accent-red": withOpacity('--color-accent-red'),
+        rule: withOpacity('--color-rule'),
+        periwinkle: withOpacity('--color-accent'),
+        apricot: withOpacity('--color-accent-2'),
+        dusk: withOpacity('--color-dusk'),
+        glass: withOpacity('--glass'),
       },
       fontFamily: {
         display: "var(--font-display)",
