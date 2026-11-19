@@ -118,6 +118,23 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
     } catch {}
   }, [currentStepIdx]);
 
+  // Initial broadcast from Leader on mount if not yet established
+  useEffect(() => {
+    if (isLeader && team?.id) {
+      const currentLive = team?.liveTask?.stage_3;
+      if (!currentLive) {
+        updateTeamLiveTask(team.id, 3, {
+          currentStepIdx,
+          stepAnswers,
+          selectedOpt,
+          eliminatedOptions,
+          isFinished,
+          finalScore
+        });
+      }
+    }
+  }, [isLeader, team?.id]);
+
   const handleCleanComplete = (num, score, badge) => {
     try { sessionStorage.removeItem("redaksi_game3_step_v5"); } catch {}
     if (team?.id) {
@@ -134,13 +151,14 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
     onBack();
   };
 
-  const currentCh = challenges[currentStepIdx];
+  const currentCh = challenges && challenges[currentStepIdx] ? challenges[currentStepIdx] : null;
 
   // Check if team has debuff "card_fake_distractor" (injeksi opsi palsu dari tim lawan!)
   const hasFakeDistractor = team?.activeDebuffs?.includes("card_fake_distractor");
   
   // Combine normal options with debuff distractors or pocket note scoops if unlocked!
   const availableOptions = React.useMemo(() => {
+    if (!currentCh || !Array.isArray(currentCh.options)) return [];
     let opts = [...currentCh.options];
     if (hasFakeDistractor && currentCh.debuffOptions) {
       opts = [...opts, ...currentCh.debuffOptions];
@@ -164,7 +182,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
   }, [currentCh, hasFakeDistractor, currentStepIdx, scoopNotes]);
 
   const handleSelect = (opt) => {
-    if (!isLeader) return;
+    if (!isLeader || !currentCh) return;
     sound.playClick();
     setSelectedOpt(opt);
     const isCorrect = opt.isCorrect;

@@ -304,6 +304,8 @@ export const applyServerState = (serverState) => {
         sessionStorage.removeItem(ACTIVE_TEAM_KEY);
         localStorage.removeItem(CURRENT_USER_KEY);
         sessionStorage.removeItem(CURRENT_USER_KEY);
+        localStorage.removeItem(ACTIVE_MODULE_KEY);
+        sessionStorage.removeItem(ACTIVE_MODULE_KEY);
       }
 
       const mergedTeams = sanitizedServerTeams.map(st => {
@@ -1125,7 +1127,7 @@ export const buyShopCard = (teamId, card) => {
     return { success: false, message: "Koin Redaksi tidak cukup untuk membeli kartu ini!" };
   }
 
-  const updatedCoins = team.coins - card.price;
+  const updatedCoins = Math.max(0, (team.coins || 0) - card.price);
   const newItem = {
     instanceId: "item_" + Date.now(),
     cardId: card.id,
@@ -1224,7 +1226,7 @@ export const transferTeamCoins = (sourceTeamId, targetTeamId, amount) => {
   if (isNaN(parsedAmount) || parsedAmount <= 0) return { success: false, message: "Jumlah koin tidak valid!" };
   if ((source.coins || 0) < parsedAmount) return { success: false, message: "Koin kas timmu tidak cukup!" };
 
-  const updatedSource = { ...source, coins: source.coins - parsedAmount };
+  const updatedSource = { ...source, coins: Math.max(0, (source.coins || 0) - parsedAmount) };
   const updatedTarget = { ...target, coins: (target.coins || 0) + parsedAmount };
 
   registerOrUpdateTeam(updatedTarget);

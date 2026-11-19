@@ -157,13 +157,12 @@ function sleep(ms) {
     await sleep(800);
 
     // Click Kerjakan Tahap Ini
-    const enterStageBtn = await page.$('::-p-text(Kerjakan Tahap Ini)');
-    if (enterStageBtn) {
-      await page.evaluate(el => el.click(), enterStageBtn);
-      await sleep(1000);
-    } else {
-      console.warn("Could not find 'Kerjakan Tahap Ini' button!");
-    }
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Kerjakan') || b.textContent.includes('Mulai & Jawab') || b.textContent.includes('Pantau Tugas'));
+      if (btn) btn.click();
+    });
+    await sleep(1000);
 
     // Verify Team 1 sees Case 1 (Kebocoran Kunci Jawaban)
     const topicTextTeam1 = await page.evaluate(() => {
@@ -196,8 +195,11 @@ function sleep(ms) {
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
     await sleep(800);
 
-    const enterStageBtn4 = await page.$('::-p-text(Kerjakan Tahap Ini)');
-    if (enterStageBtn4) await page.evaluate(el => el.click(), enterStageBtn4);
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Kerjakan') || b.textContent.includes('Mulai & Jawab') || b.textContent.includes('Pantau Tugas'));
+      if (btn) btn.click();
+    });
     await sleep(1000);
 
     // Verify Team 4 sees Case 4 (Panel Surya Korsleting)
@@ -231,8 +233,11 @@ function sleep(ms) {
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
     await sleep(800);
 
-    const enterStage2Btn = await page.$('::-p-text(Kerjakan Tahap Ini)');
-    if (enterStage2Btn) await page.evaluate(el => el.click(), enterStage2Btn);
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Kerjakan') || b.textContent.includes('Mulai & Jawab') || b.textContent.includes('Pantau Tugas'));
+      if (btn) btn.click();
+    });
     await sleep(1000);
 
     const topicStage2Team4 = await page.evaluate(() => {
@@ -265,8 +270,11 @@ function sleep(ms) {
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
     await sleep(800);
 
-    const enterStage3Btn = await page.$('::-p-text(Kerjakan Tahap Ini)');
-    if (enterStage3Btn) await page.evaluate(el => el.click(), enterStage3Btn);
+    await page.evaluate(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent.includes('Kerjakan') || b.textContent.includes('Mulai & Jawab') || b.textContent.includes('Pantau Tugas'));
+      if (btn) btn.click();
+    });
     await sleep(1000);
 
     const variationTextTeam4 = await page.evaluate(() => {

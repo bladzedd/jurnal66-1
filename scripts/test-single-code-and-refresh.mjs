@@ -67,10 +67,10 @@ async function run() {
   });
   await new Promise(r => setTimeout(r, 500));
 
-  // Enter PIN GURU2026
+  // Enter PIN 040498
   const pinInput = await page.$('input[type="password"]');
   if (pinInput) {
-    await pinInput.type('GURU2026');
+    await pinInput.type('040498');
     await page.keyboard.press('Enter');
   }
   await new Promise(r => setTimeout(r, 800));
@@ -183,7 +183,7 @@ async function run() {
   // Verify student is STILL inside Game 1 after reload!
   const game1TitleAfterReload = await page.evaluate(() => document.querySelector('h3')?.textContent);
   console.log("Inside Game 1 after reload:", game1TitleAfterReload);
-  if (!game1TitleAfterReload || !game1TitleAfterReload.includes("Kasus")) {
+  if (!game1TitleAfterReload || game1TitleAfterReload !== game1Title) {
     throw new Error("FAIL: Student was kicked out of Game 1 upon page refresh!");
   }
   console.log("SUCCESS: Game 1 state preserved across page reload!");
@@ -204,7 +204,7 @@ async function run() {
   // Logout team to go back to Landing Page
   await page.evaluate(() => {
     const btns = Array.from(document.querySelectorAll('button'));
-    const logoutBtn = btns.find(b => b.title === 'Ganti Kelompok' || b.textContent.includes('Ganti Tim'));
+    const logoutBtn = btns.find(b => b.title?.includes('Ganti') || b.textContent?.includes('Ganti Pengguna') || b.textContent?.includes('Ganti Tim'));
     if (logoutBtn) logoutBtn.click();
   });
   await new Promise(r => setTimeout(r, 600));
