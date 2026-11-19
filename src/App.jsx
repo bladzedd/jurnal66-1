@@ -19,7 +19,6 @@ import {
   registerOrUpdateTeam, 
   recordTeamStageCompletion, 
   logoutTeam,
-  resetClassroomProgress,
   getClassroomStage,
   getScreenFreeze,
   adminDeleteTeam,
@@ -181,15 +180,6 @@ export default function App() {
     setStageTick(prev => prev + 1);
   };
 
-  const handleResetAll = () => {
-    resetClassroomProgress();
-    const updated = getActiveTeam();
-    setActiveTeamState(updated);
-    setActiveModuleState(null);
-    setActiveModuleInStorage(null);
-    setStageTick(prev => prev + 1);
-  };
-
   const handleStageAdvanced = () => {
     const updated = getActiveTeam();
     setActiveTeamState(updated);
@@ -264,7 +254,7 @@ export default function App() {
         </main>
       </div>
 
-      <Footer onResetProgress={handleResetAll} />
+      <Footer />
 
       {/* Group Press Pass Modal */}
       {isPressCardOpen && (
@@ -335,7 +325,7 @@ export default function App() {
             <div className="pt-2 border-t border-rule/50 flex justify-center">
               <button
                 onClick={() => setIsAdminView(true)}
-                className="text-[11px] font-body text-ink-muted hover:text-accent underline"
+                className="text-[11px] font-body text-ink-muted hover:text-accent underline focus-visible:outline-2 focus-visible:outline-accent active:scale-95"
               >
                 Guru Pengampu? Buka Meja Guru
               </button>
