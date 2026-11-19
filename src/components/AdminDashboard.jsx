@@ -4,7 +4,7 @@ import {
   CheckCircle2, ArrowRight, Printer, AlertTriangle, Sparkles, BookOpen, 
   ArrowLeft, Edit3, ShieldAlert, FileText, Award, UserCheck, Eye, EyeOff, LogOut,
   Clock, Pause, Play, Download, Copy, Tv, Check, Flame, Crown, X, Pencil, MessageSquare,
-  Share2, Scale, ShieldCheck, Lightbulb, RotateCcw
+  Share2, Scale, ShieldCheck, Lightbulb, RotateCcw, Lock
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { 
@@ -258,6 +258,9 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   const totalCoins = teams.reduce((acc, t) => acc + (t.coins || 0), 0);
   const activeWorkingCount = teams.filter(t => [1, 2, 3].some(stg => getTeamStageTimer(t, stg).isRunning)).length;
   const allClassroomUsers = getAllClassroomUsers();
+  const stage1DoneCount = teams.filter(t => isStageCompleted(t, 1)).length;
+  const stage2DoneCount = teams.filter(t => isStageCompleted(t, 2)).length;
+  const stage3DoneCount = teams.filter(t => isStageCompleted(t, 3)).length;
 
   const refresh = () => setTick(t => t + 1);
 
@@ -448,7 +451,17 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   const handleSetGlobalStage = (num) => {
     sound.playStamp();
     setClassroomStage(num);
-    setFeedback({ type: "success", text: `Tahap ${num} (${journalismStages[num - 1]?.title}) kini dibuka serentak untuk seluruh kelas!` });
+    if (num === 0) {
+      setFeedback({ 
+        type: "info", 
+        text: "Sesi kelas dikembalikan ke Ruang Persiapan (Tahap 0). Seluruh siswa ditahan di lobi pra-sesi agar tidak curi start." 
+      });
+    } else {
+      setFeedback({ 
+        type: "success", 
+        text: `Tahap ${num} (${journalismStages[num - 1]?.title}) resmi dibuka serentak untuk seluruh kelas!` 
+      });
+    }
     refresh();
   };
 
@@ -462,7 +475,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
       setFeedback({ 
         type: "success", 
         text: keepTeams 
-          ? "Progres latihan kelas berhasil di-reset! Seluruh biro kini kembali ke Tahap 1 dengan data bersih." 
+          ? "Progres latihan kelas berhasil di-reset! Seluruh biro kini kembali ke Ruang Persiapan (Tahap 0) dengan data bersih." 
           : "Seluruh data biro dan siswa berhasil dihapus. Meja guru kembali ke kondisi awal." 
       });
       refresh();
@@ -1125,7 +1138,9 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
             <span className="font-body text-xs text-ink-muted block font-medium">Tahap kelas aktif</span>
-            <span className="font-display font-medium text-2xl text-accent-green tracking-tight mt-1 block">Tahap #{currentStage}</span>
+            <span className="font-display font-medium text-2xl text-accent-green tracking-tight mt-1 block">
+              {currentStage === 0 ? "Pra-Sesi" : `Tahap #${currentStage}`}
+            </span>
           </div>
           <div className="glass p-4 rounded-xl border border-rule shadow-card">
             <span className="font-body text-xs text-ink-muted block font-medium">Tim sedang kerja</span>
@@ -1140,6 +1155,125 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
               <Coins className="w-6 h-6 text-accent-orange" />
               <span>{totalCoins}</span>
             </span>
+          </div>
+        </div>
+
+        {/* CLASSROOM STAGE PACING ORCHESTRATION BAR */}
+        <div className="glass p-4 sm:p-5 rounded-2xl border border-rule shadow-card flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                currentStage === 0 
+                  ? "bg-accent-orange animate-pulse" 
+                  : "bg-accent-green animate-pulse"
+              }`}></span>
+              <strong className="font-display font-semibold text-sm sm:text-base text-ink">
+                Orkestrasi Pacing Sesi:
+              </strong>
+              <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
+                currentStage === 0
+                  ? "bg-accent-orange/15 text-accent-orange border-accent-orange/30"
+                  : "bg-accent/15 text-accent border border-accent/30"
+              }`}>
+                {currentStage === 0 
+                  ? "Ruang Persiapan (Tahap 0)" 
+                  : `Tahap ${currentStage}: ${journalismStages[currentStage - 1]?.title || "Materi"}`}
+              </span>
+            </div>
+            <p className="font-body text-xs text-ink-muted">
+              {currentStage === 0 && "Seluruh biro ditahan di ruang persiapan agar tidak curi start. Klik Buka Tahap 1 ketika kelas siap."}
+              {currentStage === 1 && `Tahap 1 berlangsung. ${stage1DoneCount} dari ${teams.length} biro selesai & menunggu di Ruang Tunggu.`}
+              {currentStage === 2 && `Tahap 2 berlangsung. ${stage2DoneCount} dari ${teams.length} biro selesai & menunggu di Ruang Tunggu.`}
+              {currentStage === 3 && `Tahap 3 berlangsung. ${stage3DoneCount} dari ${teams.length} biro selesai menerbitkan naskah berita.`}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {/* Quick Next Stage Step Action Button */}
+            {currentStage === 0 && (
+              <button
+                onClick={() => handleSetGlobalStage(1)}
+                className="rounded-full bg-accent hover:bg-accent-hi text-accent-ink font-body font-semibold text-xs px-4 py-2 transition-colors shadow-sm inline-flex items-center gap-1.5 min-h-[38px] active:scale-95 focus-visible:outline-2 focus-visible:outline-accent"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Buka Tahap 1 Serentak</span>
+              </button>
+            )}
+            {currentStage === 1 && (
+              <button
+                onClick={() => handleSetGlobalStage(2)}
+                className="rounded-full bg-accent hover:bg-accent-hi text-accent-ink font-body font-semibold text-xs px-4 py-2 transition-colors shadow-sm inline-flex items-center gap-1.5 min-h-[38px] active:scale-95 focus-visible:outline-2 focus-visible:outline-accent"
+              >
+                <span>Buka Tahap 2 Serentak ({stage1DoneCount}/{teams.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentStage === 2 && (
+              <button
+                onClick={() => handleSetGlobalStage(3)}
+                className="rounded-full bg-accent hover:bg-accent-hi text-accent-ink font-body font-semibold text-xs px-4 py-2 transition-colors shadow-sm inline-flex items-center gap-1.5 min-h-[38px] active:scale-95 focus-visible:outline-2 focus-visible:outline-accent"
+              >
+                <span>Buka Tahap 3 Serentak ({stage2DoneCount}/{teams.length})</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {currentStage === 3 && (
+              <button
+                onClick={() => setActiveTab("leaderboard")}
+                className="rounded-full bg-accent-orange hover:bg-accent-orange/90 text-white font-body font-semibold text-xs px-4 py-2 transition-colors shadow-sm inline-flex items-center gap-1.5 min-h-[38px] active:scale-95 focus-visible:outline-2 focus-visible:outline-accent"
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>Lihat Rekap Nilai ({stage3DoneCount}/{teams.length})</span>
+              </button>
+            )}
+
+            {/* Quick Step Selectors (0, 1, 2, 3) */}
+            <div className="inline-flex rounded-full bg-paper-2 border border-rule p-0.5 gap-0.5">
+              <button
+                onClick={() => handleSetGlobalStage(0)}
+                title="Tahan semua biro di Lobi Pra-Sesi (Tahap 0)"
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                  currentStage === 0 
+                    ? "bg-accent-orange text-white" 
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Persiapan (0)
+              </button>
+              <button
+                onClick={() => handleSetGlobalStage(1)}
+                title="Buka Tahap 1: 5W+1H"
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                  currentStage === 1 
+                    ? "bg-accent text-accent-ink" 
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Tahap 1
+              </button>
+              <button
+                onClick={() => handleSetGlobalStage(2)}
+                title="Buka Tahap 2: Piramida Terbalik"
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                  currentStage === 2 
+                    ? "bg-accent text-accent-ink" 
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Tahap 2
+              </button>
+              <button
+                onClick={() => handleSetGlobalStage(3)}
+                title="Buka Tahap 3: Menulis Berita Utuh"
+                className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-colors min-h-[32px] ${
+                  currentStage === 3 
+                    ? "bg-accent text-accent-ink" 
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                Tahap 3
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2082,39 +2216,207 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         {/* TAB 2: ORKESTRASI TAHAP & KURIKULUM */}
         {activeTab === "stages" && (
           <div className="space-y-6">
-            <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-4">
-              <h3 className="font-display font-medium text-xl text-ink">
-                Sinkronisasi Tahap Bersama Seluruh Kelas:
-              </h3>
-              <p className="font-body text-xs text-ink-2 leading-relaxed">
-                Pilih tahap materi straight news yang sedang aktif. Seluruh biro akan saling menunggu di Ruang Tunggu Redaksi hingga Guru membuka tahap berikutnya secara serempak.
-              </p>
+            <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rule pb-4">
+                <div>
+                  <h3 className="font-display font-medium text-xl text-ink">
+                    Sinkronisasi & Orkestrasi Pacing Sesi Kelas:
+                  </h3>
+                  <p className="font-body text-xs text-ink-2 leading-relaxed mt-1">
+                    Atur tahap materi yang dibuka serentak. Seluruh biro akan saling menunggu di Lobi atau Ruang Tunggu Redaksi hingga Guru membuka tahap berikutnya secara serempak.
+                  </p>
+                </div>
+                <div className="shrink-0 flex items-center gap-2">
+                  <span className="font-body text-xs text-ink-muted">Tahap Aktif:</span>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                    currentStage === 0 
+                      ? "bg-accent-orange/15 text-accent-orange border-accent-orange/30" 
+                      : "bg-accent/15 text-accent border border-accent/30"
+                  }`}>
+                    {currentStage === 0 ? "Ruang Persiapan (0)" : `Tahap ${currentStage}`}
+                  </span>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  onClick={() => handleSetGlobalStage(1)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
-                    currentStage === 1 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Tahap 0: Ruang Persiapan */}
+                <div 
+                  className={`p-4 rounded-2xl border flex flex-col justify-between transition-colors ${
+                    currentStage === 0
+                      ? "bg-accent-orange/10 border-accent-orange shadow-md ring-1 ring-accent-orange/30"
+                      : "bg-paper-2/70 border-rule hover:border-rule-hover"
                   }`}
                 >
-                  Buka Tahap 1: Unsur 5W+1H
-                </button>
-                <button
-                  onClick={() => handleSetGlobalStage(2)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
-                    currentStage === 2 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        currentStage === 0
+                          ? "bg-accent-orange/20 text-accent-orange border-accent-orange/40"
+                          : "bg-paper-3 text-ink-muted border-rule"
+                      }`}>
+                        {currentStage === 0 ? "Aktif: Terkunci" : "Tahap 0"}
+                      </span>
+                      <Lock className={`w-4 h-4 ${currentStage === 0 ? "text-accent-orange" : "text-ink-muted"}`} />
+                    </div>
+                    <h4 className="font-display font-medium text-base text-ink">
+                      Ruang Persiapan (Lobi Pra-Sesi)
+                    </h4>
+                    <p className="font-body text-xs text-ink-muted leading-relaxed">
+                      Kunci seluruh penugasan sebelum sesi kelas dimulai. Siswa hanya dapat melihat nama biro, anggota, & kode masuk.
+                    </p>
+                  </div>
+                  <div className="pt-4 mt-2 border-t border-rule/50 space-y-2">
+                    <div className="text-[11px] font-body text-ink-muted">
+                      Status: {currentStage === 0 ? "Seluruh kelas tertahan di lobi" : "Lobi selesai dilewati"}
+                    </div>
+                    <button
+                      onClick={() => handleSetGlobalStage(0)}
+                      className={`w-full py-2.5 px-3 rounded-full text-xs font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-1.5 ${
+                        currentStage === 0
+                          ? "bg-accent-orange text-white shadow-sm font-bold"
+                          : "bg-paper-3 border border-rule hover:bg-paper-2 text-ink"
+                      }`}
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>{currentStage === 0 ? "Sedang Mengunci Sesi" : "Kunci ke Persiapan (0)"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tahap 1: Unsur 5W+1H */}
+                <div 
+                  className={`p-4 rounded-2xl border flex flex-col justify-between transition-colors ${
+                    currentStage === 1
+                      ? "bg-accent/10 border-accent shadow-md ring-1 ring-accent/30"
+                      : "bg-paper-2/70 border-rule hover:border-rule-hover"
                   }`}
                 >
-                  Buka Tahap 2: Piramida Terbalik
-                </button>
-                <button
-                  onClick={() => handleSetGlobalStage(3)}
-                  className={`p-3.5 rounded-2xl border text-xs font-body font-semibold transition-colors min-h-[44px] ${
-                    currentStage === 3 ? "bg-accent text-accent-ink border-accent shadow-sm" : "bg-paper-2 border-rule hover:bg-paper-3 text-ink"
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        currentStage === 1
+                          ? "bg-accent/20 text-accent border-accent/40"
+                          : "bg-paper-3 text-ink-muted border-rule"
+                      }`}>
+                        {currentStage === 1 ? "Aktif Serentak" : "Tahap 1"}
+                      </span>
+                      <BookOpen className={`w-4 h-4 ${currentStage === 1 ? "text-accent" : "text-ink-muted"}`} />
+                    </div>
+                    <h4 className="font-display font-medium text-base text-ink">
+                      Tahap 1: Unsur 5W+1H
+                    </h4>
+                    <p className="font-body text-xs text-ink-muted leading-relaxed">
+                      Verifikasi 6 elemen berita pokok dari naskah wawancara saksi kasus redaksi sekolah.
+                    </p>
+                  </div>
+                  <div className="pt-4 mt-2 border-t border-rule/50 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-body text-ink-muted">
+                      <span>Progres selesai:</span>
+                      <span className="font-bold text-ink"><span className="font-mono">{stage1DoneCount}/{teams.length}</span> biro</span>
+                    </div>
+                    <button
+                      onClick={() => handleSetGlobalStage(1)}
+                      className={`w-full py-2.5 px-3 rounded-full text-xs font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-1.5 ${
+                        currentStage === 1
+                          ? "bg-accent text-accent-ink shadow-sm font-bold"
+                          : "bg-paper-3 border border-rule hover:bg-paper-2 text-ink"
+                      }`}
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>{currentStage === 1 ? "Sedang Berlangsung" : "Buka Tahap 1 Serentak"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tahap 2: Piramida Terbalik */}
+                <div 
+                  className={`p-4 rounded-2xl border flex flex-col justify-between transition-colors ${
+                    currentStage === 2
+                      ? "bg-accent/10 border-accent shadow-md ring-1 ring-accent/30"
+                      : "bg-paper-2/70 border-rule hover:border-rule-hover"
                   }`}
                 >
-                  Buka Tahap 3: Menulis Berita Utuh
-                </button>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        currentStage === 2
+                          ? "bg-accent/20 text-accent border-accent/40"
+                          : "bg-paper-3 text-ink-muted border-rule"
+                      }`}>
+                        {currentStage === 2 ? "Aktif Serentak" : "Tahap 2"}
+                      </span>
+                      <FileText className={`w-4 h-4 ${currentStage === 2 ? "text-accent" : "text-ink-muted"}`} />
+                    </div>
+                    <h4 className="font-display font-medium text-base text-ink">
+                      Tahap 2: Piramida Terbalik
+                    </h4>
+                    <p className="font-body text-xs text-ink-muted leading-relaxed">
+                      Menyusun struktur naskah straight news: Judul, Lead (Kepala), Body (Tubuh), & Ekor.
+                    </p>
+                  </div>
+                  <div className="pt-4 mt-2 border-t border-rule/50 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-body text-ink-muted">
+                      <span>Progres selesai:</span>
+                      <span className="font-bold text-ink"><span className="font-mono">{stage2DoneCount}/{teams.length}</span> biro</span>
+                    </div>
+                    <button
+                      onClick={() => handleSetGlobalStage(2)}
+                      className={`w-full py-2.5 px-3 rounded-full text-xs font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-1.5 ${
+                        currentStage === 2
+                          ? "bg-accent text-accent-ink shadow-sm font-bold"
+                          : "bg-paper-3 border border-rule hover:bg-paper-2 text-ink"
+                      }`}
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>{currentStage === 2 ? "Sedang Berlangsung" : "Buka Tahap 2 Serentak"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tahap 3: Menulis Berita Utuh */}
+                <div 
+                  className={`p-4 rounded-2xl border flex flex-col justify-between transition-colors ${
+                    currentStage === 3
+                      ? "bg-accent/10 border-accent shadow-md ring-1 ring-accent/30"
+                      : "bg-paper-2/70 border-rule hover:border-rule-hover"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                        currentStage === 3
+                          ? "bg-accent/20 text-accent border-accent/40"
+                          : "bg-paper-3 text-ink-muted border-rule"
+                      }`}>
+                        {currentStage === 3 ? "Aktif Serentak" : "Tahap 3"}
+                      </span>
+                      <Award className={`w-4 h-4 ${currentStage === 3 ? "text-accent" : "text-ink-muted"}`} />
+                    </div>
+                    <h4 className="font-display font-medium text-base text-ink">
+                      Tahap 3: Menulis Berita Utuh
+                    </h4>
+                    <p className="font-body text-xs text-ink-muted leading-relaxed">
+                      Penyusunan naskah final liputan redaksi sekolah dan penerbitan ke meja juri kelas.
+                    </p>
+                  </div>
+                  <div className="pt-4 mt-2 border-t border-rule/50 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-body text-ink-muted">
+                      <span>Progres selesai:</span>
+                      <span className="font-bold text-ink"><span className="font-mono">{stage3DoneCount}/{teams.length}</span> biro</span>
+                    </div>
+                    <button
+                      onClick={() => handleSetGlobalStage(3)}
+                      className={`w-full py-2.5 px-3 rounded-full text-xs font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-1.5 ${
+                        currentStage === 3
+                          ? "bg-accent text-accent-ink shadow-sm font-bold"
+                          : "bg-paper-3 border border-rule hover:bg-paper-2 text-ink"
+                      }`}
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      <span>{currentStage === 3 ? "Sedang Berlangsung" : "Buka Tahap 3 Serentak"}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 

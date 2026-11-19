@@ -265,23 +265,30 @@ export const setActiveModuleInStorage = (moduleData) => {
   }
 };
 
-// Classroom Global Stage Sync (1 = 5W+1H, 2 = Struktur Berita, 3 = Menulis Berita)
+// Classroom Global Stage Sync (0 = Lobby / Pra-Sesi, 1 = 5W+1H, 2 = Struktur Berita, 3 = Menulis Berita)
 export const getClassroomStage = () => {
-  if (typeof window === "undefined") return 1;
+  if (typeof window === "undefined") return 0;
   try {
     const raw = localStorage.getItem(CLASSROOM_STAGE_KEY);
-    return raw ? parseInt(raw, 10) : 1;
+    return raw !== null ? parseInt(raw, 10) : 0;
   } catch (err) {
-    return 1;
+    return 0;
   }
 };
 
 export const setClassroomStage = (stageNum) => {
   if (typeof window === "undefined") return;
-  const num = Math.min(3, Math.max(1, stageNum));
+  const num = Math.min(3, Math.max(0, stageNum));
   localStorage.setItem(CLASSROOM_STAGE_KEY, num.toString());
   pushStateToServer({ classroomStage: num });
-  addPressWarLog(`GURU / REDAKSI: Tahap ${num} resmi dibuka untuk seluruh kelompok di kelas!`, "neutral");
+  if (num === 0) {
+    addPressWarLog("GURU / REDAKSI: Sesi kelas ditahan di Ruang Persiapan (Tahap 0). Menunggu komando mulai dari Guru Pengampu.", "warning");
+  } else {
+    addPressWarLog(`GURU / REDAKSI: Tahap ${num} resmi dibuka serentak untuk seluruh kelompok di kelas!`, "neutral");
+  }
+  try {
+    window.dispatchEvent(new CustomEvent("classroom-sync", { detail: { classroomStage: num } }));
+  } catch {}
 };
 
 export const advanceClassroomStage = () => {
@@ -1307,7 +1314,7 @@ export const resetClassroomExercise = async (keepTeams = true) => {
   } catch {}
 
   if (keepTeams) {
-    setClassroomStage(1);
+    setClassroomStage(0);
     setScreenFreeze(false);
     stopGlobalTimer();
 
@@ -1336,25 +1343,25 @@ export const resetClassroomExercise = async (keepTeams = true) => {
     try {
       await pushStateToServer({ 
         teams: resetTeams, 
-        classroomStage: 1, 
+        classroomStage: 0, 
         screenFreeze: { isFrozen: false, reason: "" }, 
         globalTimer: { isRunning: false, durationMinutes: 0, remainingSeconds: 0 }, 
         isFullRosterSync: true 
       });
     } catch {}
 
-    addPressWarLog("Guru Pengampu telah me-reset simulasi latihan redaksi! Seluruh kelompok kembali ke Tahap 1 dengan data bersih.", "warning");
+    addPressWarLog("Guru Pengampu telah me-reset simulasi latihan redaksi! Seluruh kelompok kembali ke Ruang Persiapan (Tahap 0) dengan data bersih.", "warning");
     
     try {
       window.dispatchEvent(new CustomEvent("classroom-sync", { 
-        detail: { teams: resetTeams, classroomStage: 1 } 
+        detail: { teams: resetTeams, classroomStage: 0 } 
       }));
     } catch {}
 
     return resetTeams;
   } else {
     // Total Wipe: Delete all groups and accounts
-    setClassroomStage(1);
+    setClassroomStage(0);
     setScreenFreeze(false);
     stopGlobalTimer();
 
@@ -1373,7 +1380,7 @@ export const resetClassroomExercise = async (keepTeams = true) => {
 
     try {
       window.dispatchEvent(new CustomEvent("classroom-sync", { 
-        detail: { teams: [], classroomStage: 1 } 
+        detail: { teams: [], classroomStage: 0 } 
       }));
     } catch {}
 

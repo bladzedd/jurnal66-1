@@ -55,14 +55,15 @@ export default function Dashboard({
   const currentRank = rankLevels[Math.min(3, completedStages.length)];
   const progressPct = Math.round((completedStages.length / 3) * 100);
 
-  // Single Active Stage
-  const activeStageIndex = Math.min(2, currentClassStage - 1);
+  // Single Active Stage & Classroom Pacing
+  const isPreSession = currentClassStage === 0;
+  const activeStageIndex = Math.min(2, Math.max(0, isPreSession ? 0 : currentClassStage - 1));
   const activeStageData = journalismStages[activeStageIndex];
   const isCurrentStageCompleted = isStageCompleted(team, activeStageData.number);
   const isAllGraduated = completedStages.length >= 3;
 
   // If team has completed the active stage but the teacher hasn't opened the next stage yet
-  if (isCurrentStageCompleted && !isAllGraduated && completedStages.length >= currentClassStage) {
+  if (!isPreSession && isCurrentStageCompleted && !isAllGraduated && completedStages.length >= currentClassStage) {
     return (
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <StageWaitingRoom 
@@ -402,24 +403,39 @@ export default function Dashboard({
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-accent-green animate-pulse motion-reduce:animate-none shadow-[0_0_6px_var(--color-accent-green)]"></span>
+              <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                isPreSession 
+                  ? "bg-accent-orange animate-pulse" 
+                  : "bg-accent-green animate-pulse motion-reduce:animate-none shadow-[0_0_6px_var(--color-accent-green)]"
+              }`}></span>
               <span className="font-body text-xs font-medium text-ink-muted">
-                Berkas tugas aktif kelas (serentak)
+                {isPreSession ? "Ruang Persiapan Redaksi (Menunggu Guru)" : "Berkas tugas aktif kelas (serentak)"}
               </span>
             </div>
             <span className="font-body text-xs text-ink-muted font-medium">
-              Tahap {activeStageData.number} dari 3
+              {isPreSession ? "Lobi Pra-Sesi" : `Tahap ${activeStageData.number} dari 3`}
             </span>
           </div>
 
           {/* Active Mission Card */}
           <div className="glass p-5 sm:p-8 relative shadow-card border border-rule">
             <div className="flex flex-wrap justify-between items-center gap-2 mb-3 sm:mb-4">
-              <span className="font-body text-xs font-semibold bg-accent/15 text-accent border border-accent/30 rounded-full px-3 py-1">
-                Tahap #{activeStageData.number} • Dibuka Bersama
+              <span className={`font-body text-xs font-semibold rounded-full px-3 py-1 flex items-center gap-1.5 ${
+                isPreSession
+                  ? "bg-accent-orange/15 text-accent-orange border border-accent-orange/30"
+                  : "bg-accent/15 text-accent border border-accent/30"
+              }`}>
+                {isPreSession ? (
+                  <>
+                    <Lock className="w-3.5 h-3.5 shrink-0" />
+                    <span>Lobi Pra-Sesi (Menunggu Guru Membuka Tahap 1)</span>
+                  </>
+                ) : (
+                  <span>Tahap #{activeStageData.number} (Dibuka Bersama)</span>
+                )}
               </span>
               <div className="flex gap-2">
-                <span className="font-body text-xs font-medium rounded-full bg-paper-2/70 border border-rule px-3 py-1 text-ink-2">
+                <span className="font-body text-xs font-medium rounded-full bg-paper-2 border border-rule px-3 py-1 text-ink-2">
                   Lencana: {activeStageData.badge}
                 </span>
                 <span className="font-body text-xs font-semibold rounded-full bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-3 py-1 flex items-center gap-1">
@@ -430,26 +446,41 @@ export default function Dashboard({
             </div>
 
             <h3 className="font-display font-medium text-2xl sm:text-4xl text-ink tracking-tight leading-tight">
-              {activeStageData.title}
+              {isPreSession ? `Tahap 1: ${activeStageData.title}` : activeStageData.title}
             </h3>
             <p className="font-body text-xs sm:text-sm text-accent-orange font-semibold mt-1">
-              {activeStageData.subtitle}
+              {isPreSession ? "Sesi latihan kelas belum dibuka oleh Guru Pengampu dari Meja Guru." : activeStageData.subtitle}
             </p>
 
             <div className="mt-4 p-4 bg-paper-2/50 border border-rule/80 rounded-xl font-body text-xs sm:text-base text-ink-2 leading-relaxed">
-              {activeStageData.summary}
+              {isPreSession ? (
+                <span>
+                  Kelompok redaksi <strong>{team?.name}</strong> telah berhasil terdaftar dan siap bertugas! Bagikan Kode Anggota (<strong className="font-mono text-accent">{team?.memberCode}</strong>) ke rekan se-biro kalian. Begitu Guru membuka Tahap 1 serentak dari Meja Guru, tombol pengerjaan tugas di bawah akan otomatis terbuka untuk semua kelompok.
+                </span>
+              ) : (
+                activeStageData.summary
+              )}
             </div>
 
-            <div className="mt-4 p-3 bg-accent/10 border border-accent/25 rounded-xl font-body text-xs text-ink-2 flex items-start gap-2">
-              <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-              <div>
-                <strong>Instruksi Kolaborasi Real-Time:</strong> {isLeader 
-                  ? "Sebagai Ketua, Anda memegang kendali menjawab tugas. Pilihan Anda langsung tersinkronisasi ke layar seluruh anggota tim."
-                  : `Ketua kelompok (${team?.leaderName || "Ketua"}) bertugas memilih jawaban. Anda dan anggota lainnya dapat melihat proses pengerjaan secara langsung (real-time).`}
+            {isPreSession ? (
+              <div className="mt-4 p-3 bg-accent-orange/10 border border-accent-orange/30 rounded-xl font-body text-xs text-ink flex items-center gap-2.5">
+                <Radio className="w-4 h-4 text-accent-orange animate-pulse shrink-0" />
+                <span>
+                  <strong>Lobi Pra-Sesi Redaksi:</strong> Seluruh kelompok di kelas akan memulai tugas dengan pace yang sama. Harap tenang di meja masing-masing dan simak instruksi Guru di depan kelas.
+                </span>
               </div>
-            </div>
+            ) : (
+              <div className="mt-4 p-3 bg-accent/10 border border-accent/25 rounded-xl font-body text-xs text-ink-2 flex items-start gap-2">
+                <Users className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div>
+                  <strong>Instruksi Kolaborasi Real-Time:</strong> {isLeader 
+                    ? "Sebagai Ketua, Anda memegang kendali menjawab tugas. Pilihan Anda langsung tersinkronisasi ke layar seluruh anggota tim."
+                    : `Ketua kelompok (${team?.leaderName || "Ketua"}) bertugas memilih jawaban. Anda dan anggota lainnya dapat melihat proses pengerjaan secara langsung (real-time).`}
+                </div>
+              </div>
+            )}
 
-            {!isLeader && team?.liveTask?.activeStage === activeStageData.number && (
+            {!isPreSession && !isLeader && team?.liveTask?.activeStage === activeStageData.number && (
               <div className="mt-3 p-3 bg-accent-orange/15 border border-accent-orange/35 rounded-xl font-body text-xs text-ink flex items-center justify-between gap-2 shadow-sm animate-pulse motion-reduce:animate-none">
                 <div className="flex items-center gap-2">
                   <Radio className="w-4 h-4 text-accent-orange shrink-0 animate-pulse motion-reduce:animate-none" />
@@ -462,34 +493,41 @@ export default function Dashboard({
             <div className="mt-6 pt-4 border-t border-rule/60 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <button
                 onClick={() => { sound.playClick(); onOpenShop(); }}
-                className="text-xs font-body text-accent-orange hover:bg-accent-orange/10 border border-transparent hover:border-accent-orange/30 rounded-full px-3 py-2 font-medium flex items-center justify-center sm:justify-start gap-1.5 transition-colors min-h-[42px] whitespace-nowrap"
+                className="text-xs font-body text-accent-orange hover:bg-accent-orange/10 border border-transparent hover:border-accent-orange/30 rounded-full px-3 py-2 font-medium flex items-center justify-center sm:justify-start gap-1.5 transition-colors min-h-[42px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-accent active:scale-95"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>Buka Toko Power-Up & Debuff Rival</span>
               </button>
 
-              <button
-                onClick={() => { sound.playClick(); onSelectModule(activeStageData); }}
-                className={`neo-btn p-3.5 sm:p-4 px-7 sm:px-9 font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-colors min-h-[48px] whitespace-nowrap ${
-                  isLeader 
-                    ? "bg-accent text-accent-ink hover:bg-accent-hi" 
-                    : "bg-accent-orange text-white hover:bg-accent-orange/90"
-                }`}
-              >
-                {isLeader ? (
-                  <>
-                    <Crown className="w-4 h-4 text-accent-ink" />
-                    <span>Mulai & Jawab Tugas (Ketua)</span>
-                    <ArrowRight className="w-4 h-4 text-accent-ink" />
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-4 h-4 text-white" />
-                    <span>Lihat & Pantau Tugas (Anggota)</span>
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  </>
-                )}
-              </button>
+              {isPreSession ? (
+                <div className="p-3.5 sm:p-4 px-6 sm:px-8 rounded-full border border-rule/80 bg-paper-2 text-ink-muted text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-not-allowed shadow-xs select-none">
+                  <Lock className="w-4 h-4 text-accent-orange shrink-0" />
+                  <span>Menunggu Guru Membuka Tahap 1 di Depan Kelas…</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { sound.playClick(); onSelectModule(activeStageData); }}
+                  className={`neo-btn p-3.5 sm:p-4 px-7 sm:px-9 font-body font-semibold text-sm sm:text-base rounded-full gap-2 w-full sm:w-auto justify-center shadow-lg transition-colors min-h-[48px] whitespace-nowrap active:scale-95 focus-visible:outline-2 focus-visible:outline-accent ${
+                    isLeader 
+                      ? "bg-accent text-accent-ink hover:bg-accent-hi" 
+                      : "bg-accent-orange text-white hover:bg-accent-orange/90"
+                  }`}
+                >
+                  {isLeader ? (
+                    <>
+                      <Crown className="w-4 h-4 text-accent-ink" />
+                      <span>Mulai & Jawab Tugas (Ketua)</span>
+                      <ArrowRight className="w-4 h-4 text-accent-ink" />
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-4 h-4 text-white" />
+                      <span>Lihat & Pantau Tugas (Anggota)</span>
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Users, UserCheck, LogOut, ShoppingBag, Shield, ShieldCheck, AlertTriangle, Key, Clock, Coins, Crown, PenTool, Newspaper } from 'lucide-react';
 import { sound } from '../utils/sound';
-import { getCurrentUser, getPressWarLogs, getGlobalTimer } from '../utils/storage';
+import { getCurrentUser, getPressWarLogs, getGlobalTimer, getClassroomStage } from '../utils/storage';
 
 export default function Header({ 
   team, 
@@ -99,7 +99,7 @@ export default function Header({
           )}
           <span className="hidden md:inline text-xs text-ink-muted">Tim: {team?.members?.length || 0} Siswa</span>
           <span className="bg-paper-3 border border-rule px-2 py-0.5 rounded-full text-[11px] font-medium text-ink shrink-0">
-            Tahap {Math.min(3, completedCount + 1)}/3
+            {getClassroomStage() === 0 && completedCount === 0 ? "Pra-Sesi" : `Tahap ${Math.min(3, completedCount + 1)}/3`}
           </span>
         </div>
       </div>

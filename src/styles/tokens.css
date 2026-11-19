@@ -2,11 +2,16 @@
 /* Paper: dark 17.5 268 | Display: Wix Madefor Display | Accent: Periwinkle (274) & Apricot (62) | Glass: smoked glass with lit top edge */
 
 :root {
-  /* Dusk Base Surfaces */
+  /* Dusk Base Surfaces (with Hex fallbacks for older mobile WebViews) */
+  --color-paper: #14141d;
   --color-paper: oklch(17.5% 0.014 268);
+  --color-paper-card: rgba(28, 28, 40, 0.65);
   --color-paper-card: oklch(22% 0.018 268 / 0.65);
+  --color-paper-2: #1c1c28;
   --color-paper-2: oklch(21% 0.016 268);
+  --color-paper-3: #242434;
   --color-paper-3: oklch(25% 0.017 268);
+  --color-shade: #0d0d14;
   --color-shade: oklch(10% 0.022 268);
 
   /* Typography Colors */

@@ -46,7 +46,7 @@ export default function App() {
       setFreezeState(getScreenFreeze());
       const curStage = getClassroomStage();
       const curModule = getActiveModule();
-      if (curModule && curModule.number > curStage) {
+      if (curModule && (curModule.number > curStage || curStage === 0)) {
         setActiveModuleState(null);
         setActiveModuleInStorage(null);
       }
@@ -70,9 +70,15 @@ export default function App() {
     window.addEventListener("storage", handleStorageSync);
     window.addEventListener("classroom-sync", handleSync);
 
+    let lastStage = getClassroomStage();
     const intv = setInterval(() => {
       setFreezeState(getScreenFreeze());
       const current = getActiveTeam();
+      const curStage = getClassroomStage();
+      if (curStage !== lastStage) {
+        lastStage = curStage;
+        handleSync();
+      }
       // If team was disbanded or changed remotely on server, update immediately
       if ((!current && activeTeam) || (current && !activeTeam) || (current?.id !== activeTeam?.id)) {
         setActiveTeamState(current);
@@ -127,6 +133,10 @@ export default function App() {
   const handleSelectModule = (moduleData) => {
     if (!moduleData || !moduleData.number) return;
     const currentClassStage = getClassroomStage();
+    // Guard 0: Jika Guru belum membuka sesi (currentClassStage === 0), tidak boleh masuk modul!
+    if (currentClassStage === 0) {
+      return;
+    }
     // Guard 1: cannot enter a module higher than current classroom stage
     if (moduleData.number > currentClassStage) {
       return;
