@@ -5,7 +5,15 @@ import {
   MessageSquare, BookOpen, Coins, Megaphone, Lightbulb, PenTool, Crown, Radio, Clock
 } from 'lucide-react';
 import { journalismStages } from '../data/journalismData';
-import { getCurrentUser, setCurrentUser, getClassroomStage, isStageCompleted, getActiveClassroomCase, isTeamLeader } from '../utils/storage';
+import { 
+  getCurrentUser, 
+  setCurrentUser, 
+  getClassroomStage, 
+  isStageCompleted, 
+  getActiveClassroomCase, 
+  isTeamLeader,
+  getClassroomLeaderboard
+} from '../utils/storage';
 import { sound } from '../utils/sound';
 import StageWaitingRoom from './StageWaitingRoom';
 import { WitnessAvatar, CoinBadge } from './ui/ProfessionalIcon';
@@ -22,32 +30,8 @@ export default function Dashboard({
 }) {
   const [confirmDisband, setConfirmDisband] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
-  const [, setUserTick] = useState(0);
   const currentUser = getCurrentUser();
   const isLeader = isTeamLeader(team, currentUser);
-
-  const handleSwitchActiveMember = (m, isLeader) => {
-    sound.playClick();
-    const cleanName = typeof m === "string" ? m : m.name;
-    const cleanClass = typeof m === "string" ? "" : (m.classInfo || "");
-    const cleanRole = typeof m === "string" ? (isLeader ? "Pemimpin Redaksi" : "Wartawan") : (m.role || (isLeader ? "Pemimpin Redaksi" : "Wartawan"));
-
-    const userObj = {
-      role: isLeader ? "leader" : "member",
-      name: cleanName,
-      classInfo: cleanClass,
-      memberRole: cleanRole,
-      teamId: team.id,
-      teamName: team.name,
-      code: isLeader ? team.leaderCode : team.memberCode,
-      isLeader
-    };
-    setCurrentUser(userObj);
-    setUserTick(t => t + 1);
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("storage"));
-    }
-  };
 
   const handleCopyMemberCode = () => {
     sound.playClick();
@@ -220,7 +204,7 @@ export default function Dashboard({
           </div>
         )}
 
-        {/* Team Members Roster with Roles */}
+        {/* Team Members Roster with Roles (Informative Read-Only) */}
         <div>
           <span className="font-body text-xs text-ink-muted font-medium mb-2 flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-accent" />
@@ -237,14 +221,12 @@ export default function Dashboard({
               return (
                 <div
                   key={idx}
-                  onClick={() => handleSwitchActiveMember(m, isLeader)}
-                  title={isCurrentUser ? "Profil aktif kamu saat ini" : `Klik untuk jadikan ${name} sebagai pengguna aktif di perangkat ini`}
-                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-xl px-3 py-1.5 font-medium border cursor-pointer transition-all active:scale-95 shadow-xs ${
+                  className={`inline-flex items-center gap-1.5 font-body text-xs rounded-xl px-3 py-1.5 font-medium border select-none transition-all shadow-xs ${
                     isCurrentUser 
-                      ? "bg-accent/25 border-accent text-ink shadow-sm ring-1 ring-accent/40" 
+                      ? "bg-accent/20 border-accent text-ink shadow-sm ring-1 ring-accent/40" 
                       : isLeader 
-                        ? "bg-accent/15 border-accent/35 text-ink hover:bg-accent/20" 
-                        : "bg-paper-2/60 border-rule text-ink-2 hover:bg-paper-2 hover:border-rule/80"
+                        ? "bg-accent-orange/15 border-accent-orange/35 text-ink" 
+                        : "bg-paper-2/60 border-rule text-ink-2"
                   }`}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -272,9 +254,6 @@ export default function Dashboard({
               );
             })}
           </div>
-          <span className="font-body text-[10px] text-ink-muted/80 block mt-1.5">
-            *Tip: Klik nama salah satu anggota di atas untuk berganti pengguna aktif yang sedang memegang perangkat ini.
-          </span>
         </div>
 
         {/* Offline Discussion Prompt */}
@@ -523,26 +502,106 @@ export default function Dashboard({
         </section>
       ) : (
         /* Grand Victory Card (All 3 Stages Finished) */
-        <section className="glass p-8 text-center space-y-4 shadow-card border border-accent-green/30">
-          <div className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-sm font-semibold mx-auto">
-            Lulus Akademi Jurnalistik!
-          </div>
-          <h3 className="font-display font-medium text-3xl sm:text-5xl text-ink tracking-tight">
-            Selamat, {team?.name}!
-          </h3>
-          <p className="font-body text-base max-w-lg mx-auto leading-relaxed text-ink-2">
-            Kelompok kalian telah menuntaskan seluruh 3 pilar dasar jurnalistik: <strong>5W+1H</strong>, <strong>Struktur Piramida Terbalik</strong>, dan <strong>Menulis Berita Utuh</strong>. Kalian resmi menyandang predikat Pemimpin Redaksi!
-          </p>
-          <div className="pt-2">
-            <button
-              onClick={() => { sound.playClick(); onOpenPressCard(); }}
-              className="neo-btn p-3.5 px-7 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full gap-2 transition-all shadow-lg"
-            >
-              <span>Buka & Cetak Kartu Biro Pers Kelompok</span>
-              <Award className="w-4 h-4 text-accent-ink" />
-            </button>
-          </div>
-        </section>
+        (() => {
+          const leaderboard = getClassroomLeaderboard();
+          const myRankData = leaderboard.find(l => l.id === team?.id) || {
+            rank: 1,
+            formattedTotalDuration: "00:00",
+            formattedT1: "-",
+            formattedT2: "-",
+            formattedT3: "-",
+            finalScore: 100,
+            predicate: "Redaksi Teladan (Cumlaude)",
+            badgeColor: "bg-accent-yellow/20 text-accent-yellow border-accent-yellow/40"
+          };
+
+          return (
+            <section className="glass p-6 sm:p-8 rounded-3xl text-center space-y-5 shadow-card border border-accent-green/40 bg-gradient-to-b from-paper-2/90 via-paper-2/60 to-accent-green/5 animate-in fade-in zoom-in-95 duration-300">
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-xs sm:text-sm font-semibold">
+                  🏆 Akademi Jurnalistik Selesai!
+                </span>
+                <span className="neo-stamp bg-accent/20 text-accent border-accent/40 text-xs sm:text-sm font-semibold">
+                  Peringkat #{myRankData.rank} di Kelas
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-display font-medium text-3xl sm:text-5xl text-ink tracking-tight">
+                  Selamat, {team?.name}!
+                </h3>
+                <p className="font-body text-xs sm:text-sm text-ink-muted">
+                  Kelompok kalian telah menyelesaikan seluruh materi straight news dengan sukses!
+                </p>
+              </div>
+
+              {/* Assessment Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-1">
+                {/* 1. Total Duration */}
+                <div className="glass p-4 rounded-2xl border border-rule/80 text-center space-y-1 shadow-sm">
+                  <div className="flex items-center justify-center gap-1.5 text-accent-orange text-xs font-semibold">
+                    <Clock className="w-4 h-4" />
+                    <span>Total Waktu Kerja:</span>
+                  </div>
+                  <div className="font-mono text-2xl font-bold text-ink">
+                    {myRankData.formattedTotalDuration}
+                  </div>
+                  <div className="text-[10px] font-mono text-ink-muted flex justify-center gap-1.5 pt-0.5">
+                    <span>T1: {myRankData.formattedT1}</span>
+                    <span>•</span>
+                    <span>T2: {myRankData.formattedT2}</span>
+                    <span>•</span>
+                    <span>T3: {myRankData.formattedT3}</span>
+                  </div>
+                </div>
+
+                {/* 2. Final Score & Predicate */}
+                <div className="glass p-4 rounded-2xl border border-rule/80 text-center space-y-1 shadow-sm">
+                  <div className="flex items-center justify-center gap-1.5 text-accent text-xs font-semibold">
+                    <Award className="w-4 h-4" />
+                    <span>Skor Akhir Evaluasi:</span>
+                  </div>
+                  <div className="font-mono text-2xl font-bold text-accent">
+                    {myRankData.finalScore} / 100
+                  </div>
+                  <div className="pt-0.5">
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${myRankData.badgeColor}`}>
+                      {myRankData.predicate}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Kas Koin Akhir */}
+                <div className="glass p-4 rounded-2xl border border-rule/80 text-center space-y-1 shadow-sm">
+                  <div className="flex items-center justify-center gap-1.5 text-accent-yellow text-xs font-semibold">
+                    <Coins className="w-4 h-4" />
+                    <span>Kas Koin Akhir:</span>
+                  </div>
+                  <div className="font-mono text-2xl font-bold text-ink">
+                    {team?.coins || 0}
+                  </div>
+                  <div className="text-[10px] text-ink-muted pt-0.5">
+                    +{team?.points || 0} Poin Akademi
+                  </div>
+                </div>
+              </div>
+
+              <p className="font-body text-xs sm:text-sm max-w-lg mx-auto leading-relaxed text-ink-2">
+                Seluruh 3 pilar: <strong>5W+1H</strong>, <strong>Struktur Piramida Terbalik</strong>, dan <strong>Menulis Berita Utuh</strong> telah berhasil dirampungkan. Seluruh anggota redaksi resmi menyandang gelar profesional jurnalistik!
+              </p>
+
+              <div className="pt-2 flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={() => { sound.playClick(); onOpenPressCard(); }}
+                  className="neo-btn p-3.5 px-8 bg-accent text-accent-ink hover:bg-accent-hi font-body font-semibold text-sm rounded-full gap-2 transition-all shadow-lg min-h-[46px] inline-flex items-center justify-center"
+                >
+                  <Award className="w-4 h-4 text-accent-ink" />
+                  <span>Buka & Cetak Kartu Biro Pers Kelompok</span>
+                </button>
+              </div>
+            </section>
+          );
+        })()
       )}
 
       {/* Confirmation Modal to Disband Bureau (Dusk Modern-Minimal) */}

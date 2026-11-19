@@ -311,6 +311,7 @@ export const applyServerState = (serverState) => {
         if (!lt) return st;
 
         // If local client is actively working on this team, preserve local running stopwatch timer
+        const finalCompletedStages = Array.from(new Set([...(st.completedStages || []), ...(lt.completedStages || [])]));
         const mergedTimers = { ...(st.stageTimers || {}) };
         const mergedTimes = { ...(st.stageTimes || {}) };
 
@@ -330,6 +331,20 @@ export const applyServerState = (serverState) => {
             }
           }
         }
+
+        // Strictly enforce frozen/paused timer on any completed stages!
+        finalCompletedStages.forEach(stgNum => {
+          const key = `stage_${stgNum}`;
+          const finalSec = mergedTimes[key] || st.stageTimes?.[key] || lt.stageTimes?.[key] || mergedTimers[key]?.durationSeconds || mergedTimers[key]?.accumulatedSeconds || 0;
+          mergedTimers[key] = {
+            durationSeconds: finalSec,
+            accumulatedSeconds: finalSec,
+            startedAt: null,
+            isPaused: true,
+            completedAt: mergedTimers[key]?.completedAt || new Date().toISOString()
+          };
+          mergedTimes[key] = finalSec;
+        });
 
         // Leader preserves newer local liveTask; Member always adopts authoritative server liveTask from Leader
         const isCurLeader = isTeamLeader(st, getCurrentUser());
@@ -1064,6 +1079,8 @@ export const recordTeamStageCompletion = (stageNumber, score, badgeName, duratio
     ...(activeTeam.stageTimers || {}),
     [`stage_${stageNumber}`]: {
       durationSeconds: finalDuration,
+      accumulatedSeconds: finalDuration,
+      startedAt: null,
       isPaused: true,
       completedAt: new Date().toISOString()
     }
@@ -1085,15 +1102,13 @@ export const recordTeamStageCompletion = (stageNumber, score, badgeName, duratio
   addPressWarLog(`${activeTeam.name} berhasil menuntaskan Tahap ${stageNumber} dalam ${formatDuration(finalDuration)} (Timer Di-pause)! Memperoleh +${earnedCoins} Koin.`, "success");
   registerOrUpdateTeam(updatedTeam, true);
 
-  // Check if ALL registered teams have finished this stage!
+  // Inform teacher when all teams finish this stage (Teacher advances manually from Meja Guru)
   const allTeams = getAllTeams();
   const currentStage = getClassroomStage();
   if (currentStage === stageNumber && allTeams.length > 0) {
     const allDone = allTeams.every(t => t.id === activeTeam.id ? true : isStageCompleted(t, stageNumber));
-    if (allDone && currentStage < 3) {
-      // Auto advance to next stage!
-      advanceClassroomStage();
-      addPressWarLog(`Seluruh kelompok telah menyelesaikan Tahap ${stageNumber}! Melangkah bersama ke Tahap berikutnya!`, "neutral");
+    if (allDone) {
+      addPressWarLog(`Seluruh kelompok (${allTeams.length} Biro) telah menuntaskan Tahap ${stageNumber}! Menunggu Guru Pengampu membuka Tahap Berikutnya di Meja Guru.`, "cooperation");
     }
   }
 
@@ -1255,23 +1270,237 @@ export const logoutTeam = () => {
 };
 
 export const resetClassroomProgress = () => {
-  setClassroomStage(1);
-  const teams = getAllTeams();
-  const resetTeams = teams.map(t => ({
-    ...t,
-    coins: 100,
-    inventory: [],
-    activeShield: false,
-    activeDebuffs: [],
-    completedStages: [],
-    scores: {},
-    stageTimes: {},
-    stageTimers: {},
-    badges: [],
-    points: 0
+  return resetClassroomExercise(true);
+};
+
+export const resetClassroomExercise = async (keepTeams = true) => {
+  if (typeof window === "undefined") return [];
+
+  // Reset module selection in sessionStorage
+  try {
+    sessionStorage.removeItem("redaksi_active_module");
+  } catch {}
+
+  if (keepTeams) {
+    setClassroomStage(1);
+    setScreenFreeze(false);
+    stopGlobalTimer();
+
+    const teams = getAllTeams();
+    const resetTeams = teams.map(t => ({
+      ...t,
+      coins: 100,
+      inventory: [],
+      activeShield: false,
+      activeDebuffs: [],
+      completedStages: [],
+      scores: {},
+      stageTimes: {},
+      stageTimers: {},
+      badges: [],
+      points: 0,
+      liveTask: null,
+      rubricScores: {},
+      teacherNotes: "",
+      pocketNotes: [],
+      interviewProgress: {}
+    }));
+
+    saveAllTeams(resetTeams, true);
+    
+    try {
+      await pushStateToServer({ 
+        teams: resetTeams, 
+        classroomStage: 1, 
+        screenFreeze: { isFrozen: false, reason: "" }, 
+        globalTimer: { isRunning: false, durationMinutes: 0, remainingSeconds: 0 }, 
+        isFullRosterSync: true 
+      });
+    } catch {}
+
+    addPressWarLog("Guru Pengampu telah me-reset simulasi latihan redaksi! Seluruh kelompok kembali ke Tahap 1 dengan data bersih.", "warning");
+    
+    try {
+      window.dispatchEvent(new CustomEvent("classroom-sync", { 
+        detail: { teams: resetTeams, classroomStage: 1 } 
+      }));
+    } catch {}
+
+    return resetTeams;
+  } else {
+    // Total Wipe: Delete all groups and accounts
+    setClassroomStage(1);
+    setScreenFreeze(false);
+    stopGlobalTimer();
+
+    try {
+      localStorage.removeItem(TEAMS_STORAGE_KEY);
+      localStorage.removeItem(ACTIVE_TEAM_KEY);
+      sessionStorage.removeItem(ACTIVE_TEAM_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
+      sessionStorage.removeItem(CURRENT_USER_KEY);
+      localStorage.removeItem(SERVER_ROSTER_USERS_KEY);
+    } catch {}
+
+    try {
+      await fetch('/api/reset', { method: 'POST' });
+    } catch {}
+
+    try {
+      window.dispatchEvent(new CustomEvent("classroom-sync", { 
+        detail: { teams: [], classroomStage: 1 } 
+      }));
+    } catch {}
+
+    return [];
+  }
+};
+
+// --- LEADERBOARD & FINAL ASSESSMENT EVALUATION ENGINE ---
+export const getTeamTotalDuration = (team) => {
+  if (!team) return 0;
+  const t1 = team.stageTimes?.stage_1 || team.stageTimers?.stage_1?.durationSeconds || team.stageTimers?.stage_1?.accumulatedSeconds || 0;
+  const t2 = team.stageTimes?.stage_2 || team.stageTimers?.stage_2?.durationSeconds || team.stageTimers?.stage_2?.accumulatedSeconds || 0;
+  const t3 = team.stageTimes?.stage_3 || team.stageTimers?.stage_3?.durationSeconds || team.stageTimers?.stage_3?.accumulatedSeconds || 0;
+  
+  const completedStages = team.completedStages || [];
+  let total = 0;
+  if (completedStages.includes(1) || isStageCompleted(team, 1)) total += (Number(t1) || 0);
+  if (completedStages.includes(2) || isStageCompleted(team, 2)) total += (Number(t2) || 0);
+  if (completedStages.includes(3) || isStageCompleted(team, 3)) total += (Number(t3) || 0);
+  
+  return total;
+};
+
+export const getTeamFinalScore = (team) => {
+  if (!team) return { score: 0, predicate: "Belum Dinilai", badgeColor: "text-ink-muted", avgStageScore: 0, rubricScore: null, speedBonus: 0, isAllCompleted: false };
+
+  const completedStages = team.completedStages || [];
+  const completedCount = completedStages.length;
+  const s1 = isStageCompleted(team, 1) ? (team.scores?.stage_1 || 100) : 0;
+  const s2 = isStageCompleted(team, 2) ? (team.scores?.stage_2 || 100) : 0;
+  const s3 = isStageCompleted(team, 3) ? (team.scores?.stage_3 || 100) : 0;
+
+  let totalStagePoints = 0;
+  if (isStageCompleted(team, 1)) totalStagePoints += s1;
+  if (isStageCompleted(team, 2)) totalStagePoints += s2;
+  if (isStageCompleted(team, 3)) totalStagePoints += s3;
+
+  const avgStageScore = completedCount > 0 ? Math.round(totalStagePoints / completedCount) : 0;
+
+  // Rubric score if teacher graded
+  const rubric = team.rubricScores || {};
+  const hasRubric = rubric.total !== undefined && rubric.total !== null && rubric.total > 0;
+  const rubricScore = hasRubric ? Number(rubric.total) : null;
+
+  // Speed bonus: if finished 3 stages fast
+  const totalDur = getTeamTotalDuration(team);
+  let speedBonus = 0;
+  if (completedCount >= 3) {
+    if (totalDur > 0 && totalDur <= 300) speedBonus = 5; // under 5 mins
+    else if (totalDur > 0 && totalDur <= 600) speedBonus = 2; // under 10 mins
+  }
+
+  let finalScore = 0;
+  if (hasRubric) {
+    finalScore = Math.min(100, Math.round((avgStageScore * 0.4) + (rubricScore * 0.6) + speedBonus));
+  } else {
+    finalScore = Math.min(100, avgStageScore + speedBonus);
+  }
+
+  // Predicate based on Indonesian journalism curriculum
+  let predicate = "Redaksi Berkembang";
+  let badgeColor = "bg-paper-2 text-ink-muted border-rule";
+  if (finalScore >= 90) {
+    predicate = "Redaksi Teladan (Cumlaude)";
+    badgeColor = "bg-accent-yellow/20 text-accent-yellow border-accent-yellow/40";
+  } else if (finalScore >= 80) {
+    predicate = "Redaksi Berprestasi (Sangat Baik)";
+    badgeColor = "bg-accent-green/20 text-accent-green border-accent-green/40";
+  } else if (finalScore >= 70) {
+    predicate = "Redaksi Terampil (Baik)";
+    badgeColor = "bg-accent/20 text-accent border-accent/40";
+  } else {
+    predicate = "Redaksi Berkembang (Cukup)";
+    badgeColor = "bg-accent-orange/20 text-accent-orange border-accent-orange/40";
+  }
+
+  return {
+    score: finalScore,
+    predicate,
+    badgeColor,
+    avgStageScore,
+    rubricScore,
+    speedBonus,
+    isAllCompleted: completedCount >= 3
+  };
+};
+
+export const getClassroomLeaderboard = (teamsList = null) => {
+  const teams = teamsList || getAllTeams();
+  
+  const evaluated = teams.map((team) => {
+    const completedStages = team.completedStages || [];
+    const completedCount = completedStages.length;
+    const isAllCompleted = completedCount >= 3;
+    const totalDuration = getTeamTotalDuration(team);
+    const scoreData = getTeamFinalScore(team);
+    
+    const t1 = team.stageTimes?.stage_1 || team.stageTimers?.stage_1?.durationSeconds || team.stageTimers?.stage_1?.accumulatedSeconds || 0;
+    const t2 = team.stageTimes?.stage_2 || team.stageTimers?.stage_2?.durationSeconds || team.stageTimers?.stage_2?.accumulatedSeconds || 0;
+    const t3 = team.stageTimes?.stage_3 || team.stageTimers?.stage_3?.durationSeconds || team.stageTimers?.stage_3?.accumulatedSeconds || 0;
+
+    return {
+      team,
+      id: team.id,
+      name: team.name,
+      leaderName: team.leaderName || team.members?.[0]?.name || "Ketua",
+      leaderClass: team.leaderClass || "-",
+      memberCount: team.members?.length || 0,
+      completedCount,
+      completedStages,
+      isAllCompleted,
+      totalDuration,
+      formattedTotalDuration: formatDuration(totalDuration),
+      t1: Number(t1) || 0,
+      formattedT1: formatDuration(Number(t1) || 0),
+      t2: Number(t2) || 0,
+      formattedT2: formatDuration(Number(t2) || 0),
+      t3: Number(t3) || 0,
+      formattedT3: formatDuration(Number(t3) || 0),
+      finalScore: scoreData.score,
+      predicate: scoreData.predicate,
+      badgeColor: scoreData.badgeColor,
+      points: team.points || 0,
+      coins: team.coins || 0
+    };
+  });
+
+  // Sort criteria (Siapa yang duluan & tercepat):
+  // 1. More completed stages (3/3 > 2/3 > 1/3)
+  // 2. Lowest total active working duration (who finished first)
+  // 3. Higher final score
+  // 4. Higher points / coins
+  evaluated.sort((a, b) => {
+    if (b.completedCount !== a.completedCount) {
+      return b.completedCount - a.completedCount;
+    }
+    // If both have completed stages, compare duration: smaller duration finished first!
+    if (a.completedCount > 0 && a.totalDuration > 0 && b.totalDuration > 0) {
+      if (a.totalDuration !== b.totalDuration) {
+        return a.totalDuration - b.totalDuration;
+      }
+    }
+    if (b.finalScore !== a.finalScore) {
+      return b.finalScore - a.finalScore;
+    }
+    return (b.points || 0) - (a.points || 0);
+  });
+
+  return evaluated.map((item, index) => ({
+    ...item,
+    rank: index + 1
   }));
-  saveAllTeams(resetTeams);
-  return resetTeams;
 };
 
 export const initDefaultTeamIfNeeded = () => {

@@ -4,7 +4,7 @@ import {
   CheckCircle2, ArrowRight, Printer, AlertTriangle, Sparkles, BookOpen, 
   ArrowLeft, Edit3, ShieldAlert, FileText, Award, UserCheck, Eye, EyeOff, LogOut,
   Clock, Pause, Play, Download, Copy, Tv, Check, Flame, Crown, X, Pencil, MessageSquare,
-  Share2, Scale, ShieldCheck, Lightbulb
+  Share2, Scale, ShieldCheck, Lightbulb, RotateCcw
 } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { 
@@ -13,6 +13,10 @@ import {
   getClassroomStage, 
   setClassroomStage, 
   resetClassroomProgress,
+  resetClassroomExercise,
+  getClassroomLeaderboard,
+  getTeamTotalDuration,
+  getTeamFinalScore,
   registerOrUpdateTeam,
   adminDeleteTeam,
   adminRegenerateCodes,
@@ -113,11 +117,13 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   const [copiedCode, setCopiedCode] = useState(null);
   const [teamToDisband, setTeamToDisband] = useState(null);
 
-  // Super-Admin Powers States: Timer, Screen Freeze, Projector Mode
+  // Super-Admin Powers States: Timer, Screen Freeze, Projector Mode, Reset Exercise
   const [timerState, setTimerState] = useState(() => getGlobalTimer());
   const [freezeState, setFreezeState] = useState(() => getScreenFreeze());
   const [isProjectorMode, setIsProjectorMode] = useState(false);
   const [freezePromptInput, setFreezePromptInput] = useState("Pena Diturunkan! Perhatikan penjelasan Guru Pengampu di depan kelas.");
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Rubric Edit States per team: { [teamId]: { factAccuracy, pyramidStructure, journalismLanguage, notes } }
   const [rubricInputs, setRubricInputs] = useState({});
@@ -446,6 +452,27 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
     refresh();
   };
 
+  // 2b. Reset Exercise Handler
+  const handleResetExercise = async (keepTeams) => {
+    sound.playStamp();
+    setIsResetting(true);
+    try {
+      await resetClassroomExercise(keepTeams);
+      setIsResetModalOpen(false);
+      setFeedback({ 
+        type: "success", 
+        text: keepTeams 
+          ? "Progres latihan kelas berhasil di-reset! Seluruh biro kini kembali ke Tahap 1 dengan data bersih." 
+          : "Seluruh data biro dan siswa berhasil dihapus. Meja guru kembali ke kondisi awal." 
+      });
+      refresh();
+    } catch (err) {
+      setFeedback({ type: "error", text: "Gagal mereset latihan: " + err.message });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   // 3. Adjust Coins Handler
   const handleCoinDelta = (teamId, delta, reason) => {
     sound.playClick();
@@ -683,7 +710,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
   // PROJECTOR MODE (Papan Skor Smartboard Layar Penuh)
   if (isProjectorMode) {
-    const sortedTeams = [...teams].sort((a, b) => (b.points || 0) - (a.points || 0));
+    const sortedLeaderboard = getClassroomLeaderboard(teams);
 
     return (
       <div className="min-h-screen bg-paper text-ink p-4 sm:p-8 flex flex-col justify-between">
@@ -698,7 +725,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 </span>
               </div>
               <h1 className="font-display font-medium text-3xl sm:text-5xl text-ink tracking-tight mt-1">
-                Klasemen Redaksi & Liputan Berita
+                Klasemen Redaksi & Penilaian Waktu Kelas
               </h1>
             </div>
 
@@ -720,41 +747,41 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
 
           {/* Leaderboard Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedTeams.map((t, idx) => {
-              const completedCount = t.completedStages?.length || 0;
-              const isFirst = idx === 0;
+            {sortedLeaderboard.map((item) => {
+              const t = item.team;
+              const isFirst = item.rank === 1;
 
               return (
                 <div 
-                  key={t.id}
+                  key={item.id}
                   className={`glass p-5 rounded-2xl border transition-all shadow-card space-y-3 ${
                     isFirst ? "border-accent ring-2 ring-accent/30 bg-accent/5" : "border-rule"
                   }`}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2.5">
-                      <span className={`w-8 h-8 rounded-xl font-display font-bold text-sm flex items-center justify-center ${
-                        isFirst ? "bg-accent text-accent-ink" : "bg-paper-2 text-ink"
+                      <span className={`w-9 h-9 rounded-xl font-display font-bold text-sm flex items-center justify-center ${
+                        isFirst ? "bg-accent text-accent-ink" : "bg-paper-2 text-ink border border-rule"
                       }`}>
-                        #{idx + 1}
+                        #{item.rank}
                       </span>
                       <div>
                         <h3 className="font-display font-medium text-lg text-ink truncate max-w-[180px]">
-                          {t.name}
+                          {item.name}
                         </h3>
                         <span className="font-body text-xs text-ink-muted">
-                          Ketua: {t.leaderName || t.members?.[0]?.name} ({t.leaderClass || "-"})
+                          Ketua: {item.leaderName} ({item.leaderClass})
                         </span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <span className="font-display font-medium text-xl text-accent block">
-                        {t.points || 0} Poin
+                      <span className="font-display font-bold text-xl text-accent block">
+                        {item.finalScore} <span className="text-xs text-ink-muted font-normal">/ 100</span>
                       </span>
-                      <span className="font-body text-xs text-accent-orange font-semibold inline-flex items-center gap-1">
-                        <Coins className="w-3.5 h-3.5" />
-                        <span>{t.coins || 0} Koin</span>
+                      <span className="font-mono text-xs text-accent-orange font-bold inline-flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Total: {item.formattedTotalDuration}</span>
                       </span>
                     </div>
                   </div>
@@ -763,12 +790,12 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                   <div className="space-y-1">
                     <div className="flex justify-between text-[11px] font-body text-ink-muted">
                       <span>Progres Jurnalistik:</span>
-                      <span className="font-semibold text-ink">{completedCount}/3 Tahap Selesai</span>
+                      <span className="font-semibold text-ink">{item.completedCount}/3 Tahap Selesai</span>
                     </div>
                     <div className="w-full bg-paper-2 rounded-full h-2 overflow-hidden border border-rule">
                       <div 
                         className="bg-accent h-full rounded-full transition-all duration-500"
-                        style={{ width: `${(completedCount / 3) * 100}%` }}
+                        style={{ width: `${(item.completedCount / 3) * 100}%` }}
                       ></div>
                     </div>
                   </div>
@@ -810,17 +837,11 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                     })}
                   </div>
 
-                  {/* Badges Earned */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {t.badges?.length > 0 ? (
-                      t.badges.map((b, i) => (
-                        <span key={i} className="bg-accent-green/15 text-accent-green border border-accent-green/30 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                          <Award className="w-3 h-3" /> {b}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-[11px] font-body text-ink-muted italic">Belum ada lencana</span>
-                    )}
+                  {/* Predicate */}
+                  <div className="pt-1">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 border ${item.badgeColor}`}>
+                      <Award className="w-3 h-3" /> {item.predicate}
+                    </span>
                   </div>
                 </div>
               );
@@ -846,6 +867,165 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
       </div>
     );
   }
+
+  // --- LEADERBOARD & FINAL ASSESSMENT COMPONENT ---
+  const renderLeaderboardSection = () => {
+    const leaderboard = getClassroomLeaderboard(teams);
+
+    return (
+      <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-rule/60 pb-3.5">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🏆</span>
+              <h3 className="font-display font-medium text-xl text-ink">
+                Papan Peringkat & Penilaian Akhir (Leaderboard Siapa yang Duluan)
+              </h3>
+            </div>
+            <p className="font-body text-xs text-ink-muted mt-0.5">
+              Diurutkan berdasarkan kelulusan tahap (3/3), waktu total pengerjaan tercepat (siapa yang duluan tuntas), dan akurasi skor akhir.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadCSV}
+              className="rounded-full bg-accent text-accent-ink hover:bg-accent-hi text-xs font-body font-semibold gap-1.5 px-3.5 py-2 inline-flex items-center shadow-sm min-h-[40px]"
+              title="Unduh Rekap Spreadsheet CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Unduh CSV</span>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule text-ink text-xs font-body font-medium gap-1.5 px-3 py-2 inline-flex items-center shadow-sm min-h-[40px]"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Cetak</span>
+            </button>
+          </div>
+        </div>
+
+        {leaderboard.length === 0 ? (
+          <div className="text-center py-8 text-ink-muted font-body text-sm">
+            Belum ada biro terdaftar. Terbitkan kode mandat ketua untuk memulai kelas!
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-body">
+              <thead>
+                <tr className="border-b border-rule/60 text-ink-muted uppercase tracking-wider text-[10px]">
+                  <th className="py-3 px-3">Peringkat</th>
+                  <th className="py-3 px-3">Biro Redaksi</th>
+                  <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-2 text-center">T1 (5W1H)</th>
+                  <th className="py-3 px-2 text-center">T2 (Piramida)</th>
+                  <th className="py-3 px-2 text-center">T3 (Menulis)</th>
+                  <th className="py-3 px-3 text-center font-bold text-accent">Waktu Total</th>
+                  <th className="py-3 px-3 text-center">Skor Akhir</th>
+                  <th className="py-3 px-3 text-left">Predikat Jurnalistik</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-rule/40 font-body">
+                {leaderboard.map((item) => {
+                  const isTop1 = item.rank === 1;
+                  const rankIcon = item.rank === 1 ? "🥇 #1" : item.rank === 2 ? "🥈 #2" : item.rank === 3 ? "🥉 #3" : `#${item.rank}`;
+
+                  return (
+                    <tr 
+                      key={item.id} 
+                      className={`transition-colors ${
+                        isTop1 ? "bg-accent/10 hover:bg-accent/15" : "hover:bg-paper-2/50"
+                      }`}
+                    >
+                      {/* Peringkat */}
+                      <td className="py-3 px-3 whitespace-nowrap font-display font-bold text-sm">
+                        <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-xl text-xs ${
+                          item.rank === 1 ? "bg-accent-yellow/20 text-accent-yellow border border-accent-yellow/40 font-bold" :
+                          item.rank === 2 ? "bg-paper-3 text-ink border border-rule font-semibold" :
+                          item.rank === 3 ? "bg-accent-orange/20 text-accent-orange border border-accent-orange/30 font-semibold" :
+                          "text-ink-muted"
+                        }`}>
+                          {rankIcon}
+                        </span>
+                      </td>
+
+                      {/* Biro Redaksi */}
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <div className="font-display font-medium text-sm text-ink">{item.name}</div>
+                        <div className="text-[11px] text-ink-muted">
+                          Ketua: <strong>{item.leaderName}</strong> ({item.leaderClass}) • {item.memberCount} Siswa
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        {item.isAllCompleted ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-accent-green/20 text-accent-green border border-accent-green/40 px-2 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Lulus (3/3)</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-accent-orange/15 text-accent-orange border border-accent-orange/30 px-2 py-0.5 rounded-full">
+                            <span>Tahap #{item.completedCount + 1}</span>
+                            <span className="text-ink-muted">({item.completedCount}/3)</span>
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Durasi T1 */}
+                      <td className="py-3 px-2 text-center font-mono whitespace-nowrap text-[11px]">
+                        <span className={item.completedStages.includes(1) ? "text-accent-green font-semibold" : "text-ink-muted"}>
+                          {item.formattedT1}
+                        </span>
+                      </td>
+
+                      {/* Durasi T2 */}
+                      <td className="py-3 px-2 text-center font-mono whitespace-nowrap text-[11px]">
+                        <span className={item.completedStages.includes(2) ? "text-accent-green font-semibold" : "text-ink-muted"}>
+                          {item.formattedT2}
+                        </span>
+                      </td>
+
+                      {/* Durasi T3 */}
+                      <td className="py-3 px-2 text-center font-mono whitespace-nowrap text-[11px]">
+                        <span className={item.completedStages.includes(3) ? "text-accent-green font-semibold" : "text-ink-muted"}>
+                          {item.formattedT3}
+                        </span>
+                      </td>
+
+                      {/* Waktu Total Kerja (Penentu Siapa yang Duluan) */}
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 font-mono text-xs font-bold bg-accent/15 text-accent border border-accent/30 px-2.5 py-1 rounded-xl shadow-2xs">
+                          <Clock className="w-3 h-3" />
+                          <span>{item.formattedTotalDuration}</span>
+                        </span>
+                      </td>
+
+                      {/* Skor Akhir */}
+                      <td className="py-3 px-3 text-center whitespace-nowrap">
+                        <span className="font-display font-bold text-base text-ink">
+                          {item.finalScore}
+                        </span>
+                        <span className="text-[10px] text-ink-muted font-normal"> / 100</span>
+                      </td>
+
+                      {/* Predikat Jurnalistik */}
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${item.badgeColor}`}>
+                          <Award className="w-3 h-3" />
+                          <span>{item.predicate}</span>
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-paper text-ink pb-12">
@@ -893,6 +1073,16 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             >
               <Key className="w-3.5 h-3.5" />
               <span>Kunci Jawaban</span>
+            </button>
+
+            {/* Reset Exercise Trigger */}
+            <button
+              onClick={() => { sound.playClick(); setIsResetModalOpen(true); }}
+              className="rounded-full bg-accent-red/20 hover:bg-accent-red hover:text-white text-accent-red border border-accent-red/40 text-xs font-body font-semibold gap-1.5 px-3.5 py-2 shadow-sm inline-flex items-center min-h-[42px] transition-all"
+              title="Reset Progres Latihan Kelas untuk Mengulang Simulasi"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Latihan</span>
             </button>
 
             <button
@@ -1079,6 +1269,18 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         {/* Tab Navigation Menu (Dusk Segmented Glass Control) */}
         <div className="flex p-1 bg-paper-2/50 border border-rule rounded-2xl shadow-card backdrop-blur-md overflow-x-auto gap-1 no-scrollbar touch-pan-x w-full">
           <button
+            onClick={() => { sound.playClick(); setActiveTab("leaderboard"); }}
+            className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
+              activeTab === "leaderboard" 
+                ? "bg-accent text-accent-ink font-semibold shadow-sm" 
+                : "text-ink-muted hover:text-ink hover:bg-paper-2/40"
+            }`}
+          >
+            <Award className="w-4 h-4 shrink-0 text-accent-yellow" />
+            <span className="text-xs sm:text-sm font-semibold">🏆 Papan Peringkat & Penilaian</span>
+          </button>
+
+          <button
             onClick={() => { sound.playClick(); setActiveTab("teams"); }}
             className={`p-2.5 px-3 sm:px-4 rounded-xl flex items-center gap-2 whitespace-nowrap shrink-0 transition-all min-h-[44px] ${
               activeTab === "teams" 
@@ -1169,6 +1371,13 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             <span className="text-xs sm:hidden font-medium">7. Kunci Jawaban</span>
           </button>
         </div>
+
+        {/* TAB 0: PAPAN PERINGKAT & EVALUASI AKHIR */}
+        {activeTab === "leaderboard" && (
+          <div className="space-y-6">
+            {renderLeaderboardSection()}
+          </div>
+        )}
 
         {/* TAB 1: MANAJEMEN BIRO & KODE 5-KARAKTER */}
         {activeTab === "teams" && (
@@ -2136,14 +2345,17 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         {/* TAB 5: REKAPITULASI NILAI & RUBRIK JURNALISTIK GURU */}
         {activeTab === "grades" && (
           <div className="space-y-6">
+            {/* Top Ranked Leaderboard */}
+            {renderLeaderboardSection()}
+
             <div className="glass p-5 sm:p-6 rounded-2xl border border-rule shadow-card space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-rule/60 pb-3.5">
                 <div>
                   <h3 className="font-display font-medium text-xl text-ink">
-                    Rekapitulasi Nilai & Rubrik Jurnalistik:
+                    Rubrik Penilaian Jurnalistik Individual:
                   </h3>
                   <p className="font-body text-xs text-ink-muted mt-0.5">
-                    Daftar perolehan skor mini-game, rubrik kualitatif, serta unduh format CSV untuk buku nilai guru.
+                    Input penilaian kualitatif (akurasi fakta, piramida terbalik, bahasa jurnalistik) dan catatan bimbingan untuk setiap biro.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -2699,6 +2911,84 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
                 className="rounded-full bg-accent-red text-white hover:bg-accent-red/90 px-5 py-2.5 text-xs font-body font-semibold transition-all shadow-md min-h-[42px] flex-1"
               >
                 Ya, Bubarkan Biro
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Reset Latihan Kelas */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="glass p-6 sm:p-7 rounded-3xl border border-accent-orange/40 max-w-lg w-full space-y-4 shadow-card text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-14 h-14 rounded-2xl bg-accent-orange/20 text-accent-orange border border-accent-orange/40 flex items-center justify-center mx-auto text-2xl shadow-sm">
+              <RotateCcw className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-display font-medium text-xl sm:text-2xl text-ink">
+                Reset Latihan Simulasi Redaksi
+              </h3>
+              <p className="font-body text-xs text-ink-muted">
+                Pilih mode di bawah untuk mengulang sesi latihan bagi seluruh kelas:
+              </p>
+            </div>
+
+            <div className="space-y-3 text-left pt-1">
+              {/* Option A: Recommended - Reset Progress, Keep Teams */}
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={() => handleResetExercise(true)}
+                className="w-full p-4 rounded-2xl border border-accent/40 bg-accent/10 hover:bg-accent/20 text-left transition-all group flex items-start gap-3 shadow-xs"
+              >
+                <div className="w-9 h-9 rounded-xl bg-accent/20 text-accent border border-accent/40 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                  <RefreshCw className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display font-semibold text-sm text-ink">
+                      Ulang Latihan dari Tahap 1 (Biro & Kode Tetap Aktif)
+                    </span>
+                    <span className="bg-accent text-accent-ink text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">
+                      Direkomendasikan
+                    </span>
+                  </div>
+                  <p className="font-body text-xs text-ink-muted mt-1 leading-relaxed">
+                    Seluruh progres materi (Tahap 1, 2, 3), timer pengerjaan, skor jawaban, dan kas koin di-reset kembali ke awal. <strong>Tim, nama siswa, dan kode 5-karakter tetap tersimpan</strong> sehingga siswa langsung kembali ke Tahap 1 tanpa perlu login ulang.
+                  </p>
+                </div>
+              </button>
+
+              {/* Option B: Danger - Total Wipe */}
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={() => handleResetExercise(false)}
+                className="w-full p-4 rounded-2xl border border-accent-red/30 bg-accent-red/5 hover:bg-accent-red/15 text-left transition-all group flex items-start gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-accent-red/20 text-accent-red border border-accent-red/40 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-display font-semibold text-sm text-accent-red block">
+                    Reset Total (Hapus Semua Biro & Siswa)
+                  </span>
+                  <p className="font-body text-xs text-ink-muted mt-1 leading-relaxed">
+                    Menghapus seluruh kelompok dan akun siswa dari server untuk memulai kelas baru dari nol.
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={() => setIsResetModalOpen(false)}
+                className="rounded-full bg-paper-2 hover:bg-paper-3 border border-rule px-6 py-2.5 text-xs font-body font-medium text-ink transition-all min-h-[42px] w-full"
+              >
+                Batal
               </button>
             </div>
           </div>

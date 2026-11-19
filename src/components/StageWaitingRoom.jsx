@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle2, Users, ArrowRight, ShoppingBag, ShieldAlert, Sparkles, Pause, Play } from 'lucide-react';
+import { Clock, CheckCircle2, Users, ArrowRight, ShoppingBag, ShieldAlert, Sparkles, Pause, Play, Radio, Lock } from 'lucide-react';
 import { sound } from '../utils/sound';
-import { getAllTeams, advanceClassroomStage, isStageCompleted, getTeamStageTimer, formatDuration } from '../utils/storage';
+import { getAllTeams, isStageCompleted, getTeamStageTimer, formatDuration } from '../utils/storage';
 import { journalismStages } from '../data/journalismData';
 
 export default function StageWaitingRoom({ team, currentStage, onOpenShop, onStageAdvanced }) {
@@ -23,18 +23,12 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
 
   const completedCount = allTeams.filter(t => isStageCompleted(t, currentStage)).length;
 
-  const handleTeacherAdvance = () => {
-    sound.playStamp();
-    advanceClassroomStage();
-    onStageAdvanced();
-  };
-
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 space-y-4 sm:space-y-6 animate-in fade-in duration-200">
       {/* Waiting Room Hero Banner */}
       <section className="glass p-6 sm:p-8 rounded-2xl border border-rule text-center space-y-3 sm:space-y-4 shadow-card">
         <div className="neo-stamp bg-accent-green/20 text-accent-green border-accent-green/40 text-xs sm:text-sm font-semibold mx-auto">
-          Tahap {currentStage} Tuntas!
+          Tahap #{currentStage} Tuntas & Terkunci!
         </div>
 
         <h2 className="font-display font-medium text-2xl sm:text-4xl text-ink tracking-tight break-words">
@@ -42,30 +36,30 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
         </h2>
 
         {/* Paused Working Time Banner for Current Group */}
-        <div className="p-3 sm:p-3.5 bg-accent-green/15 border border-accent-green/40 rounded-2xl max-w-md mx-auto flex items-center justify-center gap-3 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-accent-green/25 text-accent-green flex items-center justify-center shrink-0 shadow-2xs">
-            <Pause className="w-4 h-4 fill-current" />
+        <div className="p-3.5 sm:p-4 bg-accent-green/15 border border-accent-green/40 rounded-2xl max-w-lg mx-auto flex items-center justify-center gap-3.5 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-accent-green/25 text-accent-green flex items-center justify-center shrink-0 shadow-2xs">
+            <Pause className="w-5 h-5 fill-current" />
           </div>
           <div className="text-left">
-            <span className="text-[10px] sm:text-[11px] font-semibold text-accent-green uppercase tracking-wider block">
-              WAKTU KERJA BIRO KAMU (DIPAUSE):
+            <span className="text-[10px] sm:text-[11px] font-bold text-accent-green uppercase tracking-wider block">
+              WAKTU KERJA BIRO RESMI DI-PAUSE:
             </span>
-            <span className="font-mono text-sm sm:text-base font-bold text-ink flex items-center gap-1.5 flex-wrap">
+            <span className="font-mono text-base sm:text-lg font-bold text-ink flex items-center gap-2 flex-wrap">
               <span className="text-accent-green">{currentTeamTimer.formatted}</span>
-              <span className="text-xs font-normal text-ink-muted">• Nunggu kelompok lain beres dulu ya</span>
+              <span className="text-xs font-normal text-ink-muted">(Waktu jeda tunggu TIDAK dihitung)</span>
             </span>
           </div>
         </div>
 
         <p className="font-body text-xs sm:text-base text-ink-2 max-w-xl mx-auto leading-relaxed">
-          Biro kalian udah berhasil nyelesaiin <strong>{stageData.title}</strong>! Timer kerja biro otomatis <strong>di-pause</strong> biar adil. Tahap berikutnya bakal kebuka serentak begitu kelompok lain kelar atau pas Guru lanjutin materi ya!
+          Biro kalian sudah berhasil menyelesaikan <strong>{stageData.title}</strong>! Stopwatch kerja biro otomatis <strong>di-pause</strong> agar adil. Tahap berikutnya akan dibuka serentak oleh Guru Pengampu dari Meja Guru.
         </p>
 
         {/* Live Status Indicator */}
         <div className="p-3 bg-accent/15 border border-accent/30 rounded-xl inline-flex items-center gap-2.5 shadow-sm text-xs font-body text-ink text-left">
           <Clock className="w-4 h-4 text-accent-orange animate-spin shrink-0" />
           <span>
-            <strong>Progres Kelas:</strong> {completedCount} dari {allTeams.length} kelompok udah kelar Tahap {currentStage}
+            <strong>Progres Kelas:</strong> {completedCount} dari {allTeams.length} kelompok telah menyelesaikan Tahap {currentStage}
           </span>
         </div>
       </section>
@@ -156,28 +150,26 @@ export default function StageWaitingRoom({ team, currentStage, onOpenShop, onSta
           </div>
         </div>
 
-        {/* Teacher Override Control */}
-        <div className="glass p-5 rounded-2xl border border-rule/80 flex flex-col justify-between shadow-card">
+        {/* Live Classroom Status & Waiting for Teacher */}
+        <div className="glass p-5 rounded-2xl border border-rule flex flex-col justify-between shadow-card">
           <div>
-            <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent-green mb-1">
-              <Sparkles className="w-4 h-4 text-accent-green" />
-              <span>Panel Khusus Guru / Penguji</span>
+            <div className="flex items-center gap-2 font-body text-xs font-semibold text-accent mb-1">
+              <Radio className="w-4 h-4 text-accent animate-pulse" />
+              <span>Status Otorisasi Kelas Terpusat</span>
             </div>
-            <h4 className="font-display font-medium text-base text-ink">
-              Buka Tahap Berikutnya Serentak
+            <h4 className="font-display font-medium text-base text-ink flex items-center gap-2">
+              <Lock className="w-4 h-4 text-ink-muted" />
+              <span>Menunggu Pembukaan Tahap Berikutnya</span>
             </h4>
             <p className="font-body text-xs text-ink-muted mt-1 leading-relaxed">
-              Guru dapat langsung membuka materi berikutnya untuk seluruh kelompok di kelas tanpa harus menunggu kelompok yang tertinggal.
+              Guru Pengampu akan membuka materi <strong>{nextStageData?.title || "Tahap Berikutnya"}</strong> secara serentak dari Meja Guru. Begitu dibuka, layar seluruh kelompok akan otomatis berganti secara real-time!
             </p>
           </div>
-          <div className="mt-4">
-            <button
-              onClick={handleTeacherAdvance}
-              className="neo-btn bg-accent text-accent-ink hover:bg-accent-hi text-xs font-semibold w-full py-2.5 rounded-full gap-1.5 transition-all shadow-md min-h-[44px] inline-flex items-center justify-center"
-            >
-              <span>Guru: Buka {nextStageData?.title || "Tahap Berikutnya"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          <div className="mt-4 p-3 bg-paper-2/60 border border-rule/70 rounded-xl text-center">
+            <span className="font-body text-xs text-accent font-medium inline-flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
+              <span>Menunggu komando Guru Pengampu di depan kelas...</span>
+            </span>
           </div>
         </div>
       </section>

@@ -26,7 +26,8 @@ import {
   adminDeleteTeam,
   getActiveModule,
   setActiveModuleInStorage,
-  pauseTeamStageTimer
+  pauseTeamStageTimer,
+  isStageCompleted
 } from './utils/storage';
 
 export default function App() {
@@ -46,6 +47,12 @@ export default function App() {
     const handleSync = () => {
       setActiveTeamState(getActiveTeam());
       setFreezeState(getScreenFreeze());
+      const curStage = getClassroomStage();
+      const curModule = getActiveModule();
+      if (curModule && curModule.number > curStage) {
+        setActiveModuleState(null);
+        setActiveModuleInStorage(null);
+      }
       setStageTick(prev => prev + 1);
     };
 
@@ -121,6 +128,17 @@ export default function App() {
   }
 
   const handleSelectModule = (moduleData) => {
+    if (!moduleData || !moduleData.number) return;
+    const currentClassStage = getClassroomStage();
+    // Guard 1: cannot enter a module higher than current classroom stage
+    if (moduleData.number > currentClassStage) {
+      return;
+    }
+    // Guard 2: if team already completed this stage and waiting for teacher
+    const curTeam = getActiveTeam();
+    if (curTeam && isStageCompleted(curTeam, moduleData.number) && (curTeam.completedStages || []).length >= currentClassStage) {
+      return;
+    }
     setActiveModuleState(moduleData);
     setActiveModuleInStorage(moduleData);
   };
