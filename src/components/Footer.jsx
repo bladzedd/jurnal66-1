@@ -27,7 +27,7 @@ export default function Footer() {
           <span className="text-rule hidden sm:inline">|</span>
 
           <span className="bg-accent/15 text-accent border border-accent/30 rounded-full px-3 py-1 font-medium text-[11px] shadow-sm">
-            Jurnal66 1.0 (Straight News)
+            Jurnal66 1.1 (Straight News)
           </span>
         </div>
       </div>
