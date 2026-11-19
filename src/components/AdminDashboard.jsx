@@ -412,7 +412,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
         </div>
 
         <div className="text-center font-body text-xs text-ink-muted/70 py-4">
-          Jurnal66 Task • Sistem Manajemen Kelas & Multiplayer Terintegrasi
+          Jurnal66 Task (Sistem Manajemen Kelas & Multiplayer Terintegrasi)
         </div>
       </div>
     );
@@ -1040,7 +1040,14 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
   return (
     <div className="min-h-screen bg-paper text-ink pb-12">
       {/* Top Admin Masthead Banner */}
-      <header className="backdrop-blur-xl bg-paper/90 border-b border-rule sticky top-0 z-40">
+      <header 
+        style={{ 
+          backgroundColor: '#14141d', 
+          background: '#14141d',
+          transform: 'translateZ(0)'
+        }}
+        className="bg-[#14141d] bg-paper border-b border-rule sticky top-0 z-40 isolate shadow-md"
+      >
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-display font-semibold text-lg shadow-sm">
@@ -1049,7 +1056,7 @@ export default function AdminDashboard({ onExitAdmin, onBackToDashboard }) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-display font-medium text-base sm:text-lg tracking-tight text-ink">
-                  Dewan Pers Pendidikan • Meja Guru
+                  Dewan Pers Pendidikan : Meja Guru
                 </span>
                 <span className="bg-accent-orange/15 text-accent-orange border border-accent-orange/30 rounded-full text-[10px] font-body font-semibold px-2 py-0.2">
                   Otoritas Penuh

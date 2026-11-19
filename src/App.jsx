@@ -238,6 +238,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col justify-between bg-paper text-ink selection:bg-accent-yellow selection:text-ink">
       <div>
         <Header
+          key={`header-${activeTeam?.id}-${stageTick}`}
           team={activeTeam}
           onOpenPressCard={() => setIsPressCardOpen(true)}
           onOpenShop={() => setIsShopOpen(true)}
@@ -251,6 +252,7 @@ export default function App() {
             renderActiveGame()
           ) : (
             <Dashboard
+              key={`dash-${activeTeam?.id}-${stageTick}`}
               team={activeTeam}
               onSelectModule={handleSelectModule}
               onOpenPressCard={() => setIsPressCardOpen(true)}

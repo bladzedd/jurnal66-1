@@ -342,7 +342,7 @@ export default function GameWriteNews({ moduleData, team, onComplete, onBack, on
           )}
 
           <span className="font-body text-xs font-semibold bg-accent-green/15 text-accent-green border border-accent-green/30 rounded-full px-3 py-1.5 min-h-[32px] flex items-center">
-            Tahap 3 • {VARIATION_BEATS[assignedVarIdx]?.title || "Menulis Berita"}
+            Tahap 3 ({VARIATION_BEATS[assignedVarIdx]?.title || "Menulis Berita"})
           </span>
           <span className="font-body text-xs text-ink-muted hidden md:inline">
             Estimasi: ~12-15 Menit

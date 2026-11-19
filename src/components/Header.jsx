@@ -44,13 +44,17 @@ export default function Header({
 
   return (
     <header 
-      style={{ backgroundColor: 'var(--color-paper)' }}
-      className="bg-paper border-b border-rule sticky top-0 z-50 max-w-full overflow-hidden shadow-md"
+      style={{ 
+        backgroundColor: '#14141d', 
+        background: '#14141d',
+        transform: 'translateZ(0)'
+      }}
+      className="bg-[#14141d] bg-paper border-b border-rule sticky top-0 z-50 max-w-full overflow-hidden shadow-md isolate"
     >
       {/* Top Meta Bar */}
       <div 
-        style={{ backgroundColor: 'var(--color-paper-2)' }}
-        className="bg-paper-2 border-b border-rule py-1 sm:py-1.5 px-3 sm:px-4 flex justify-between items-center text-xs font-body tracking-tight text-ink-muted"
+        style={{ backgroundColor: '#1c1c28', background: '#1c1c28' }}
+        className="bg-[#1c1c28] bg-paper-2 border-b border-rule py-1 sm:py-1.5 px-3 sm:px-4 flex justify-between items-center text-xs font-body tracking-tight text-ink-muted"
       >
         <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <span className="inline-block w-2 h-2 rounded-full bg-accent-green shrink-0"></span>
@@ -98,7 +102,7 @@ export default function Header({
             </button>
           )}
           <span className="hidden md:inline text-xs text-ink-muted">Tim: {team?.members?.length || 0} Siswa</span>
-          <span className="bg-paper-3 border border-rule px-2 py-0.5 rounded-full text-[11px] font-medium text-ink shrink-0">
+          <span className="bg-[#242434] bg-paper-3 border border-rule px-2 py-0.5 rounded-full text-[11px] font-medium text-ink shrink-0">
             {getClassroomStage() === 0 && completedCount === 0 ? "Pra-Sesi" : `Tahap ${Math.min(3, completedCount + 1)}/3`}
           </span>
         </div>
@@ -106,35 +110,35 @@ export default function Header({
 
       {/* Main Masthead Banner */}
       <div 
-        style={{ backgroundColor: 'var(--color-paper)' }}
-        className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 bg-paper"
+        style={{ backgroundColor: '#14141d', background: '#14141d' }}
+        className="max-w-6xl mx-auto px-3 sm:px-4 py-1.5 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 bg-[#14141d] bg-paper"
       >
         {/* Brand / Logo */}
         <div 
           onClick={() => { sound.playClick(); onBackToHome(); }}
           className="cursor-pointer flex items-center gap-2 sm:gap-3 group min-w-0"
         >
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-display font-semibold text-xs sm:text-base tracking-tight shadow-sm group-hover:bg-accent group-hover:text-accent-ink transition-colors shrink-0">
+          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-display font-semibold text-xs sm:text-base tracking-tight shadow-sm group-hover:bg-accent group-hover:text-accent-ink transition-colors shrink-0">
             J66
           </div>
           <div className="min-w-0">
-            <h1 className="font-display font-medium text-base sm:text-xl md:text-2xl tracking-tight leading-none text-ink truncate">
+            <h1 className="font-display font-medium text-sm sm:text-xl md:text-2xl tracking-tight leading-none text-ink truncate">
               <span className="hidden sm:inline">Jurnal66 Task</span>
               <span className="sm:hidden">Jurnal66</span>
             </h1>
-            <div className="font-body text-[11px] sm:text-xs text-ink-muted leading-tight mt-1 truncate flex items-center gap-1.5">
+            <div className="font-body text-[10px] sm:text-xs text-ink-muted leading-tight mt-0.5 truncate flex items-center gap-1 sm:gap-1.5">
               <span className="truncate max-w-[100px] sm:max-w-none">Biro: <strong className="text-ink-2 font-medium">{team?.name}</strong></span>
               {currentUser && (
-                <span className="bg-paper-3 border border-rule px-1.5 py-0.5 rounded text-[10px] text-ink font-medium shrink-0 inline-flex items-center gap-1">
+                <span className="bg-[#242434] bg-paper-3 border border-rule px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] text-ink font-medium shrink-0 inline-flex items-center gap-0.5 sm:gap-1">
                   {currentUser.role === "leader" || currentUser.isLeader ? (
                     <>
-                      <Crown className="w-3 h-3 text-accent-orange shrink-0" />
+                      <Crown className="w-2.5 h-2.5 text-accent-orange shrink-0" />
                       <span>Ketua</span>
                     </>
                   ) : (
                     <>
-                      <PenTool className="w-2.5 h-2.5 text-accent shrink-0" />
-                      <span className="truncate max-w-[60px] sm:max-w-none">{currentUser.name}</span>
+                      <PenTool className="w-2 h-2 text-accent shrink-0" />
+                      <span className="truncate max-w-[50px] sm:max-w-none">{currentUser.name}</span>
                     </>
                   )}
                 </span>
@@ -144,13 +148,13 @@ export default function Header({
         </div>
 
         {/* Right Action Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
           {/* Currency / Shop Button */}
           <button
             onClick={() => { sound.playClick(); onOpenShop(); }}
             title="Buka Toko Peralatan & Pasar Strategi Pers"
             aria-label="Toko Peralatan & Koin"
-            className="no-min-h rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/25 active:scale-95 px-2 sm:px-3 h-8 sm:h-9 text-xs font-body font-semibold flex items-center gap-1 sm:gap-1.5 transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent"
+            className="no-min-h rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange hover:bg-accent-orange/25 active:scale-95 px-2 sm:px-3 h-7 sm:h-9 text-xs font-body font-semibold flex items-center gap-1 transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent shrink-0"
           >
             <Coins className="w-3.5 h-3.5 shrink-0 text-accent-orange" />
             <span className="font-mono font-bold">{team?.coins || 0}</span>
@@ -162,16 +166,16 @@ export default function Header({
           <button
             onClick={toggleSound}
             title={muted ? "Nyalakan Efek Suara" : "Matikan Efek Suara"}
-            className="no-min-h w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-rule bg-paper-2 hover:bg-paper-3 active:scale-95 text-ink flex items-center justify-center transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent"
+            className="no-min-h w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-rule bg-[#1c1c28] bg-paper-2 hover:bg-[#242434] active:scale-95 text-ink flex items-center justify-center transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent shrink-0"
             aria-label="Toggle Sound"
           >
-            {muted ? <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ink-muted" /> : <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-ink" />}
+            {muted ? <VolumeX className="w-3.5 h-3.5 text-ink-muted" /> : <Volume2 className="w-3.5 h-3.5 text-ink" />}
           </button>
 
           {/* Press Card Button */}
           <button
             onClick={() => { sound.playClick(); onOpenPressCard(); }}
-            className="no-min-h rounded-full bg-paper-2 hover:bg-paper-3 active:scale-95 border border-rule px-2 sm:px-2.5 h-8 sm:h-9 text-xs font-body text-ink flex items-center gap-1 sm:gap-1.5 transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent"
+            className="no-min-h rounded-full bg-[#1c1c28] bg-paper-2 hover:bg-[#242434] active:scale-95 border border-rule px-1.5 sm:px-2.5 h-7 sm:h-9 text-xs font-body text-ink flex items-center gap-1 transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent shrink-0"
             title="Kartu Biro Pers"
             aria-label="Kartu Pers"
           >
@@ -187,7 +191,7 @@ export default function Header({
             onClick={() => { sound.playClick(); onLogoutTeam(); }}
             title="Ganti Pengguna / Profil Biro"
             aria-label="Ganti Pengguna"
-            className="no-min-h w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-paper-2 hover:bg-paper-3 active:scale-95 border border-rule text-xs font-body text-ink-muted hover:text-ink flex items-center justify-center transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent"
+            className="no-min-h w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#1c1c28] bg-paper-2 hover:bg-[#242434] active:scale-95 border border-rule text-xs font-body text-ink-muted hover:text-ink flex items-center justify-center transition-colors shadow-sm focus-visible:outline-2 focus-visible:outline-accent shrink-0"
           >
             <LogOut className="w-3.5 h-3.5 text-accent-red" />
           </button>
@@ -196,8 +200,8 @@ export default function Header({
 
       {/* Ticker Bar (Kawat Berita Redaksi) */}
       <div 
-        style={{ backgroundColor: 'var(--color-paper-3)' }}
-        className="bg-paper-3 border-t border-rule py-1 sm:py-1.5 px-3 text-[11px] sm:text-xs font-body text-ink-muted flex items-center overflow-hidden max-w-full"
+        style={{ backgroundColor: '#242434', background: '#242434' }}
+        className="bg-[#242434] bg-paper-3 border-t border-rule py-1 px-3 text-[11px] sm:text-xs font-body text-ink-muted flex items-center overflow-hidden max-w-full"
       >
         <div className="rounded-full bg-accent-orange/15 border border-accent-orange/30 text-accent-orange px-2 py-0.5 text-[9px] sm:text-[10px] font-semibold mr-2 shrink-0">
           Kawat Berita

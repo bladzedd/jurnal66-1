@@ -2,73 +2,68 @@
 /* Paper: dark 17.5 268 | Display: Wix Madefor Display | Accent: Periwinkle (274) & Apricot (62) | Glass: smoked glass with lit top edge */
 
 :root {
-  /* Dusk Base Surfaces (with Hex fallbacks for older mobile WebViews) */
+  /* Dusk Base Surfaces (Hex / RGB standard fallbacks for all mobile browsers & WebViews) */
   --color-paper: #14141d;
-  --color-paper: oklch(17.5% 0.014 268);
-  --color-paper-card: rgba(28, 28, 40, 0.65);
-  --color-paper-card: oklch(22% 0.018 268 / 0.65);
+  --color-paper-card: rgba(28, 28, 40, 0.75);
   --color-paper-2: #1c1c28;
-  --color-paper-2: oklch(21% 0.016 268);
   --color-paper-3: #242434;
-  --color-paper-3: oklch(25% 0.017 268);
   --color-shade: #0d0d14;
-  --color-shade: oklch(10% 0.022 268);
 
   /* Typography Colors */
-  --color-ink: oklch(96% 0.006 75);
-  --color-ink-2: oklch(85% 0.010 262);
-  --color-ink-muted: oklch(70% 0.016 262);
-  --color-muted: oklch(70% 0.016 262);
-  --color-light: oklch(99% 0.006 274);
+  --color-ink: #f2f2f7;
+  --color-ink-2: #d1d1db;
+  --color-ink-muted: #9c9cae;
+  --color-muted: #9c9cae;
+  --color-light: #fbfbfe;
 
   /* Rules & Hairlines */
-  --color-rule: oklch(30% 0.016 266);
+  --color-rule: #323246;
   --rule-hair: 1px;
   --rule-thick: 1px;
   --rule-thin: 1px;
 
   /* Dusk Signals: Periwinkle (Matched/Primary) & Apricot (Attention/Open) */
-  --color-accent: oklch(77% 0.10 274);
-  --color-accent-ink: oklch(19% 0.035 274);
-  --color-accent-hi: oklch(84% 0.085 274);
-  --color-accent-deep: oklch(44% 0.13 274);
-  --color-accent-soft: oklch(91% 0.038 274);
-  --color-focus: oklch(80% 0.10 274);
-  --color-accent-2: oklch(83% 0.095 62);
-  --color-accent-2-soft: oklch(83% 0.095 62 / 0.14);
-  --color-accent-2-glow: oklch(83% 0.095 62 / 0.2);
-  --color-input-bg: oklch(15% 0.015 268 / 0.75);
-  --color-dusk: oklch(70% 0.12 330);
+  --color-accent: #a5b4fc;
+  --color-accent-ink: #1e1b4b;
+  --color-accent-hi: #c7d2fe;
+  --color-accent-deep: #4338ca;
+  --color-accent-soft: #e0e7ff;
+  --color-focus: #a5b4fc;
+  --color-accent-2: #fba979;
+  --color-accent-2-soft: rgba(251, 169, 121, 0.14);
+  --color-accent-2-glow: rgba(251, 169, 121, 0.2);
+  --color-input-bg: rgba(20, 20, 29, 0.75);
+  --color-dusk: #f472b6;
 
   /* Aliased App Signals to Dusk Palette */
-  --color-accent-yellow: oklch(77% 0.10 274); /* Periwinkle signal */
-  --color-accent-orange: oklch(83% 0.095 62); /* Apricot signal */
-  --color-accent-cyan: oklch(85% 0.08 230);   /* Soft ice signal */
-  --color-accent-green: oklch(80% 0.07 160);  /* Sage / mint signal */
-  --color-accent-red: oklch(70% 0.12 330);    /* Dusk berry / rose */
+  --color-accent-yellow: #a5b4fc; /* Periwinkle signal */
+  --color-accent-orange: #fba979; /* Apricot signal */
+  --color-accent-cyan: #67e8f9;   /* Soft ice signal */
+  --color-accent-green: #6ee7b7;  /* Sage / mint signal */
+  --color-accent-red: #f472b6;    /* Dusk berry / rose */
 
   /* Glassmorphism & Shadow Tokens */
-  --glass: oklch(22% 0.018 268 / 0.58);
+  --glass: rgba(28, 28, 40, 0.75);
   --glass-blur: 22px;
-  --glass-hi: inset 0 1px 0 oklch(100% 0 0 / 0.10), inset 0 0 0 1px oklch(100% 0 0 / 0.06);
-  --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 40px 80px -32px rgba(10, 10, 16, 0.7);
 
   /* Adapted Shadows for Neo-Tokens to Dusk Elevation */
-  --shadow-neo: 0 1px 0 oklch(100% 0 0 / 0.08) inset, 0 20px 40px -12px oklch(8% 0.02 268 / 0.6);
-  --shadow-neo-sm: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 8px 20px -6px oklch(8% 0.02 268 / 0.4);
-  --shadow-neo-lg: 0 1px 0 oklch(100% 0 0 / 0.10) inset, 0 40px 80px -28px oklch(8% 0.02 268 / 0.75);
+  --shadow-neo: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 20px 40px -12px rgba(10, 10, 16, 0.6);
+  --shadow-neo-sm: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 8px 20px -6px rgba(10, 10, 16, 0.4);
+  --shadow-neo-lg: 0 1px 0 rgba(255, 255, 255, 0.10) inset, 0 40px 80px -28px rgba(10, 10, 16, 0.75);
 
   /* Gradients, Button Shadows & Focus Elevation */
-  --bg-gradient-top: oklch(24% 0.04 274 / 0.35);
-  --bg-gradient-side: oklch(21% 0.02 268 / 0.25);
-  --color-rule-hover: oklch(35% 0.02 266);
-  --color-rule-btn-hover: oklch(40% 0.02 266);
-  --color-box-yellow-bg: oklch(77% 0.10 274 / 0.12);
-  --color-box-yellow-border: oklch(77% 0.10 274 / 0.35);
-  --shadow-btn-hi: inset 0 1px 0 oklch(100% 0 0 / 0.12);
-  --shadow-btn-hover: inset 0 1px 0 oklch(100% 0 0 / 0.22), 0 12px 24px -6px oklch(8% 0.02 268 / 0.6);
-  --shadow-btn-active: inset 0 1px 0 oklch(0% 0 0 / 0.2);
-  --shadow-input-focus-hi: inset 0 1px 0 oklch(100% 0 0 / 0.1);
+  --bg-gradient-top: rgba(99, 102, 241, 0.25);
+  --bg-gradient-side: rgba(49, 46, 129, 0.20);
+  --color-rule-hover: #40405a;
+  --color-rule-btn-hover: #4a4a68;
+  --color-box-yellow-bg: rgba(165, 180, 252, 0.12);
+  --color-box-yellow-border: rgba(165, 180, 252, 0.35);
+  --shadow-btn-hi: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --shadow-btn-hover: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 12px 24px -6px rgba(10, 10, 16, 0.6);
+  --shadow-btn-active: inset 0 1px 0 rgba(0, 0, 0, 0.2);
+  --shadow-input-focus-hi: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
   /* Radii */
   --radius-card: 18px;
@@ -81,4 +76,55 @@
   --font-mono: "Space Mono", ui-monospace, monospace;
   --tracking-display: -0.022em;
   --display-weight: 500;
+}
+
+/* Modern Gamut-Wide OKLCH enhancement when supported by the client browser */
+@supports (color: oklch(0% 0 0)) {
+  :root {
+    --color-paper: oklch(17.5% 0.014 268);
+    --color-paper-card: oklch(22% 0.018 268 / 0.65);
+    --color-paper-2: oklch(21% 0.016 268);
+    --color-paper-3: oklch(25% 0.017 268);
+    --color-shade: oklch(10% 0.022 268);
+
+    --color-ink: oklch(96% 0.006 75);
+    --color-ink-2: oklch(85% 0.010 262);
+    --color-ink-muted: oklch(70% 0.016 262);
+    --color-muted: oklch(70% 0.016 262);
+    --color-light: oklch(99% 0.006 274);
+
+    --color-rule: oklch(30% 0.016 266);
+
+    --color-accent: oklch(77% 0.10 274);
+    --color-accent-ink: oklch(19% 0.035 274);
+    --color-accent-hi: oklch(84% 0.085 274);
+    --color-accent-deep: oklch(44% 0.13 274);
+    --color-accent-soft: oklch(91% 0.038 274);
+    --color-focus: oklch(80% 0.10 274);
+    --color-accent-2: oklch(83% 0.095 62);
+    --color-accent-2-soft: oklch(83% 0.095 62 / 0.14);
+    --color-accent-2-glow: oklch(83% 0.095 62 / 0.2);
+    --color-input-bg: oklch(15% 0.015 268 / 0.75);
+    --color-dusk: oklch(70% 0.12 330);
+
+    --color-accent-yellow: oklch(77% 0.10 274);
+    --color-accent-orange: oklch(83% 0.095 62);
+    --color-accent-cyan: oklch(85% 0.08 230);
+    --color-accent-green: oklch(80% 0.07 160);
+    --color-accent-red: oklch(70% 0.12 330);
+
+    --glass: oklch(22% 0.018 268 / 0.58);
+    --shadow-card: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 40px 80px -32px oklch(8% 0.02 268 / 0.7);
+
+    --shadow-neo: 0 1px 0 oklch(100% 0 0 / 0.08) inset, 0 20px 40px -12px oklch(8% 0.02 268 / 0.6);
+    --shadow-neo-sm: 0 1px 0 oklch(100% 0 0 / 0.06) inset, 0 8px 20px -6px oklch(8% 0.02 268 / 0.4);
+    --shadow-neo-lg: 0 1px 0 oklch(100% 0 0 / 0.10) inset, 0 40px 80px -28px oklch(8% 0.02 268 / 0.75);
+
+    --bg-gradient-top: oklch(24% 0.04 274 / 0.35);
+    --bg-gradient-side: oklch(21% 0.02 268 / 0.25);
+    --color-rule-hover: oklch(35% 0.02 266);
+    --color-rule-btn-hover: oklch(40% 0.02 266);
+    --color-box-yellow-bg: oklch(77% 0.10 274 / 0.12);
+    --color-box-yellow-border: oklch(77% 0.10 274 / 0.35);
+  }
 }
